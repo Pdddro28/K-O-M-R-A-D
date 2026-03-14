@@ -1,6 +1,10 @@
 # --------------------libraries------------------------
 import cv2 as cv
 import numpy as np
+import json
+import datetime
+import tkinter as tk
+from tkinter import filedialog
 # --------------------libraries------------------------
 
 # --------------------Classes--------------------------
@@ -19,13 +23,11 @@ class VisionController():
     and color segmentation logic.
     """
     def __init__(self, usb_port=0):
-        # Default resolution for processing stability
         self.image_width  = 640
         self.image_height = 480
         self.image_lab = None
         self.frame = None
         
-        # Camera hardware initialization
         self.camera_cap = cv.VideoCapture(usb_port)
         self.camera_cap.set(cv.CAP_PROP_FRAME_WIDTH, self.image_width)
         self.camera_cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.image_height)
@@ -40,9 +42,7 @@ class VisionController():
             return False
             
         self.frame = frame_read
-        # Convert BGR (OpenCV default) to LAB space
         self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
-        # Apply blur to reduce high-frequency noise/grain
         self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
         return True
 
@@ -50,80 +50,200 @@ class VisionController():
         """
         Generates a binary mask based on a color range within a ROI.
         """
-        # Crop the image to the specified region
         img_segmented = self.image_lab[roi.y1:roi.y2, roi.x1:roi.x2]
         lower = np.array(color_range[0])
         upper = np.array(color_range[1])
         
-        # Binary segmentation: pixels in range become white (255)
         mask = cv.inRange(img_segmented, lower, upper)
         
-        # Morphological operations to clean the binary image
         kernel = np.ones((5, 5), np.uint8)
-        mask = cv.erode(mask, kernel, iterations=1)  # Removes small dots
-        mask = cv.dilate(mask, kernel, iterations=1) # Restores object size
+        mask = cv.erode(mask, kernel, iterations=1)
+        mask = cv.dilate(mask, kernel, iterations=1)
         return mask
 # --------------------Classes--------------------------
 
+# --------------------Configuration & Presets----------
+COLOR_PRESETS = {
+    0: {"name": "ROJO",      "lower": [ 30, 170, 120], "upper": [255, 255, 170]},
+    1: {"name": "VERDE",     "lower": [ 30,   0, 100], "upper": [255, 100, 160]},
+    2: {"name": "AZUL",      "lower": [ 30, 110,   0], "upper": [255, 150, 110]},
+    3: {"name": "MORADO",    "lower": [ 30, 160,   0], "upper": [255, 255, 110]},
+    4: {"name": "NARANJA",   "lower": [ 50, 140, 150], "upper": [255, 255, 255]},
+    5: {"name": "NEGRO",     "lower": [  0,   0,   0], "upper": [ 60, 255, 255]}
+}
+
+COLOR_NAMES_LIST = [COLOR_PRESETS[i]["name"] for i in range(len(COLOR_PRESETS))]
+# --------------------Configuration & Presets----------
+
+# --------------------Global Variables-----------------
+WINDOW_NAME = "Sistema de Vision Integral"
+save_triggered = False
+save_status = "LISTO"
+save_status_frames = 0
+# --------------------Global Variables-----------------
+
 # --------------------Helper Functions-----------------
+def on_color_selector_change(val):
+    """
+    Callback: Update trackbars when color preset changes.
+    """
+    preset = COLOR_PRESETS[val]
+    cv.setTrackbarPos("L-min", WINDOW_NAME, preset["lower"][0])
+    cv.setTrackbarPos("L-max", WINDOW_NAME, preset["upper"][0])
+    cv.setTrackbarPos("A-min", WINDOW_NAME, preset["lower"][1])
+    cv.setTrackbarPos("A-max", WINDOW_NAME, preset["upper"][1])
+    cv.setTrackbarPos("B-min", WINDOW_NAME, preset["lower"][2])
+    cv.setTrackbarPos("B-max", WINDOW_NAME, preset["upper"][2])
+
+def on_save_button_change(val):
+    """
+    Callback: Triggered when user clicks/moves the Save trackbar.
+    We use this as a button by checking if value changed to 1.
+    """
+    global save_triggered
+    if val == 1:
+        save_triggered = True
+        # Reset trackbar to 0 immediately so it can be clicked again
+        cv.setTrackbarPos(">>> GUARDAR JSON <<<", WINDOW_NAME, 0)
+
+def save_config_to_json(lower, upper, color_name):
+    """
+    Opens a file dialog and saves the current configuration to JSON.
+    """
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".json",
+        filetypes=[("JSON files", "*.json")],
+        initialfile=f"mask_{color_name.lower()}.json",
+        title="Guardar Configuración de Máscara"
+    )
+    
+    if file_path:
+        config_data = {
+            "color": color_name,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "bounds": {
+                "lower": lower,
+                "upper": upper
+            },
+            "space": "LAB"
+        }
+        try:
+            with open(file_path, 'w') as f:
+                json.dump(config_data, f, indent=4)
+            return True, file_path
+        except Exception as e:
+            return False, str(e)
+    return None, None
+
 def nothing(x):
-    """Placeholder function for trackbar callbacks"""
     pass
 # --------------------Helper Functions-----------------
 
 # --------------------Test Loop------------------------
 def run_test():
-    # Instance of the controller using laptop's integrated camera (0)
+    global save_triggered, save_status, save_status_frames
+    
     vision = VisionController(0)
     
-    # Trackbar Interface for real-time color calibration
-    cv.namedWindow("Trackbars")
-    cv.createTrackbar("L-min", "Trackbars", 0, 255, nothing)
-    cv.createTrackbar("L-max", "Trackbars", 255, 255, nothing)
-    cv.createTrackbar("A-min", "Trackbars", 0, 255, nothing)
-    cv.createTrackbar("A-max", "Trackbars", 255, 255, nothing)
-    cv.createTrackbar("B-min", "Trackbars", 0, 255, nothing)
-    cv.createTrackbar("B-max", "Trackbars", 255, 255, nothing)
+    if not vision.camera_cap.isOpened():
+        print("Error: No se pudo abrir la cámara.")
+        return
 
-    # Full screen Region of Interest for testing
-    test_roi = ROI(0, 0, 640, 480)
+    # Create Main Window with trackbars at top
+    cv.namedWindow(WINDOW_NAME)
+    
+    # --- Trackbars Panel (All controls in one place) ---
+    # Color Selector
+    cv.createTrackbar("Color:", WINDOW_NAME, 0, 5, on_color_selector_change)
+    
+    # LAB Values
+    cv.createTrackbar("L-min", WINDOW_NAME, 0, 255, nothing)
+    cv.createTrackbar("L-max", WINDOW_NAME, 255, 255, nothing)
+    cv.createTrackbar("A-min", WINDOW_NAME, 0, 255, nothing)
+    cv.createTrackbar("A-max", WINDOW_NAME, 255, 255, nothing)
+    cv.createTrackbar("B-min", WINDOW_NAME, 0, 255, nothing)
+    cv.createTrackbar("B-max", WINDOW_NAME, 255, 255, nothing)
+    
+    # Save Button (implemented as trackbar)
+    cv.createTrackbar(">>> GUARDAR JSON <<<", WINDOW_NAME, 0, 1, on_save_button_change)
 
-    print("System active. Press 'q' to stop and print values.")
+    # Initialize with first color
+    on_color_selector_change(0)
+
+    test_roi = ROI(0, 0, vision.image_width, vision.image_height)
+
+    print("Sistema activo. Panel de control integrado arriba.")
+    print("Click en 'GUARDAR JSON' para exportar configuración.")
 
     while True:
         if not vision.receive_image():
             break
 
-        # Fetch current UI slider values
-        l_min = cv.getTrackbarPos("L-min", "Trackbars")
-        l_max = cv.getTrackbarPos("L-max", "Trackbars")
-        a_min = cv.getTrackbarPos("A-min", "Trackbars")
-        a_max = cv.getTrackbarPos("A-max", "Trackbars")
-        b_min = cv.getTrackbarPos("B-min", "Trackbars")
-        b_max = cv.getTrackbarPos("B-max", "Trackbars")
+        # 1. Get Values
+        color_idx = cv.getTrackbarPos("Color:", WINDOW_NAME)
+        current_color_name = COLOR_PRESETS[color_idx]["name"]
+        
+        l_min = cv.getTrackbarPos("L-min", WINDOW_NAME)
+        l_max = cv.getTrackbarPos("L-max", WINDOW_NAME)
+        a_min = cv.getTrackbarPos("A-min", WINDOW_NAME)
+        a_max = cv.getTrackbarPos("A-max", WINDOW_NAME)
+        b_min = cv.getTrackbarPos("B-min", WINDOW_NAME)
+        b_max = cv.getTrackbarPos("B-max", WINDOW_NAME)
+
+        # Validation
+        if l_min > l_max: l_max = l_min
+        if a_min > a_max: a_max = a_min
+        if b_min > b_max: b_max = b_min
 
         lower = [l_min, a_min, b_min]
         upper = [l_max, a_max, b_max]
 
-        # Generate the black and white mask
+        # 2. Process Image
         mask = vision.find_mask([lower, upper], test_roi)
-        
-        # Merge mask with original frame to see color result
         result = cv.bitwise_and(vision.frame, vision.frame, mask=mask)
+        mask_color = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
 
-        # Output windows
-        cv.imshow("Original con ROI", vision.frame)
-        cv.imshow("Mascara (Blanco y Negro)", mask)
-        cv.imshow("Resultado (Color Filtrado)", result)
+        # 3. Create Video Layout (Original | Mask | Result)
+        combined_video = np.hstack([vision.frame, mask_color, result])
+        
+        # Add overlay text on video with current values
+        cv.putText(combined_video, f"Color: {current_color_name}", 
+                   (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        cv.putText(combined_video, f"LAB: [{l_min},{a_min},{b_min}] - [{l_max},{a_max},{b_max}]", 
+                   (10, 60), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+        
+        # Add save status on video
+        if save_status != "LISTO":
+            cv.putText(combined_video, f"Estado: {save_status}", 
+                       (10, 90), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            save_status_frames += 1
+            if save_status_frames > 60:  # Show status for ~2 seconds
+                save_status = "LISTO"
+                save_status_frames = 0
 
-        # Break loop on 'q' key press
+        # 4. Handle Save Request
+        if save_triggered:
+            save_status = "Guardando..."
+            success, msg = save_config_to_json(lower, upper, current_color_name)
+            if success:
+                save_status = f"Guardado: {msg.split('/')[-1]}"
+            else:
+                save_status = "Error al guardar"
+            save_triggered = False
+
+        # 5. Show Unified Interface
+        cv.imshow(WINDOW_NAME, combined_video)
+
+        # Exit
         if cv.waitKey(1) & 0xFF == ord('q'):
-            print(f"Calibration Complete.")
-            print(f"Lower Bound: {lower}")
-            print(f"Upper Bound: {upper}")
+            print(f"\nSistema detenido. Última config: {current_color_name}")
+            print(f"Lower: {lower}, Upper: {upper}")
             break
 
-    # Hardware cleanup
     vision.camera_cap.release()
     cv.destroyAllWindows()
 # --------------------Test Loop------------------------
