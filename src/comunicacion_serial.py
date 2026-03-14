@@ -1,121 +1,147 @@
-# --------------------libraries------------------------
-import serial  # Manejo de comunicación serial
-import time    # Gestión de retardos y tiempos de ejecución
-# --------------------libraries------------------------
+import serial
+import time
+import threading
 
 class MegaPiController:
     """
-    Clase para el control remoto de MegaPi desde Raspberry Pi.
-    Gestiona el empaquetado de datos y la temporización de movimientos.
+    Controller class for MegaPi robot.
+    Handles movement commands and asynchronous sensor data retrieval.
     """
 
-    def __init__(self, port='/dev/ttyUSB0', baudrate=115200):
+    def __init__(self, port='COM9', baudrate=115200):
         """
-        Constructor de la clase.
-        Establece la conexión serial y aplica un retardo de seguridad.
+        Initializes serial connection on Windows and starts the telemetry thread.
         """
         try:
-            self.ser = serial.Serial(port, baudrate, timeout=1)
-            # El Arduino suele reiniciarse al abrir la conexión serial
-            time.sleep(2) 
-            print(f"Conectado exitosamente a MegaPi en {port}")
+            # On Windows, we just use the port name like 'COM9'
+            self.ser = serial.Serial(port, baudrate, timeout=0.1)
+            time.sleep(2)  # Critical: Wait for Arduino to reboot after connection
+            print(f"✅ System: Connected to MegaPi on {port}")
+            
+            # Distance variables (updated by background thread)
+            self.dist_sensor1 = 400
+            self.dist_sensor2 = 400
+            
+            # Start Background Telemetry Thread
+            self.running = True
+            self.reader_thread = threading.Thread(target=self._read_telemetry, daemon=True)
+            self.reader_thread.start()
+
         except Exception as e:
-            print(f"Error crítico al conectar: {e}")
+            print(f"❌ Critical Error: Could not connect to {port}. {e}")
             exit()
 
-    def _enviar_comando(self, accion, v1=0, v2=0):
+    def _read_telemetry(self):
         """
-        Método privado para la construcción del paquete de protocolo.
-        Paquete de 5 bytes: [Header, Tipo, Acción, Valor1, Valor2]
+        Private method: Background loop to parse incoming sensor data and debug text.
+        """
+        while self.running:
+            try:
+                if self.ser.in_waiting >= 1:
+                    # Look for the binary telemetry header (0xAA)
+                    header = self.ser.read(1)
+                    
+                    if header == b'\xaa':
+                        # Read the next 4 bytes: [Dist1, Dist2, Padding, Padding]
+                        if self.ser.in_waiting >= 4:
+                            payload = self.ser.read(4)
+                            self.dist_sensor1 = payload[0]
+                            self.dist_sensor2 = payload[1]
+                    else:
+                        # If it's text (like our Arduino debug prints), try to read the line
+                        line = self.ser.readline().decode('ascii', errors='ignore').strip()
+                        if line:
+                            print(f"   [MegaPi Debug]: {line}")
+            except Exception as e:
+                # Silently handle transient serial errors
+                pass
+            time.sleep(0.01)
+
+    def _send_command(self, action, v1=0, v2=0):
+        """
+        Sends the 5-byte protocol packet to the MegaPi.
         """
         header = 0xFF
-        tipo = 0x01
-        package = bytearray([header, tipo, accion, v1, v2])
+        msg_type = 0x01
+        package = bytearray([header, msg_type, action, v1, v2])
         self.ser.write(package)
 
-    def avanzar(self, velocidad, duracion=None):
-        """
-        Envía comando para movimiento frontal.
-        Si se define 'duracion', detiene el motor automáticamente tras n segundos.
-        """
-        print(f"Acción: Avanzar | Velocidad: {velocidad} | Tiempo: {duracion}s")
-        self._enviar_comando(1, v1=velocidad)
-        if duracion:
-            time.sleep(duracion)
-            self.detenerse()
+    def move_forward(self, speed, duration=None):
+        """Moves the car forward."""
+        print(f"CMD: Forward | Speed: {speed}")
+        self._send_command(1, v1=speed)
+        if duration:
+            time.sleep(duration)
+            self.stop()
 
-    def retroceder(self, velocidad, duracion=None):
-        """
-        Envía comando para movimiento hacia atrás.
-        """
-        print(f"Acción: Retroceder | Velocidad: {velocidad} | Tiempo: {duracion}s")
-        self._enviar_comando(2, v1=velocidad)
-        if duracion:
-            time.sleep(duracion)
-            self.detenerse()
+    def move_backward(self, speed, duration=None):
+        """Moves the car backward."""
+        print(f"CMD: Backward | Speed: {speed}")
+        self._send_command(2, v1=speed)
+        if duration:
+            time.sleep(duration)
+            self.stop()
 
-    def girar_izquierda(self, angulo, velocidad, duracion=None):
-        """
-        Ajusta el servo a la izquierda y activa motor de tracción.
-        v1 = ángulo de dirección, v2 = velocidad del motor.
-        """
-        print(f"Acción: Girar Izq | Ángulo: {angulo} | Vel: {velocidad} | Tiempo: {duracion}s")
-        self._enviar_comando(3, v1=angulo, v2=velocidad)
-        if duracion:
-            time.sleep(duracion)
-            self.detenerse()
+    def turn_left(self, angle, speed, duration=None):
+        """Adjusts steering left and moves."""
+        print(f"CMD: Turn Left | Angle: {angle} | Speed: {speed}")
+        self._send_command(3, v1=angle, v2=speed)
+        if duration:
+            time.sleep(duration)
+            self.stop()
 
-    def girar_derecha(self, angulo, velocidad, duracion=None):
-        """
-        Ajusta el servo a la derecha y activa motor de tracción.
-        """
-        print(f"Acción: Girar Der | Ángulo: {angulo} | Vel: {velocidad} | Tiempo: {duracion}s")
-        self._enviar_comando(4, v1=angulo, v2=velocidad)
-        if duracion:
-            time.sleep(duracion)
-            self.detenerse()
+    def turn_right(self, angle, speed, duration=None):
+        """Adjusts steering right and moves."""
+        print(f"CMD: Turn Right | Angle: {angle} | Speed: {speed}")
+        self._send_command(4, v1=angle, v2=speed)
+        if duration:
+            time.sleep(duration)
+            self.stop()
 
-    def detenerse(self):
-        """
-        Detiene inmediatamente el motor y centra la dirección.
-        """
-        print("Acción: Detenerse")
-        self._enviar_comando(5)
+    def stop(self):
+        """Emergency stop: kills motors and centers steering."""
+        print("CMD: Stop")
+        self._send_command(5)
 
-    def cerrar(self):
-        """
-        Cierra el puerto serial de forma segura.
-        """
+    def get_distances(self):
+        """Returns the latest sensor readings as a tuple (S1, S2)."""
+        return (self.dist_sensor1, self.dist_sensor2)
+
+    def close(self):
+        """Clean shutdown of the controller."""
+        self.running = False
         if hasattr(self, 'ser') and self.ser.is_open:
-            self.detenerse()
+            self.stop()
             self.ser.close()
-            print("Conexión serial cerrada.")
+            print("System: Connection closed.")
 
-# --------------------Main Execution--------------------
+# --------------------Main Execution Loop--------------------
 if __name__ == "__main__":
-    # Inicialización del controlador
-    # Nota: Verificar si el puerto es /dev/ttyUSB0 o /dev/ttyACM0
-    carro = MegaPiController(port='/dev/ttyUSB0')
+    # Initialize using the COM9 port for Windows
+    car = MegaPiController(port='COM9')
 
     try:
-        # Ejemplo de secuencia: Giro programado de 4 segundos a 100 PWM
-        carro.girar_derecha(angulo=45, velocidad=100, duracion=4)
+        print("\nStarting Intelligent Navigation. Press Ctrl+C to stop.")
+        
+        # Initial action
+        car.move_forward(speed=120)
 
-        time.sleep(1) # Pausa de estabilización
-
-        # Avance frontal por 2 segundos a velocidad media
-        carro.avanzar(velocidad=150, duracion=2)
-
-        print("Secuencia completada con éxito.")
+        while True:
+            # Update sensor values from the background thread
+            d1, d2 = car.get_distances()
+            
+            # Print status on a single line (overwriting)
+            print(f"   [Status] Front: {d1}cm | Side: {d2}cm    ", end='\r')
+            
+            # Obstacle avoidance logic
+            if d1 < 30:
+                print(f"\n⚠️  Obstacle at {d1}cm! Stopping.")
+                car.stop()
+                break
+            
+            time.sleep(0.1)
 
     except KeyboardInterrupt:
-        # Manejo de parada de emergencia con Ctrl+C
-        if carro:
-            carro.detenerse()
-        print("\nControl interrumpido por el usuario.")
-    
+        print("\nUser interruption.")
     finally:
-        # Asegurar el cierre del puerto al finalizar
-        if carro:
-            carro.cerrar()
-# --------------------Main Execution--------------------
+        car.close()
