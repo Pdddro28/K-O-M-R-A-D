@@ -1,6 +1,39 @@
 Control software
+====
 
+ped ped ped ped ped ped
 
-This directory must contain code for control software which is used by the vehicle to participate in the competition and which was developed by the participants.
+Folders structure
+====
 
-All artifacts required to resolve dependencies and build the project must be included in this directory as well.
+ped ped ped ped ped ped
+
+Table of contents
+====
+
+ped ped ped ped ped ped
+
+Code description
+====
+
+ped ped ped ped ped ped
+
+Calibration
+====
+
+ped ped ped ped ped ped
+
+Open challenge
+====
+
+ped ped ped ped ped ped
+
+Obstacle challenge
+====
+
+ped ped ped ped ped ped
+
+Recomendations
+====
+
+ped ped ped ped ped ped
