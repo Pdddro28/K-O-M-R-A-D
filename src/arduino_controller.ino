@@ -1,20 +1,23 @@
 #include "MeMegaPi.h"
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
 
 // --- System Constants ---
-#define SERVO_CENTER   90    // Default neutral position for steering
-#define MAX_LEFT       180   // Maximum hardware limit for left turn
-#define MIN_RIGHT      0     // Minimum hardware limit for right turn
-#define SERIAL_BAUD    115200 // Communication speed for RPi4 link
-#define SENSOR_TIMEOUT 25000 // Pulse timeout in microseconds (~4 meters)
+#define SERVO_CENTER    90    // Default neutral position for steering
+#define MAX_LEFT        180   // Maximum hardware limit for left turn
+#define MIN_RIGHT       0     // Minimum hardware limit for right turn
+#define SERIAL_BAUD     115200 // Communication speed for RPi4 link
+#define SENSOR_TIMEOUT  25000 // Pulse timeout in microseconds (~4 meters)
 
 /**
- * Carro
- * Handles low-level hardware control for traction, steering, and sensing.
+ * Carro Class
+ * Handles low-level hardware control for traction, steering, IMU, and ultrasonic sensing.
  */
 class Carro {
   private:
     MeMegaPiDCMotor motorTraccion; // Main DC motor connected to PORT1
     Servo servoDireccion;          // Front axle steering servo
+    Adafruit_MPU6050 mpu;          // IMU Sensor instance
     
     // Pin Definitions
     const int pinServo = A6;       
@@ -33,7 +36,7 @@ class Carro {
     Carro() : motorTraccion(PORT1) {} 
 
     /**
-     * Configures hardware pins and attaches the steering servo.
+     * Configures hardware pins, attaches servo, and initializes MPU6050.
      */
     void inicializar() {
       servoDireccion.attach(pinServo);
@@ -45,14 +48,23 @@ class Carro {
       pinMode(trig2, OUTPUT);
       pinMode(echo2, INPUT);
       
+      // Initialize MPU6050 IMU
+      if (!mpu.begin()) {
+        Serial.println("System: MPU6050 NOT Found");
+      } else {
+        Serial.println("System: MPU6050 Initialized");
+        // Basic sensor range configurations
+        mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+        mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+        mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+      }
+      
       Serial.println("System: Hardware Initialized");
     }
 
     /**
      * Measures distance using HC-SR04 ultrasonic sensors.
-     * Trigger pin
-     * Echo pin
-     * Distance in centimeters (returns 400 if no echo).
+     * @return Distance in centimeters (returns 400 if no echo).
      */
     long obtenerDistancia(int trig, int echo) {
       digitalWrite(trig, LOW);
@@ -67,13 +79,27 @@ class Carro {
       return (distancia == 0) ? 400 : distancia;
     }
 
-    // Helper methods for telemetry
+    /**
+     * Reads IMU data and maps it to 8-bit integers for serial efficiency.
+     * Accel values are scaled by 10 to preserve one decimal of precision.
+     */
+    void getMPUData(int8_t &accelX, int8_t &accelY, int8_t &gyroZ) {
+      sensors_event_t a, g, temp;
+      mpu.getEvent(&a, &g, &temp);
+
+      // Mapping values to signed bytes (-128 to 127)
+      // Acceleration roughly covers -10 to 10 m/s^2 * 10
+      accelX = (int8_t)constrain(a.acceleration.x * 10, -128, 127);
+      accelY = (int8_t)constrain(a.acceleration.y * 10, -128, 127);
+      gyroZ  = (int8_t)constrain(g.gyro.z * 10, -128, 127);
+    }
+
+    // Helper methods for distance telemetry
     long getDistancia1() { return obtenerDistancia(trig1, echo1); }
     long getDistancia2() { return obtenerDistancia(trig2, echo2); }
 
     /**
-     * Moves the car forward at a set speed while centering steering.
-     * PWM speed (0-255).
+     * Moves the car forward at a set speed.
      */
     void avanzar(byte velocidad) {
       servoDireccion.write(centro);
@@ -90,8 +116,6 @@ class Carro {
 
     /**
      * Executes a left turn by adding an offset to the center.
-     * Degrees to add (0-90).
-     * Movement speed during turn.
      */
     void girarIzquierda(byte angulo, byte velocidad) {
       int pos = centro + angulo;
@@ -135,7 +159,7 @@ void setup() {
 // Main Control Loop
 // ---------------------------------------------------------
 void loop() {
-  /* * Part 1: Serial Command Processing (RPi4 -> MegaPi)
+  /** * Part 1: Serial Command Processing (RPi4 -> MegaPi)
    * Protocol format: [0xFF, Type, Action, Param1, Param2]
    */
   if (Serial.available() >= 5) {
@@ -157,19 +181,24 @@ void loop() {
     }
   }
 
-  /* * Part 2: Periodic Telemetry Update (MegaPi -> RPi4)
-   * Broadcasts sensor data every 100ms.
+  /**
+   * Part 2: Periodic Telemetry Update (MegaPi -> RPi4)
+   * Broadcasts ultrasonic and IMU data every 100ms.
+   * Packet: [Header, Dist1, Dist2, AccelX, AccelY, GyroZ]
    */
   if (millis() - timerSensores > 100) {
     int d1 = (int)miCarro.getDistancia1();
     int d2 = (int)miCarro.getDistancia2();
     
-    // Telemetry Packet: [Header, Sensor1, Sensor2, Padding, Padding]
-    Serial.write(0xAA); 
+    int8_t ax, ay, gz;
+    miCarro.getMPUData(ax, ay, gz);
+    
+    Serial.write(0xAA); // Telemetry Header
     Serial.write(constrain(d1, 0, 255));
     Serial.write(constrain(d2, 0, 255));
-    Serial.write(0x00);
-    Serial.write(0x00);
+    Serial.write((byte)ax);
+    Serial.write((byte)ay);
+    Serial.write((byte)gz);
     
     timerSensores = millis();
   }
