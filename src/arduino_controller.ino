@@ -104,6 +104,9 @@ class Carro {
       motorTraccion.stop();
       servoDireccion.write(centro);
     }
+    void girarCentro() {
+      servoDireccion.write(centro);
+    }
 };
 
 Carro miCarro;
@@ -130,6 +133,7 @@ void loop() {
         case 3: miCarro.girarIzquierda(v1, v2); break;
         case 4: miCarro.girarDerecha(v1, v2); break;
         case 5: miCarro.detenerse(); break;
+        case 6: miCarro.girarCentro(); break;
         default: miCarro.detenerse(); break;
       }
     }
