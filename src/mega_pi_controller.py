@@ -3,7 +3,7 @@ import time
 import threading
 import pandas as pd
 import random
-
+from vision_controller import VisionController
 class MegaPiController:
     """
     Controller class for MegaPi robot.
@@ -15,7 +15,7 @@ class MegaPiController:
     ACTION_FORWARD = 1
     ACTION_RIGHT = 2
 
-    def __init__(self, port='COM5', baudrate=115200):
+    def __init__(self, port='COM9', baudrate=115200, cam_port=0):
         try:
             self.ser = serial.Serial(port, baudrate, timeout=0.1)
             time.sleep(2) 
@@ -29,38 +29,46 @@ class MegaPiController:
             # Data Logging List (For Pandas)
             self.data_log = []
             self.log_index = 0
-            
+            self.vision = VisionController(usb_port=cam_port)  # Assuming specified camera is used for vision
             # Thread setup
             self.running = True
             self.reader_thread = threading.Thread(target=self._read_telemetry, daemon=True)
             self.reader_thread.start()
+            self.button_value = 0
+
 
         except Exception as e:
             print(f"❌ Critical Error: Could not connect to {port}. {e}")
             exit()
 
     def _read_telemetry(self):
-        """Background loop to parse incoming sensor data (3 sensors + 2 padding)."""
-        while self.running:
-            try:
-                if self.ser.in_waiting >= 1:
-                    header = self.ser.read(1)
-                    
-                    if header == b'\xaa':
-                        # Read 5 bytes: [Front, Left, Right, Padding, Padding]
-                        if self.ser.in_waiting >= 5:
+            """Background loop to parse incoming sensor data (Header + 5 bytes)."""
+            while self.running:
+                try:
+                    # Necesitamos al menos 6 bytes para un paquete completo
+                    if self.ser.in_waiting >= 6:
+                        header = self.ser.read(1)
+                        
+                        if header == b'\xaa':
+                            # Leemos exactamente los 5 bytes restantes: 
+                            # [Front, Left, Right, Button, Padding]
                             payload = self.ser.read(5)
+                            
                             self.dist_front = payload[0]
-                            self.dist_left = payload[1]
+                            self.dist_left  = payload[1]
                             self.dist_right = payload[2]
-                    else:
-                        line = self.ser.readline().decode('ascii', errors='ignore').strip()
-                        if line:
-                            print(f"   [MegaPi Debug]: {line}")
-            except Exception:
-                pass
-            time.sleep(0.01)
-
+                            self.button_value = payload[3]  # El botón es el 4to byte (índice 3)
+                            
+                        else:
+                            # Si no es el header, limpiamos el buffer para buscar el próximo AA
+                            # Esto evita que el error se arrastre
+                            line = self.ser.readline().decode('ascii', errors='ignore').strip()
+                            if line:
+                                print(f"   [MegaPi Debug]: {line}")
+                except Exception as e:
+                    print(f"Telemetry Error: {e}")
+                
+                time.sleep(0.01) # Pequeño respiro para el procesador
     def _send_command(self, action, v1=0, v2=0):
         header = 0xFF
         msg_type = 0x01
@@ -150,13 +158,19 @@ class MegaPiController:
             self.ser.close()
             print("System: Connection closed.")
 
+    def start (self):
+        return self.button_value == 1
 
 # --------------------Main Execution Loop (Solo para testing)--------------------
 if __name__ == "__main__":
-    car = MegaPiController(port='COM5')
+    car = MegaPiController(port='COM9')
 
     try:
-        print("\n🤖 Starting Data Collection for AI Training...")
+        print("\n ESPERANDO BOTÓN FÍSICO PARA ARRANCAR...")
+        while not car.start():
+            time.sleep(0.1)
+        
+        print("\n🚀 K-O-M-R-A-D Iniciado: Recolectando datos...")
         car.move_forward(speed=100, log=True)
 
         while True:

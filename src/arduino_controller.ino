@@ -18,18 +18,21 @@ class Carro {
     const int pinServo = A6;
     const int centro   = SERVO_CENTER;
     
-    // HC-SR04 Ultrasonic Sensor Pins (3 sensors now!)
     const int trig_front = A15;
     const int echo_front = A14;
     const int trig_left  = A13;
     const int echo_left  = A12;
-    const int trig_right = A11;  // NUEVO sensor derecho
-    const int echo_right = A10;  // NUEVO sensor derecho
+    const int trig_right = A11;
+    const int echo_right = A10;
+
+    const int botonPin = A7;
 
   public:
     Carro() : motorTraccion(PORT1) {}
 
     void inicializar() {
+      boton.
+
       servoDireccion.attach(pinServo);
       servoDireccion.write(centro);
       
@@ -134,6 +137,7 @@ void loop() {
         case 4: miCarro.girarDerecha(v1, v2); break;
         case 5: miCarro.detenerse(); break;
         case 6: miCarro.girarCentro(); break;
+        case 7: miCarro.iniciar(); break;
         default: miCarro.detenerse(); break;
       }
     }

@@ -40,23 +40,25 @@ try:
         # Lógica de Control WASD
         if keys[pygame.K_w]:
             print("  ⬆️  Adelante", end='\r')
-            mover(SPEED, -SPEED) # Uno invertido dependiendo de la posición del motor
+            mover(SPEED, -SPEED) 
         elif keys[pygame.K_s]:
             print("  ⬇️  Atrás   ", end='\r')
             mover(-SPEED, SPEED)
         elif keys[pygame.K_a]:
             print("  ⬅️  Izquierda", end='\r')
-            mover(-SPEED, -SPEED)
+            # Rotación usando una sola rueda para mantener contacto
+            mover(0, -SPEED) 
         elif keys[pygame.K_d]:
             print("  ➡️  Derecha  ", end='\r')
-            mover(SPEED, SPEED)
+            # Rotación usando una sola rueda para mantener contacto
+            mover(SPEED, 0)
         elif keys[pygame.K_ESCAPE]:
             raise KeyboardInterrupt
         else:
             mover(0, 0)
             print("  🛑  Detenido ", end='\r')
 
-        time.sleep(0.02) # Respuesta rápida
+        time.sleep(0.02)
 
 except KeyboardInterrupt:
     print("\n\nDeteniendo K-O-M-R-A-D...")
