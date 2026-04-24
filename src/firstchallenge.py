@@ -1,6 +1,8 @@
 from mega_pi_controller import *
+from constants import *
+import cv2 as cv
 # LNMbi setup
-LNM = MegaPiController("/dev/ttyUSB0")
+LNM = MegaPiController("COM9", 115200, cam_port=0)
 
 # Centering the directions
 LNM.turn_center()
@@ -9,7 +11,7 @@ LNM.turn_center()
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 
 # Waiting to press the button
-while LNM.Start():
+while LNM.start():
     pass
 
 running = True
@@ -19,7 +21,7 @@ line_detected = False
 # Start moving
 while running:
     try:
-        LNM.go_forward(0)
+        LNM.move_forward(speed=100)
         # get areas and contours-----------------
         LNM.vision.receive_image()
         
@@ -90,10 +92,10 @@ while running:
     except Exception as e:
         print("Exception:", e)
         #print(traceback.format_exc())
-        LNM.Stop()
+        LNM.stop()
         break
     
     
 
-LNM.Stop()
+LNM.stop()
 

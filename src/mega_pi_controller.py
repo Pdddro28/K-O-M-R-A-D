@@ -35,6 +35,7 @@ class MegaPiController:
             self.reader_thread = threading.Thread(target=self._read_telemetry, daemon=True)
             self.reader_thread.start()
             self.button_value = 0
+            self.turning_direction = 0 # 0: No turn, 1: Left, 2: Right
 
 
         except Exception as e:
