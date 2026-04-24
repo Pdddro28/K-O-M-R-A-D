@@ -2,10 +2,10 @@ from mega_pi_controller import *
 from constants import *
 import cv2 as cv
 # LNMbi setup
-LNM = MegaPiController("COM9", 115200, cam_port=0)
+LNM = MegaPiController("/dev/ttyUSB0", 115200, cam_port=0)
 
 # Centering the directions
-LNM.turn_center()
+# LNM.turn_center()
 
 # Saving the ROIs
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
@@ -18,19 +18,34 @@ running = True
 loops = 0
 line_detected = False
 
+girando = False
+
 # Start moving
 while running:
     try:
-        LNM.move_forward(speed=100)  # Works
+        LNM.move_forward(speed = 80)  #Avanza siempre
         # get areas and contours-----------------
         #LNM.vision.receive_image()
         front_dist, left_dist, right_dist = LNM.get_distances()
         print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist}")
 
-        if front_dist < 20:
-            print("Obstacle detected! Stopping.")
-            LNM.stop()
-            break
+        if front_dist < 98 and right_dist > 70: #Gira derecha
+           print("Obstacle detected! Stopping.")
+           LNM.turn_left(angle=40, speed=120)
+           girando = True
+        elif front_dist < 98 and left_dist > 70: #Gira izquierda
+           print("Obstacle detected! Stopping.")
+           LNM.turn_right(angle=40, speed=120)
+           girando = True
+        elif right_dist < 70 and left_dist < 70 and girando == True: #Sigue avanzando
+           print("Obstacle detected! Stopping.")
+           LNM.turn_left(angle=90, speed=80)
+           girando = False
+           #time.sleep(2)
+           #LNM.stop()
+           #break
+
+
         # get areas and contours-----------------
         
         # get turn direction based on line color----------

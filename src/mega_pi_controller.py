@@ -3,7 +3,7 @@ import time
 import threading
 import pandas as pd
 import random
-#from vision_controller import VisionController
+from vision_controller import VisionController
 class MegaPiController:
     """
     Controller class for MegaPi robot.
@@ -29,7 +29,7 @@ class MegaPiController:
             # Data Logging List (For Pandas)
             self.data_log = []
             self.log_index = 0
-            #self.vision = VisionController(usb_port=cam_port)  # Assuming specified camera is used for vision
+            self.vision = VisionController(usb_port=cam_port)  # Assuming specified camera is used for vision
             # Thread setup
             self.running = True
             self.reader_thread = threading.Thread(target=self._read_telemetry, daemon=True)
