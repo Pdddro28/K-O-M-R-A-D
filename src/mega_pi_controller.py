@@ -115,6 +115,11 @@ class MegaPiController:
         self._send_command(2, v1=speed)
         if log: self.log_step(self.ACTION_FORWARD)
 
+    def trun_direction(self):
+        if self.turning_direction == 1:
+            self.turn_left(angle=90, speed=80, log=True)
+        elif self.turning_direction == 2:
+            self.turn_right(angle=90, speed=80, log=True)
     def turn_left(self, angle, speed, log=True):
         print(f"CMD: Turn Left | Angle: {angle} | Speed: {speed}")
         self._send_command(3, v1=angle, v2=speed)

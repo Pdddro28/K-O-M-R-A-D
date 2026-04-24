@@ -1,13 +1,25 @@
 #include "MeMegaPi.h"
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
+#include <Wire.h>
 
-// --- System Constants ---
+// --- Constantes del Sistema ---
 #define SERVO_CENTER    90
 #define MAX_LEFT        180
 #define MIN_RIGHT       0
 #define SERIAL_BAUD     115200
 #define SENSOR_TIMEOUT  25000
+
+// Pines de Hardware
+#define BUTTON          A7
+#define pinServo        A6
+#define trig_front      A15
+#define echo_front      A14
+#define trig_left       A13
+#define echo_left       A12
+#define trig_right      A11
+#define echo_right      A10
+#define centro          90
 
 class Carro {
   private:
@@ -15,33 +27,24 @@ class Carro {
     Servo servoDireccion;
     Adafruit_MPU6050 mpu;
     
-    const int pinServo = A6;
-    const int centro   = SERVO_CENTER;
-    
-    const int trig_front = A15;
-    const int echo_front = A14;
-    const int trig_left  = A13;
-    const int echo_left  = A12;
-    const int trig_right = A11;
-    const int echo_right = A10;
-
-    const int botonPin = A7;
-
   public:
+    // Motor conectado al Puerto 1 de la MegaPi
     Carro() : motorTraccion(PORT1) {}
 
     void inicializar() {
-      boton.
+      // Configuración del botón (Pull-up interna)
+      pinMode(BUTTON, INPUT_PULLUP);
 
+      // Configuración del Servo
       servoDireccion.attach(pinServo);
       servoDireccion.write(centro);
       
-      // Ultrasonic pins setup
+      // Configuración de Sensores Ultrasónicos
       pinMode(trig_front, OUTPUT); pinMode(echo_front, INPUT);
       pinMode(trig_left, OUTPUT);  pinMode(echo_left, INPUT);
       pinMode(trig_right, OUTPUT); pinMode(echo_right, INPUT);
-      
-      // MPU6050 IMU
+      /*
+      // Inicialización del MPU6050 (I2C)
       if (!mpu.begin()) {
         Serial.println("System: MPU6050 NOT Found");
       } else {
@@ -50,8 +53,13 @@ class Carro {
         mpu.setGyroRange(MPU6050_RANGE_500_DEG);
         mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
       }
-      
+      */
       Serial.println("System: Hardware Initialized");
+    }
+
+    // --- Lógica de Sensores ---
+    bool botonPresionado() {
+      return digitalRead(BUTTON) == LOW; // LOW porque usa INPUT_PULLUP
     }
 
     long obtenerDistancia(int trig, int echo) {
@@ -64,21 +72,15 @@ class Carro {
       long duracion = pulseIn(echo, HIGH, SENSOR_TIMEOUT);
       long distancia = duracion * 0.034 / 2;
       
-      return (distancia == 0) ? 400 : distancia;
-    }
-
-    void getMPUData(int8_t &accelX, int8_t &accelY, int8_t &gyroZ) {
-      sensors_event_t a, g, temp;
-      mpu.getEvent(&a, &g, &temp);
-      accelX = (int8_t)constrain(a.acceleration.x * 10, -128, 127);
-      accelY = (int8_t)constrain(a.acceleration.y * 10, -128, 127);
-      gyroZ  = (int8_t)constrain(g.gyro.z * 10, -128, 127);
+      // Si el sensor da 0 (fuera de rango), devolvemos 400cm como valor seguro
+      return (distancia <= 0) ? 400 : distancia;
     }
 
     long getDistanciaFront() { return obtenerDistancia(trig_front, echo_front); }
     long getDistanciaLeft()  { return obtenerDistancia(trig_left, echo_left); }
     long getDistanciaRight() { return obtenerDistancia(trig_right, echo_right); }
 
+    // --- Lógica de Movimiento ---
     void avanzar(byte velocidad) {
       servoDireccion.write(centro);
       motorTraccion.run(velocidad);
@@ -107,6 +109,7 @@ class Carro {
       motorTraccion.stop();
       servoDireccion.write(centro);
     }
+
     void girarCentro() {
       servoDireccion.write(centro);
     }
@@ -121,14 +124,14 @@ void setup() {
 }
 
 void loop() {
-  // Part 1: Serial Command Processing
+  // --- PARTE 1: Procesamiento de Comandos (Raspberry -> Arduino) ---
   if (Serial.available() >= 5) {
     byte header = Serial.read();
     if (header == 0xFF) {
       byte tipo   = Serial.read();
       byte accion = Serial.read();
-      byte v1     = Serial.read();
-      byte v2     = Serial.read();
+      byte v1     = Serial.read(); // Velocidad o Ángulo
+      byte v2     = Serial.read(); // Velocidad secundaria
 
       switch (accion) {
         case 1: miCarro.avanzar(v1); break;
@@ -137,24 +140,26 @@ void loop() {
         case 4: miCarro.girarDerecha(v1, v2); break;
         case 5: miCarro.detenerse(); break;
         case 6: miCarro.girarCentro(); break;
-        case 7: miCarro.iniciar(); break;
+        case 7: miCarro.inicializar(); break; // Reiniciar configuración
         default: miCarro.detenerse(); break;
       }
     }
   }
 
-  // Part 2: Telemetry Update (3 distances + 2 padding)
+  // --- PARTE 2: Telemetría (Arduino -> Raspberry) cada 100ms ---
   if (millis() - timerSensores > 100) {
     int d_front = (int)miCarro.getDistanciaFront();
     int d_left  = (int)miCarro.getDistanciaLeft();
     int d_right = (int)miCarro.getDistanciaRight();
+    byte estadoBoton = miCarro.botonPresionado() ? 1 : 0;
     
-    Serial.write(0xAA);              // Header
-    Serial.write(constrain(d_front, 0, 255));  // Byte 1: Front
-    Serial.write(constrain(d_left, 0, 255));   // Byte 2: Left
-    Serial.write(constrain(d_right, 0, 255));  // Byte 3: Right
-    Serial.write(0x00);              // Byte 4: Padding
-    Serial.write(0x00);              // Byte 5: Padding
+    // Paquete de Telemetría (6 bytes en total)
+    Serial.write(0xAA);                        // Byte 0: Header
+    Serial.write(constrain(d_front, 0, 255));  // Byte 1: Frontal
+    Serial.write(constrain(d_left, 0, 255));   // Byte 2: Izquierda
+    Serial.write(constrain(d_right, 0, 255));  // Byte 3: Derecha
+    Serial.write(estadoBoton);                 // Byte 4: Botón (0 o 1)
+    Serial.write(0x00);                        // Byte 5: Relleno (Padding)
     
     timerSensores = millis();
   }
