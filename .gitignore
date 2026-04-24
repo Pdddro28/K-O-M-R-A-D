@@ -1,2 +1,5 @@
 other/RETO SYSTEM JV 21 DÍAS.pdf
 *.pdf
+env
+__pycache__
+system-site-packages/*
