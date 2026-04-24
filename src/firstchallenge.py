@@ -1,22 +1,30 @@
 from mega_pi_controller import *
 from constants import *
 import cv2 as cv
+import time
+
 # LNMbi setup
 LNM = MegaPiController("COM9", 115200, cam_port=0)
 
 # Centering the directions
 LNM.turn_center()
 
-# Saving the ROIs
-ROIS = [OPEN_ROI_CENTER, ROI_LINES]
+# Saving the ROIs (Comentado por ahora ya que Vision no procesa)
+# ROIS = [OPEN_ROI_CENTER, ROI_LINES]
+
+# --- NUEVOS UMBRALES DE DISTANCIA ---
+DIST_TURN_THRESH = 30   # Equivale a TURN_THRESH (cuándo empezar a girar)
+DIST_EXIT_THRESH = 50   # Equivale a TURN_EXIT_THRESH (cuándo centrar)
 
 # Waiting to press the button
-while LNM.start():
-    pass
+print("Esperando botón para iniciar...")
+while not LNM.start():
+    time.sleep(0.1)
 
 running = True
 loops = 0
 line_detected = False
+giro_en_progreso = False
 
 # Start moving
 while running:
@@ -32,9 +40,19 @@ while running:
         black_area = LNM.vision.max_contour(cnt_front_wall, OPEN_ROI_CENTER)[0]
         blue_area = LNM.vision.max_contour(cnt_lines_blue, ROI_LINES)[0]
         orange_area = LNM.vision.max_contour(cnt_lines_orange, ROI_LINES)[0]
-        # get areas and contours-----------------
+        """
+        # Variables de área en 0 para evitar errores si algo quedó sin comentar
+        black_area = 0
+        blue_area = 0
+        orange_area = 0
+        # ---------------------------------
         
-        # get turn direction based on line color----------
+        # Lógica de dirección (si no hay visión, decide por el lado más despejado)
+        if (LNM.turning_direction == 0):
+            if l > r:
+                LNM.turning_direction = 1 # izquierda
+            else:
+                LNM.turning_direction = 2 # derecha
         
         # if (LNM.turning_direction == 0): #only look for line colors if no colors have been detected yet.
         #     if (blue_area >= 10):
@@ -59,43 +77,33 @@ while running:
                 
         # Break the cycle if it has completed all the laps
         if (loops == 12):
+            print("\n🏁 ¡12 vueltas completadas!")
             break
 
-        print(loops)
+        print(f"Vueltas: {loops} | Distancia Frontal: {f}cm  ", end='\r')
         
-        
-        
-        #DRAWING------------------------------------------------------
-        #draw rois---------s
+        # --- SECCIÓN DE DIBUJO Y GUI COMENTADA ---
+        """
         for roi in ROIS:
             LNM.vision.draw_roi(roi)
-        #draw rois---------
             
-        #draw contours-----------
         LNM.vision.draw_contours(cnt_front_wall, OPEN_ROI_CENTER, (255,255,0))
         LNM.vision.draw_contours(cnt_lines_blue, ROI_LINES, (255,255,0))
         LNM.vision.draw_contours(cnt_lines_orange, ROI_LINES, (255,0,0))
-        #draw contours-----------
         
-        #draw final img
-        cv.putText(LNM.vision.frame, "black area: " + str(black_area), (0,20), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-        cv.putText(LNM.vision.frame, "blue area: " + str(blue_area), (0,40), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-        cv.putText(LNM.vision.frame, "orange area: " + str(orange_area), (0,60), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+        cv.putText(LNM.vision.frame, "F Dist: " + str(f), (0,20), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
         cv.imshow("frame", LNM.vision.frame)
         
-        #------------
-        if cv.waitKey(1) == ord('q') or not running:
-            LNM.vision.camera_cap.release()
-            cv.destroyAllWindows()
-            
+        if cv.waitKey(1) == ord('q'):
+            break
+        # -----------------------------------------
+        
+        time.sleep(0.05)
         
     except Exception as e:
-        print("Exception:", e)
-        #print(traceback.format_exc())
+        print("\nException:", e)
         LNM.stop()
         break
-    
-    
 
 LNM.stop()
-
+LNM.close()
