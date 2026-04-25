@@ -15,7 +15,7 @@ class MegaPiController:
     ACTION_FORWARD = 1
     ACTION_RIGHT = 2
 
-    def __init__(self, port='COM9', baudrate=115200, cam_port=0):
+    def __init__(self, port='COM9', baudrate=115200 ):
         try:
             self.ser = serial.Serial(port, baudrate, timeout=0.1)
             time.sleep(2) 
@@ -29,8 +29,9 @@ class MegaPiController:
             # Data Logging List (For Pandas)
             self.data_log = []
             self.log_index = 0
-            self.vision = VisionController(usb_port=cam_port)  # Assuming specified camera is used for vision
+            #self.vision = VisionController()  # Assuming specified camera is used for vision
             # Thread setup
+            time.sleep(1)  # Give the serial connection a moment to stabilize
             self.running = True
             self.reader_thread = threading.Thread(target=self._read_telemetry, daemon=True)
             self.reader_thread.start()

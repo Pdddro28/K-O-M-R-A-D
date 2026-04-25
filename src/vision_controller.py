@@ -1,8 +1,7 @@
 import cv2 as cv
 import numpy as np
 from dataclasses import dataclass
-from picamera import PiCamera  # Librería necesaria
-from picamera.array import PiRGBArray # Para convertir a arrays de numpy
+from picamera2 import Picamera2  # Librería necesaria
 import time
 
 @dataclass
@@ -23,7 +22,7 @@ class VisionController():
         self.frame = None
 
         # Inicialización de PiCamera
-        self.camera = PiCamera()
+        self.camera = Picamera2()
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
         
