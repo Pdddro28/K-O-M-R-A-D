@@ -5,14 +5,14 @@
 
 // --- Constantes del Sistema ---
 #define SERVO_CENTER    90
-#define MAX_LEFT        180
-#define MIN_RIGHT       0
+#define LEFT            0
+#define RIGHT           180
 #define SERIAL_BAUD     115200
 #define SENSOR_TIMEOUT  25000
 
 // Pines de Hardware
-#define BUTTON          A7
-#define pinServo        A6
+#define BUTTON          A9
+#define pinServo        A8
 #define trig_front      A15
 #define echo_front      A14
 #define trig_left       A13
@@ -93,14 +93,14 @@ class Carro {
 
     void girarIzquierda(byte angulo, byte velocidad) {
       int pos = centro + angulo;
-      if (pos > MAX_LEFT) pos = MAX_LEFT;
+      if (pos > LEFT) pos = LEFT;
       servoDireccion.write(pos);
       motorTraccion.run(velocidad);
     }
 
     void girarDerecha(byte angulo, byte velocidad) {
       int pos = centro - angulo;
-      if (pos < MIN_RIGHT) pos = MIN_RIGHT;
+      if (pos < RIGHT) pos = RIGHT;
       servoDireccion.write(pos);
       motorTraccion.run(velocidad);
     }
