@@ -11,8 +11,8 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200)
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 
 # Waiting to press the button
-while not LNM.start():
-    pass
+# while not LNM.start():
+#     pass
 
 running = True
 loops = 0
@@ -29,7 +29,7 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # get areas and contours-----------------
-        #LNM.vision.receive_image()
+        LNM.vision.receive_image()
         print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist}")
 
         if front_dist < 100 and LNM.turning_direction == 2: #Gira derecha

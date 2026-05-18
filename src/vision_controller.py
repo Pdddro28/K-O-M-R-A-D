@@ -26,23 +26,15 @@ class VisionController():
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
         
-        # Generamos el buffer para capturar imágenes
-        self.raw_capture = PiRGBArray(self.camera, size=(self.image_width, self.image_height))
-
         # Tiempo de espera para que la cámara caliente (opcional pero recomendado)
         time.sleep(0.1)
 
     def receive_image(self):
         """Receive image array from PiCamera and convert it to LAB format"""
         
-        # Limpiamos el buffer antes de la nueva captura
-        self.raw_capture.truncate(0)
-        
-        # Capturamos un solo frame
-        self.camera.capture(self.raw_capture, format="bgr", use_video_port=True)
-        
+
         # Obtenemos la imagen como un array de numpy (formato OpenCV)
-        self.frame = self.raw_capture.array
+        self.frame = self.camera.capture_array('main')
 
         if self.frame is None:
             print("No se pudo obtener imagen de la PiCamera.")
