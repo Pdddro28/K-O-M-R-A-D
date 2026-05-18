@@ -2,7 +2,7 @@ from mega_pi_controller import *
 from constants import *
 import cv2 as cv
 # LNMbi setup
-LNM = MegaPiController("/dev/ttyUSB0", 115200, cam_port=0)
+LNM = MegaPiController("/dev/ttyUSB0", 115200)
 
 # Centering the directions
 # LNM.turn_center()
@@ -11,7 +11,7 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200, cam_port=0)
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 
 # Waiting to press the button
-while LNM.start():
+while not LNM.start():
     pass
 
 running = True
@@ -20,22 +20,25 @@ line_detected = False
 
 girando = False
 
+LNM.turning_direction = 2
+
 # Start moving
 while running:
     try:
-        LNM.move_forward(speed = 80)  #Avanza siempre
+        LNM.move_forward(speed = 65)  #Avanza siempre
+        front_dist, left_dist, right_dist = LNM.get_distances()
+
         # get areas and contours-----------------
         #LNM.vision.receive_image()
-        front_dist, left_dist, right_dist = LNM.get_distances()
         print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist}")
 
-        if front_dist < 98 and right_dist > 70: #Gira derecha
+        if front_dist < 100 and LNM.turning_direction == 2: #Gira derecha
            print("Obstacle detected! Stopping.")
-           LNM.turn_left(angle=40, speed=120)
+           LNM.turn_left(angle=40, speed=130)
            girando = True
-        elif front_dist < 98 and left_dist > 70: #Gira izquierda
+        elif front_dist < 100 and left_dist > 41: #Gira izquierda
            print("Obstacle detected! Stopping.")
-           LNM.turn_right(angle=40, speed=120)
+           #LNM.turn_right(angle=40, speed=120)
            girando = True
         elif right_dist < 70 and left_dist < 70 and girando == True: #Sigue avanzando
            print("Obstacle detected! Stopping.")

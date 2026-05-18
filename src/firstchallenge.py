@@ -4,10 +4,10 @@ import cv2 as cv
 import time
 
 # LNMbi setup
-LNM = MegaPiController("COM9", 115200, cam_port=0)
+LNM = MegaPiController("/dev/ttyUSB1", 115200)
 
 # Centering the directions
-LNM.turn_center()
+#LNM.turn_center()
 
 # Saving the ROIs (Comentado por ahora ya que Vision no procesa)
 # ROIS = [OPEN_ROI_CENTER, ROI_LINES]
