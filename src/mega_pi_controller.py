@@ -46,7 +46,6 @@ class MegaPiController:
             self.reader_thread.start()
             self.button_value = 0
             self.turning_direction = 0 # 0: No turn, 1: Left, 2: Right
-            self.vision = VisionController()  # Assuming specified camera is used for vision
 
             # Action Constants
             self.ACTION_LEFT = 0
@@ -110,7 +109,7 @@ class MegaPiController:
 
 # -------------------------------------Vision stuff------------------------------------ 
     def get_masks(self, color):
-        with open(f'mask_{color}.json') as f:
+        with open(f'src/Colors/mask_{color}.json') as f:
             config = json.load(f)
         lower = config['bounds']['lower']
         upper = config['bounds']['upper']
@@ -122,23 +121,20 @@ class MegaPiController:
         self.mask_blue = self.get_masks('azul')
         self.mask_orange = self.get_masks('naranja')
         self.mask_black = self.get_masks('negro')
-        self.mask_green = self.get_masks('verde')
-        self.mask_red = self.get_masks('rojo')
-        self.mask_purple = self.get_masks('morado')
+        #self.mask_green = self.get_masks('verde')
+        #self.mask_red = self.get_masks('rojo')
+        #self.mask_purple = self.get_masks('morado')
     def obtenerarea_frontal(self):
-        self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[2])
+        self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[0])
         self.black_area = self.vision.max_contour(self.cnt_front_wall, self.rois[0])[0]
-        return self.black_area 
 
     def obtener_linea_naranja(self):
         self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1])
         self.orange_area = self.vision.max_contour(self.cnt_orange_line, self.rois[1])[0]
-        return self.orange_area
 
     def obtener_linea_azul(self):
         self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1])
         self.blue_area = self.vision.max_contour(self.cnt_blue_line, self.rois[1])[0]
-        return self.blue_area
     
 
     def debug_UI(self):
@@ -189,19 +185,13 @@ class MegaPiController:
 
     def log_step(self, action_code):
         d_front, d_left, d_right = self.get_distances()
-        area_front = self.obtenerarea_frontal()
-        area_left = self.obtenerarea_izquierda()
-        area_right = self.obtenerarea_derecha()
+
         
         self.data_log.append({
             'index': self.log_index,
             'dist_front_cm': d_front,
             'dist_left_cm': d_left,
             'dist_right_cm': d_right,
-            'black_front_area': area_front,
-            'black_left_area': area_left,
-            'black_right_area': area_right,
-            'action_taken': action_code
         })
         
         self.log_index += 1
@@ -240,7 +230,7 @@ class MegaPiController:
     def stop(self, log=True):
         print("CMD: Stop")
         self._send_command(5)
-        if log: self.log_step(self.ACTION_FORWARD)
+        #if log: self.log_step(self.ACTION_FORWARD)
 
     def get_distances(self):
         return (self.dist_front, self.dist_left, self.dist_right)

@@ -26,6 +26,11 @@ LNM.turning_direction = 2
 while running:
     try:
         LNM.move_forward(speed = 65)  #Avanza siempre
+        LNM.vision.receive_image()
+        LNM.obtener_linea_azul()
+        LNM.obtener_linea_naranja()
+        LNM.obtenerarea_frontal()
+
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # get areas and contours-----------------
@@ -47,33 +52,9 @@ while running:
            #time.sleep(2)
            #LNM.stop()
            #break
-
-
-        # get areas and contours-----------------
         
-        # get turn direction based on line color----------
-        
-        # if (LNM.turning_direction == 0): #only look for line colors if no colors have been detected yet.
-        #     if (blue_area >= 10):
-        #         LNM.turning_direction = 1 #left
-        #     elif (orange_area >= 10):
-        #         LNM.turning_direction = 2 #right
-        # get turn direction based on line color----------
-        
-        # Determines if the car have to turn
-        # if (black_area >= TURN_THRESH):
-        #     LNM.turn_direction()
-        #     if line_detected:
-        #         line_detected = False
-
-        # # Center the car  
-        # if (LNM.turning_direction != 0):
-        #     if (black_area <= TURN_EXIT_THRESH):
-        #         LNM.turn_center()
-        #         if not line_detected:
-        #             loops += 1
-        #             line_detected = True
-                
+        LNM.debug_UI()
+        if cv2.waitKey(1) & 0xFF == ord('q'): break
         # Break the cycle if it has completed all the laps
         if (loops == 12):
             break

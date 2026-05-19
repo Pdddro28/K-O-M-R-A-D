@@ -43,8 +43,7 @@ class VisionController():
         # Procesamiento
         self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
         self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
-
-    # ... El resto de tus métodos (draw_roi, find_contours, etc.) permanecen igual ...
+        self.image_lab = cv.flip(self.image_lab, 1)
 
     def draw_roi(self, roi):
         cv.rectangle(self.frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
