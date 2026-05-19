@@ -174,32 +174,33 @@ class MegaPiController:
 
 
     def move_backward(self, speed, log=True):
-        print(f"CMD: Backward | Speed: {speed}")
+        #print(f"CMD: Backward | Speed: {speed}")
         self._send_command(2, v1=speed)
         if log: self.log_step(self.ACTION_FORWARD)
 
     def turn_direction(self):
         if self.turning_direction == 1:
-            self.turn_left(angle=90, speed=80, log=True)
+            self.turn_left(angle=40, speed=50, log=True) # OLVIDENSE DE ESTO
         elif self.turning_direction == 2:
-            self.turn_right(angle=90, speed=80, log=True)
+            self.turn_right(angle=120, speed=50, log=True) # ESTAMOS AQUI
+
     def turn_left(self, angle, speed, log=True):
-        print(f"CMD: Turn Left | Angle: {angle} | Speed: {speed}")
+        #print(f"CMD: Turn Left | Angle: {angle} | Speed: {speed}")
         self._send_command(3, v1=angle, v2=speed)
         if log: self.log_step(self.ACTION_LEFT)
 
     def turn_right(self, angle, speed, log=True):
-        print(f"CMD: Turn Right | Angle: {angle} | Speed: {speed}")
+        #print(f"CMD: Turn Right | Angle: {angle} | Speed: {speed}")
         self._send_command(4, v1=angle, v2=speed)
         if log: self.log_step(self.ACTION_RIGHT)
 
     def turn_center(self, log=True):
-        print("CMD: Turn Center")
+        #print("CMD: Turn Center")
         self._send_command(6)
         if log: self.log_step(self.ACTION_FORWARD)
 
     def stop(self, log=True):
-        print("CMD: Stop")
+        #print("CMD: Stop")
         self._send_command(5)
         #if log: self.log_step(self.ACTION_FORWARD)
 
@@ -230,43 +231,3 @@ class MegaPiController:
     def start (self):
         return self.button_value == 1
 
-# --------------------Main Execution Loop (Solo para testing)--------------------
-if __name__ == "__main__":
-    car = MegaPiController(port='COM9')
-
-    try:
-        print("\n ESPERANDO BOTÓN FÍSICO PARA ARRANCAR...")
-        while not car.start():
-            time.sleep(0.1)
-        
-        print("\n🚀 K-O-M-R-A-D Iniciado: Recolectando datos...")
-        car.move_forward(speed=100, log=True)
-
-        while True:
-            d_front, d_left, d_right = car.get_distances()
-            print(f"   [Sensors] F:{d_front:3}cm L:{d_left:3}cm R:{d_right:3}cm  ", end='\r')
-            
-            if d_front < 25:
-                car.stop(log=True)
-                time.sleep(0.5)
-                if d_left > d_right: 
-                    car.turn_left(angle=90, speed=80, log=True)
-                else:
-                    car.turn_right(angle=90, speed=80, log=True)
-                car.move_forward(speed=100, log=True)
-            elif d_left < 15:
-                car.turn_right(angle=10, speed=80, log=True)
-                car.move_forward(speed=100, log=True)
-            elif d_right < 15:
-                car.turn_left(angle=10, speed=80, log=True)
-                car.move_forward(speed=100, log=True)
-            else:
-                car.log_step(car.ACTION_FORWARD)
-            
-            time.sleep(0.2)
-
-    except KeyboardInterrupt:
-        print("\n\n⛔ User interruption detected.")
-    finally:
-        car.save_data_to_csv('training_data.csv')
-        car.close()

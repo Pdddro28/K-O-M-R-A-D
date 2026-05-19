@@ -19,10 +19,12 @@ loops = 0
 line_detected = False
 
 girando = False
-
-LNM.turning_direction = 2
+#LNM.turning_direction = 2
+#LNM.turn_direction()
+#LNM.turn_center(log=False)
 
 # Start moving
+
 while running:
     try:
         LNM.move_forward(speed = 65)  #Avanza siempre
@@ -37,16 +39,21 @@ while running:
         print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist} | Blue Area: {LNM.blue_area} | Orange Area: {LNM.orange_area} | Front Area: {LNM.black_area}")
         
         if LNM.turning_direction == 0: #Obtener direccion de giro
-            if LNM.orange_area > 2000:
-                  LNM.turning_direction = 1
-            elif LNM.blue_area > 2000:
+            if LNM.orange_area > 1200:
                   LNM.turning_direction = 2
+            elif LNM.blue_area > 1200:
+                  LNM.turning_direction = 1
         #Determinar giro
-        if front_dist < 100 and LNM.black_area > 12000 and LNM.turning_direction != 0:
+        if front_dist < 100 and girando == False and LNM.black_area > 8000 and LNM.turning_direction != 0:
            LNM.turn_direction()
            loops += 1
-        elif LNM.black_area < 9000:
+           girando = True
+              
+        if LNM.black_area < 8000 and girando == True and front_dist > 100:
            LNM.turn_center()
+           girando = False
+
+        if left_dist < 20
 
         #UI debug
         #LNM.debug_UI()
@@ -66,4 +73,3 @@ while running:
     
 
 LNM.stop()
-

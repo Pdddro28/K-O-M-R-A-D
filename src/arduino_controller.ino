@@ -82,7 +82,6 @@ class Carro {
 
     // --- Lógica de Movimiento ---
     void avanzar(byte velocidad) {
-      servoDireccion.write(centro);
       motorTraccion.run(velocidad);
     }
 
