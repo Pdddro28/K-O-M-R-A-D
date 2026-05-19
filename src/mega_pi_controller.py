@@ -57,6 +57,7 @@ class MegaPiController:
 
             # Color Areas 
             self.black_area = 0
+            self.black_area_derecha = 0
             self.blue_area = 0
             self.orange_area = 0
             self.green_area = 0
@@ -64,8 +65,8 @@ class MegaPiController:
             
             #Region´s of interest
             self.rois = [
-                ROI(261, 169, 1014, 582), # Centro 
-                ROI(316, 472, 962, 567), # Lineas (Azul y Naranja)
+                ROI(200, 50, 430, 200),
+                ROI(200, 300, 440, 350)
             ]
 
         except Exception as e:
@@ -124,6 +125,7 @@ class MegaPiController:
         #self.mask_green = self.get_masks('verde')
         #self.mask_red = self.get_masks('rojo')
         #self.mask_purple = self.get_masks('morado')
+
     def obtenerarea_frontal(self):
         self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[0])
         self.black_area = self.vision.max_contour(self.cnt_front_wall, self.rois[0])[0]
@@ -138,47 +140,16 @@ class MegaPiController:
     
 
     def debug_UI(self):
-                    # Dibujar ROIs de referencia
-        for i, r in enumerate(self.rois):
-            cv2.rectangle(self.vision.frame, (r.x1, r.y1), (r.x2, r.y2), (255, 255, 255), 1)
+        # Llamar a la función con corrección de posición
+        for item in self.rois:
+            self.vision.draw_roi(item)  # ROI para pared frontal
+        self.vision.draw_contours(self.cnt_blue_line, self.rois[1], (255, 0, 0))  # Contornos de línea azul
+        self.vision.draw_contours(self.cnt_orange_line, self.rois[1], (0, 165, 255))  # Contornos de línea naranja
+        self.vision.draw_contours(self.cnt_front_wall, self.rois[0], (0, 0, 255))  # Contornos de pared frontal izquierda
 
-            # Empaquetar datos
-        contours_to_draw = {'blue': self.cnt_blue_line, 'orange': self.cnt_orange_line, 'black': self.cnt_front_wall}
-        areas_to_display = {'blue': self.blue_area, 'orange': self.orange_area, 'black': self.black_area}
-
-            # Llamar a la función con corrección de posición
-        self.draw_vision_feedback(self.vision.frame, contours_to_draw, areas_to_display)
+            # Mostrar áreas en la consola
         cv2.imshow('Vision HD - Posicion Corregida', self.vision.frame)
 
-    def draw_vision_feedback(self, frame, contours_data, areas_data):
-        """Dibuja contornos ajustando el desfase de la ROI y valores de área"""
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        
-        config = {
-            'blue': ((255, 0, 0), "Blue Line", self.rois[1]),
-            'orange': ((0, 165, 255), "Orange Line", self.rois[1]),
-            'black': ((0, 255, 0), "Front Wall", self.rois[0])
-        }
-
-        for key, (color, label, roi) in config.items():
-            # 1. Dibujar Contornos con ajuste de OFFSET
-            if contours_data[key] is not None:
-                # Creamos una copia de los contornos para no modificar los originales
-                shifted_contours = []
-                for cnt in contours_data[key]:
-                    # Sumamos x1 y y1 a todos los puntos del contorno
-                    # cnt es un array de puntos [[x, y]]
-                    shifted_cnt = cnt + [roi.x1, roi.y1]
-                    shifted_contours.append(shifted_cnt)
-                
-                # Dibujamos los contornos ya desplazados a su posición real
-                cv2.drawContours(frame, shifted_contours, -1, color, 2)
-            
-            # 2. Dibujar Texto de Áreas
-            area_val = areas_data[key]
-            text = f"{label}: {int(area_val)}"
-            y_offset = 30 if key == 'blue' else 10
-            cv2.putText(frame, text, (roi.x1, roi.y1 - y_offset), font, 0.5, color, 2)
 
 
 # -------------------------------------Vision stuff------------------------------------ 

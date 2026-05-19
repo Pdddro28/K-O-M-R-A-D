@@ -34,7 +34,7 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # get areas and contours-----------------
-        print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist}")
+        print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist} | Blue Area: {LNM.blue_area} | Orange Area: {LNM.orange_area} | Front Area: {LNM.black_area}")
 
         if front_dist < 100 and LNM.turning_direction == 2: #Gira derecha
            print("Obstacle detected! Stopping.")

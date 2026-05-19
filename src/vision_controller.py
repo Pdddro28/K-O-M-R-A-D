@@ -17,7 +17,7 @@ class VisionController():
     def __init__(self):
         # Configuraciones de resolución
         self.image_width  = 640
-        self.image_height = 480
+        self.image_height = 370
         self.image_lab = 0
         self.frame = None
 
@@ -25,6 +25,8 @@ class VisionController():
         self.camera = Picamera2()
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
+        config = self.camera.create_video_configuration(main={"format": 'RGB888', 'size': (self.image_width, self.image_height)})
+        self.camera.configure(config)
         self.camera.start()
         
         # Tiempo de espera para que la cámara caliente (opcional pero recomendado)
@@ -36,6 +38,8 @@ class VisionController():
 
         # Obtenemos la imagen como un array de numpy (formato OpenCV)
         self.frame = self.camera.capture_array('main')
+        self.frame = cv2.flip(self.frame, 0)
+        self.frame = cv2.flip(self.frame, 1)
 
         if self.frame is None:
             print("No se pudo obtener imagen de la PiCamera.")
@@ -44,8 +48,6 @@ class VisionController():
         # Procesamiento
         self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
         self.image_lab = cv2.GaussianBlur(self.image_lab, (7,7), 0)
-        self.image_lab = cv2.flip(self.image_lab, 1)
-        self.image_lab = cv2.flip(self.image_lab, 0)
 
     def draw_roi(self, roi):
         cv2.rectangle(self.frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
