@@ -15,8 +15,8 @@
 #define pinServo        A8
 #define trig_front      A15
 #define echo_front      A14
-#define trig_left       A13
-#define echo_left       A12
+#define trig_left       29
+#define echo_left       39
 #define trig_right      A11
 #define echo_right      A10
 #define centro          90
