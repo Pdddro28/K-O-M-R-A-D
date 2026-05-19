@@ -35,33 +35,27 @@ while running:
 
         # get areas and contours-----------------
         print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist} | Blue Area: {LNM.blue_area} | Orange Area: {LNM.orange_area} | Front Area: {LNM.black_area}")
-
-        if front_dist < 100 and LNM.turning_direction == 2: #Gira derecha
-           print("Obstacle detected! Stopping.")
-           LNM.turn_left(angle=40, speed=130)
-           girando = True
-        elif front_dist < 100 and left_dist > 41: #Gira izquierda
-           print("Obstacle detected! Stopping.")
-           #LNM.turn_right(angle=40, speed=120)
-           girando = True
-        elif right_dist < 70 and left_dist < 70 and girando == True: #Sigue avanzando
-           print("Obstacle detected! Stopping.")
-           LNM.turn_left(angle=90, speed=80)
-           girando = False
-           #time.sleep(2)
-           #LNM.stop()
-           #break
         
-        LNM.debug_UI()
-        if cv2.waitKey(1) & 0xFF == ord('q'): break
+        if LNM.turning_direction == 0: #Obtener direccion de giro
+            if LNM.orange_area > 2000:
+                  LNM.turning_direction = 1
+            elif LNM.blue_area > 2000:
+                  LNM.turning_direction = 2
+        #Determinar giro
+        if front_dist < 100 and LNM.black_area > 12000 and LNM.turning_direction != 0:
+           LNM.turn_direction()
+           loops += 1
+        elif LNM.black_area < 9000:
+           LNM.turn_center()
+
+        #UI debug
+        #LNM.debug_UI()
+        #if cv2.waitKey(1) & 0xFF == ord('q'): break
         # Break the cycle if it has completed all the laps
+        
+
         if (loops == 12):
             break
-
-        
-        
-        
-            
         
     except Exception as e:
         print("Exception:", e)
