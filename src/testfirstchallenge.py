@@ -1,6 +1,6 @@
 from mega_pi_controller import *
 from constants import *
-import cv2 as cv
+import cv2 
 # LNMbi setup
 LNM = MegaPiController("/dev/ttyUSB0", 115200)
 
@@ -34,7 +34,6 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # get areas and contours-----------------
-        LNM.vision.receive_image()
         print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist}")
 
         if front_dist < 100 and LNM.turning_direction == 2: #Gira derecha
@@ -59,7 +58,7 @@ while running:
         if (loops == 12):
             break
 
-        print(loops)
+        
         
         
             
