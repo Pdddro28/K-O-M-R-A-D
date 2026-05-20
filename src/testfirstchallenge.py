@@ -47,6 +47,23 @@ while running:
            #time.sleep(2)
            #LNM.stop()
            #break
+           
+        if not girando:
+            if left_dist < 25:
+                # Demasiado cerca de la izquierda -> Microajuste a la derecha
+                # Nota: Asegúrate de si en tu librería 1 o 2 es derecha/izquierda. 
+                # Si 'LNM.turning_direction' usa 2 para un lado, aquí usamos un método manual o el inverso.
+                LNM.turn_right(angle=40, speed=80) 
+                print("-> Microajuste: Alejándose de la izquierda")
+                
+            elif right_dist < 60:
+                # Demasiado cerca de la derecha -> Microajuste a la izquierda
+                LNM.turn_left(angle=120, speed=80)
+                print("<- Microajuste: Alejándose de la derecha")
+                
+            elif left_dist > 25 and right_dist > 60:
+                # Si ya se alejó lo suficiente de ambas paredes, vuelve a centrar
+                LNM.turn_center(angle=90, speed=80)
 
 
         # get areas and contours-----------------
