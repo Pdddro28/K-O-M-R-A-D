@@ -1,4 +1,4 @@
-import cv2 as cv
+import cv2
 import numpy as np
 from dataclasses import dataclass
 from picamera2 import Picamera2  # Librería necesaria
@@ -17,7 +17,7 @@ class VisionController():
     def __init__(self):
         # Configuraciones de resolución
         self.image_width  = 640
-        self.image_height = 480
+        self.image_height = 370
         self.image_lab = 0
         self.frame = None
 
@@ -25,50 +25,45 @@ class VisionController():
         self.camera = Picamera2()
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
+        config = self.camera.create_video_configuration(main={"format": 'RGB888', 'size': (self.image_width, self.image_height)})
+        self.camera.configure(config)
+        self.camera.start()
         
-        # Generamos el buffer para capturar imágenes
-        self.raw_capture = PiRGBArray(self.camera, size=(self.image_width, self.image_height))
-
         # Tiempo de espera para que la cámara caliente (opcional pero recomendado)
         time.sleep(0.1)
 
     def receive_image(self):
         """Receive image array from PiCamera and convert it to LAB format"""
         
-        # Limpiamos el buffer antes de la nueva captura
-        self.raw_capture.truncate(0)
-        
-        # Capturamos un solo frame
-        self.camera.capture(self.raw_capture, format="bgr", use_video_port=True)
-        
+
         # Obtenemos la imagen como un array de numpy (formato OpenCV)
-        self.frame = self.raw_capture.array
+        self.frame = self.camera.capture_array('main')
+        self.frame = cv2.flip(self.frame, 0)
+        self.frame = cv2.flip(self.frame, 1)
 
         if self.frame is None:
             print("No se pudo obtener imagen de la PiCamera.")
             return
 
         # Procesamiento
-        self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
-        self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
-
-    # ... El resto de tus métodos (draw_roi, find_contours, etc.) permanecen igual ...
+        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
+        self.image_lab = cv2.GaussianBlur(self.image_lab, (7,7), 0)
 
     def draw_roi(self, roi):
-        cv.rectangle(self.frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
+        cv2.rectangle(self.frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
 
     def draw_contours(self, cnt, roi, color):
-        cv.drawContours(self.frame[roi.y1:roi.y2, roi.x1:roi.x2], cnt, -1, color, 2)
+        cv2.drawContours(self.frame[roi.y1:roi.y2, roi.x1:roi.x2], cnt, -1, color, 2)
 
     def find_contours(self, range_colors, roi: ROI):
         img_segmented = self.image_lab[roi.y1:roi.y2, roi.x1:roi.x2]
         lower_mask = np.array(range_colors[0])
         upper_mask = np.array(range_colors[1])
-        mask = cv.inRange(img_segmented, lower_mask, upper_mask)
+        mask = cv2.inRange(img_segmented, lower_mask, upper_mask)
         kernel = np.ones((5, 5), np.uint8)
-        eroded_mask = cv.erode(mask, kernel, iterations=1)
-        dilated_mask = cv.dilate(eroded_mask, kernel, iterations=1)
-        contours = cv.findContours(dilated_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
+        eroded_mask = cv2.erode(mask, kernel, iterations=1)
+        dilated_mask = cv2.dilate(eroded_mask, kernel, iterations=1)
+        contours = cv2.findContours(dilated_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         return contours
     
     def max_contour(self, contours, roi: ROI):
@@ -78,10 +73,10 @@ class VisionController():
         max_cnt = None
 
         for c in contours:
-            area = cv.contourArea(c)
+            area = cv2.contourArea(c)
             if area > 100:
-                approx = cv.approxPolyDP(c, 0.01 * cv.arcLength(c, True), True)
-                x, y, w, h = cv.boundingRect(approx)
+                approx = cv2.approxPolyDP(c, 0.01 * cv2.arcLength(c, True), True)
+                x, y, w, h = cv2.boundingRect(approx)
                 x += roi.x1 + w // 2
                 y += roi.y1 + h // 2
 

@@ -1,6 +1,6 @@
 from mega_pi_controller import *
 from constants import *
-import cv2 as cv
+import cv2 
 # LNMbi setup
 LNM = MegaPiController("/dev/ttyUSB0", 115200)
 
@@ -11,38 +11,46 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200)
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 
 # Waiting to press the button
-while not LNM.start():
-    pass
+# while not LNM.start():
+#     pass
 
 running = True
 loops = 0
 line_detected = False
 
 girando = False
-
-LNM.turning_direction = 2
+#LNM.turning_direction = 2
+#LNM.turn_direction()
+#LNM.turn_center(log=False)
 
 # Start moving
+
 while running:
     try:
         LNM.move_forward(speed = 65)  #Avanza siempre
+        LNM.vision.receive_image()
+        LNM.obtener_linea_azul()
+        LNM.obtener_linea_naranja()
+        LNM.obtenerarea_frontal()
+
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # get areas and contours-----------------
-        #LNM.vision.receive_image()
-        print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist}")
-
-        if front_dist < 100 and LNM.turning_direction == 2: #Gira derecha
-           print("Obstacle detected! Stopping.")
-           LNM.turn_left(angle=40, speed=130)
+        print(f"Distances - Front: {front_dist} | Left: {left_dist} | Right: {right_dist} | Blue Area: {LNM.blue_area} | Orange Area: {LNM.orange_area} | Front Area: {LNM.black_area}")
+        
+        if LNM.turning_direction == 0: #Obtener direccion de giro
+            if LNM.orange_area > 1200:
+                  LNM.turning_direction = 2
+            elif LNM.blue_area > 1200:
+                  LNM.turning_direction = 1
+        #Determinar giro
+        if front_dist < 100 and girando == False and LNM.black_area > 8000 and LNM.turning_direction != 0:
+           LNM.turn_direction()
+           loops += 1
            girando = True
-        elif front_dist < 100 and left_dist > 41: #Gira izquierda
-           print("Obstacle detected! Stopping.")
-           #LNM.turn_right(angle=40, speed=120)
-           girando = True
-        elif right_dist < 70 and left_dist < 70 and girando == True: #Sigue avanzando
-           print("Obstacle detected! Stopping.")
-           LNM.turn_left(angle=90, speed=80)
+              
+        if LNM.black_area < 8000 and girando == True and front_dist > 100:
+           LNM.turn_center()
            girando = False
            #time.sleep(2)
            #LNM.stop()
@@ -65,40 +73,14 @@ while running:
                 # Si ya se alejó lo suficiente de ambas paredes, vuelve a centrar
                 LNM.turn_center(angle=90, speed=80)
 
-
-        # get areas and contours-----------------
-        
-        # get turn direction based on line color----------
-        
-        # if (LNM.turning_direction == 0): #only look for line colors if no colors have been detected yet.
-        #     if (blue_area >= 10):
-        #         LNM.turning_direction = 1 #left
-        #     elif (orange_area >= 10):
-        #         LNM.turning_direction = 2 #right
-        # get turn direction based on line color----------
-        
-        # Determines if the car have to turn
-        # if (black_area >= TURN_THRESH):
-        #     LNM.turn_direction()
-        #     if line_detected:
-        #         line_detected = False
-
-        # # Center the car  
-        # if (LNM.turning_direction != 0):
-        #     if (black_area <= TURN_EXIT_THRESH):
-        #         LNM.turn_center()
-        #         if not line_detected:
-        #             loops += 1
-        #             line_detected = True
-                
+        #UI debug
+        #LNM.debug_UI()
+        #if cv2.waitKey(1) & 0xFF == ord('q'): break
         # Break the cycle if it has completed all the laps
+        
+
         if (loops == 12):
             break
-
-        print(loops)
-        
-        
-            
         
     except Exception as e:
         print("Exception:", e)
@@ -109,4 +91,3 @@ while running:
     
 
 LNM.stop()
-

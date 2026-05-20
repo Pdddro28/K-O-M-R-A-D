@@ -57,6 +57,7 @@ class MegaPiController:
 
             # Color Areas 
             self.black_area = 0
+            self.black_area_derecha = 0
             self.blue_area = 0
             self.orange_area = 0
             self.green_area = 0
@@ -64,8 +65,8 @@ class MegaPiController:
             
             #Region´s of interest
             self.rois = [
-                ROI(261, 169, 1014, 582), # Centro 
-                ROI(316, 472, 962, 567), # Lineas (Azul y Naranja)
+                ROI(200, 50, 430, 200),
+                ROI(200, 300, 440, 350)
             ]
 
         except Exception as e:
@@ -109,7 +110,7 @@ class MegaPiController:
 
 # -------------------------------------Vision stuff------------------------------------ 
     def get_masks(self, color):
-        with open(f'mask_{color}.json') as f:
+        with open(f'src/Colors/mask_{color}.json') as f:
             config = json.load(f)
         lower = config['bounds']['lower']
         upper = config['bounds']['upper']
@@ -121,86 +122,47 @@ class MegaPiController:
         self.mask_blue = self.get_masks('azul')
         self.mask_orange = self.get_masks('naranja')
         self.mask_black = self.get_masks('negro')
-        self.mask_green = self.get_masks('verde')
-        self.mask_red = self.get_masks('rojo')
-        self.mask_purple = self.get_masks('morado')
+        #self.mask_green = self.get_masks('verde')
+        #self.mask_red = self.get_masks('rojo')
+        #self.mask_purple = self.get_masks('morado')
+
     def obtenerarea_frontal(self):
-        self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[2])
+        self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[0])
         self.black_area = self.vision.max_contour(self.cnt_front_wall, self.rois[0])[0]
-        return self.black_area 
 
     def obtener_linea_naranja(self):
         self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1])
         self.orange_area = self.vision.max_contour(self.cnt_orange_line, self.rois[1])[0]
-        return self.orange_area
 
     def obtener_linea_azul(self):
         self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1])
         self.blue_area = self.vision.max_contour(self.cnt_blue_line, self.rois[1])[0]
-        return self.blue_area
     
 
     def debug_UI(self):
-                    # Dibujar ROIs de referencia
-        for i, r in enumerate(self.rois):
-            cv2.rectangle(self.vision.frame, (r.x1, r.y1), (r.x2, r.y2), (255, 255, 255), 1)
+        # Llamar a la función con corrección de posición
+        for item in self.rois:
+            self.vision.draw_roi(item)  # ROI para pared frontal
+        self.vision.draw_contours(self.cnt_blue_line, self.rois[1], (255, 0, 0))  # Contornos de línea azul
+        self.vision.draw_contours(self.cnt_orange_line, self.rois[1], (0, 165, 255))  # Contornos de línea naranja
+        self.vision.draw_contours(self.cnt_front_wall, self.rois[0], (0, 0, 255))  # Contornos de pared frontal izquierda
 
-            # Empaquetar datos
-        contours_to_draw = {'blue': self.cnt_blue_line, 'orange': self.cnt_orange_line, 'black': self.cnt_front_wall}
-        areas_to_display = {'blue': self.blue_area, 'orange': self.orange_area, 'black': self.black_area}
-
-            # Llamar a la función con corrección de posición
-        self.draw_vision_feedback(self.vision.frame, contours_to_draw, areas_to_display)
+            # Mostrar áreas en la consola
         cv2.imshow('Vision HD - Posicion Corregida', self.vision.frame)
 
-    def draw_vision_feedback(self, frame, contours_data, areas_data):
-        """Dibuja contornos ajustando el desfase de la ROI y valores de área"""
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        
-        config = {
-            'blue': ((255, 0, 0), "Blue Line", self.rois[1]),
-            'orange': ((0, 165, 255), "Orange Line", self.rois[1]),
-            'black': ((0, 255, 0), "Front Wall", self.rois[0])
-        }
-
-        for key, (color, label, roi) in config.items():
-            # 1. Dibujar Contornos con ajuste de OFFSET
-            if contours_data[key] is not None:
-                # Creamos una copia de los contornos para no modificar los originales
-                shifted_contours = []
-                for cnt in contours_data[key]:
-                    # Sumamos x1 y y1 a todos los puntos del contorno
-                    # cnt es un array de puntos [[x, y]]
-                    shifted_cnt = cnt + [roi.x1, roi.y1]
-                    shifted_contours.append(shifted_cnt)
-                
-                # Dibujamos los contornos ya desplazados a su posición real
-                cv2.drawContours(frame, shifted_contours, -1, color, 2)
-            
-            # 2. Dibujar Texto de Áreas
-            area_val = areas_data[key]
-            text = f"{label}: {int(area_val)}"
-            y_offset = 30 if key == 'blue' else 10
-            cv2.putText(frame, text, (roi.x1, roi.y1 - y_offset), font, 0.5, color, 2)
 
 
 # -------------------------------------Vision stuff------------------------------------ 
 
     def log_step(self, action_code):
         d_front, d_left, d_right = self.get_distances()
-        area_front = self.obtenerarea_frontal()
-        area_left = self.obtenerarea_izquierda()
-        area_right = self.obtenerarea_derecha()
+
         
         self.data_log.append({
             'index': self.log_index,
             'dist_front_cm': d_front,
             'dist_left_cm': d_left,
             'dist_right_cm': d_right,
-            'black_front_area': area_front,
-            'black_left_area': area_left,
-            'black_right_area': area_right,
-            'action_taken': action_code
         })
         
         self.log_index += 1
@@ -212,34 +174,35 @@ class MegaPiController:
 
 
     def move_backward(self, speed, log=True):
-        print(f"CMD: Backward | Speed: {speed}")
+        #print(f"CMD: Backward | Speed: {speed}")
         self._send_command(2, v1=speed)
         if log: self.log_step(self.ACTION_FORWARD)
 
     def turn_direction(self):
         if self.turning_direction == 1:
-            self.turn_left(angle=90, speed=80, log=True)
+            self.turn_left(angle=40, speed=50, log=True) # OLVIDENSE DE ESTO
         elif self.turning_direction == 2:
-            self.turn_right(angle=90, speed=80, log=True)
+            self.turn_right(angle=120, speed=50, log=True) # ESTAMOS AQUI
+
     def turn_left(self, angle, speed, log=True):
-        print(f"CMD: Turn Left | Angle: {angle} | Speed: {speed}")
+        #print(f"CMD: Turn Left | Angle: {angle} | Speed: {speed}")
         self._send_command(3, v1=angle, v2=speed)
         if log: self.log_step(self.ACTION_LEFT)
 
     def turn_right(self, angle, speed, log=True):
-        print(f"CMD: Turn Right | Angle: {angle} | Speed: {speed}")
+        #print(f"CMD: Turn Right | Angle: {angle} | Speed: {speed}")
         self._send_command(4, v1=angle, v2=speed)
         if log: self.log_step(self.ACTION_RIGHT)
 
     def turn_center(self, log=True):
-        print("CMD: Turn Center")
+        #print("CMD: Turn Center")
         self._send_command(6)
         if log: self.log_step(self.ACTION_FORWARD)
 
     def stop(self, log=True):
-        print("CMD: Stop")
+        #print("CMD: Stop")
         self._send_command(5)
-        if log: self.log_step(self.ACTION_FORWARD)
+        #if log: self.log_step(self.ACTION_FORWARD)
 
     def get_distances(self):
         return (self.dist_front, self.dist_left, self.dist_right)
@@ -268,43 +231,3 @@ class MegaPiController:
     def start (self):
         return self.button_value == 1
 
-# --------------------Main Execution Loop (Solo para testing)--------------------
-if __name__ == "__main__":
-    car = MegaPiController(port='COM9')
-
-    try:
-        print("\n ESPERANDO BOTÓN FÍSICO PARA ARRANCAR...")
-        while not car.start():
-            time.sleep(0.1)
-        
-        print("\n🚀 K-O-M-R-A-D Iniciado: Recolectando datos...")
-        car.move_forward(speed=100, log=True)
-
-        while True:
-            d_front, d_left, d_right = car.get_distances()
-            print(f"   [Sensors] F:{d_front:3}cm L:{d_left:3}cm R:{d_right:3}cm  ", end='\r')
-            
-            if d_front < 25:
-                car.stop(log=True)
-                time.sleep(0.5)
-                if d_left > d_right: 
-                    car.turn_left(angle=90, speed=80, log=True)
-                else:
-                    car.turn_right(angle=90, speed=80, log=True)
-                car.move_forward(speed=100, log=True)
-            elif d_left < 15:
-                car.turn_right(angle=10, speed=80, log=True)
-                car.move_forward(speed=100, log=True)
-            elif d_right < 15:
-                car.turn_left(angle=10, speed=80, log=True)
-                car.move_forward(speed=100, log=True)
-            else:
-                car.log_step(car.ACTION_FORWARD)
-            
-            time.sleep(0.2)
-
-    except KeyboardInterrupt:
-        print("\n\n⛔ User interruption detected.")
-    finally:
-        car.save_data_to_csv('training_data.csv')
-        car.close()
