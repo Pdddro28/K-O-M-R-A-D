@@ -168,7 +168,6 @@ class MegaPiController:
         self.log_index += 1
 
     def move_forward(self, speed, log=True):
-        print(f"CMD: Forward | Speed: {speed}")
         self._send_command(1, v1=speed)
         if log: self.log_step(self.ACTION_FORWARD)
 
