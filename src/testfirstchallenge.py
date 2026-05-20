@@ -14,7 +14,7 @@ girando = False
 # ==========================================
 # VARIABLES Y CONSTANTES PARA EL PID
 # ==========================================
-TARGET_DIST = 25.0  # La distancia ideal que queremos mantener de la pared
+TARGET_DIST = 30.0  # La distancia ideal que queremos mantener de la pared
 Kp = 1.5   # Proporcional: Qu� tan fuerte reacciona al error actual
 Ki = 0.0   # Integral: Corrige desviaciones constantes (d�jalo en 0 por ahora)
 Kd = 0.8   # Derivativo: Predice y suaviza el movimiento (evita el zig-zag)
@@ -97,8 +97,8 @@ while running:
 
         print("Loop count:", loops)
 
-        if loops == 12:
-            print("Circuito completado")
+            
+        if loops == 13 and LNM.black_area < 6000 and front_dist  < 100 :
             break
         
     except Exception as e:
