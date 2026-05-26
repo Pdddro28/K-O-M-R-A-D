@@ -7,16 +7,17 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200)
 
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 
+states = {"straight": False, "girando": False}
+
 running = True
 loops = 0
-girando = False
 
 # ==========================================
 # VARIABLES Y CONSTANTES PARA EL PID
 # ==========================================
 TARGET_DIST = 30.0  # La distancia ideal que queremos mantener de la pared
-Kp = 1.5   # Proporcional: Qu� tan fuerte reacciona al error actual
-Ki = 0.0   # Integral: Corrige desviaciones constantes (d�jalo en 0 por ahora)
+Kp = 1.5   # Proporcional: Que tan fuerte reacciona al error actual
+Ki = 0.0   # Integral: Corrige desviaciones constantes (dejalo en 0 por ahora)
 Kd = 0.8   # Derivativo: Predice y suaviza el movimiento (evita el zig-zag)
 
 prev_error = 0.0
@@ -44,7 +45,7 @@ while running:
         # ==========================================
         # 2. SISTEMA DE CENTRADO PID (Solo en rectas)
         # ==========================================
-        if not girando and LNM.turning_direction == 2:
+        if not states["girando"] and LNM.turning_direction == 2:
             # Calculamos el error. 
             # Si left_dist < 25 (ej. 15): error es +10 (muy cerca, hay que alejarse)
             # Si left_dist > 25 (ej. 35): error es -10 (muy lejos, hay que acercarse)
@@ -77,7 +78,7 @@ while running:
                 LNM.turn_left(angle=steering_angle, speed=50)
 
         # ==========================================
-        # 3. L�GICA DE ESQUINAS Y VUELTAS
+        # 3. LOGICA DE ESQUINAS Y VUELTAS
         # ==========================================
         if right_dist > 100 and girando and conteo == False:
             loops += 1
