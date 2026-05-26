@@ -5,6 +5,7 @@ import json
 import datetime
 import tkinter as tk
 from tkinter import filedialog
+from picamera2 import Picamera2 # <-- Importamos Picamera2
 # --------------------libraries------------------------
 
 # --------------------Classes--------------------------
@@ -20,31 +21,40 @@ class ROI:
 class VisionController():
     """
     Handles camera stream, image preprocessing, 
-    and color segmentation logic.
+    and color segmentation logic using Picamera2.
     """
-    def __init__(self, usb_port=0):
+    def __init__(self):
         self.image_width  = 640
         self.image_height = 480
         self.image_lab = None
         self.frame = None
         
-        self.camera_cap = cv.VideoCapture(usb_port)
-        self.camera_cap.set(cv.CAP_PROP_FRAME_WIDTH, self.image_width)
-        self.camera_cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.image_height)
+        # Inicialización de Picamera2
+        self.picam2 = Picamera2()
+        
+        # Configuración de video con el tamaño deseado y formato BGR compatible con OpenCV
+        config = self.picam2.create_video_configuration(main={"size": (self.image_width, self.image_height), "format": "BGR888"})
+        self.picam2.configure(config)
+        self.picam2.start()
 
     def receive_image(self):
         """
-        Captures frame from hardware and converts it to 
+        Captures frame from Picamera2 and converts it to 
         LAB color space for better light invariance.
         """
-        ret, frame_read = self.camera_cap.read()
-        if not ret:
-            return False
+        try:
+            # Capturamos el frame directamente como un arreglo de NumPy
+            self.frame = self.picam2.capture_array()
             
-        self.frame = frame_read
-        self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
-        self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
-        return True
+            if self.frame is None:
+                return False
+                
+            self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
+            self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
+            return True
+        except Exception as e:
+            print(f"Error capturando frame: {e}")
+            return False
 
     def find_mask(self, color_range, roi):
         """
@@ -147,11 +157,8 @@ def nothing(x):
 def run_test():
     global save_triggered, save_status, save_status_frames
     
-    vision = VisionController(0)
-    
-    if not vision.camera_cap.isOpened():
-        print("Error: No se pudo abrir la cámara.")
-        return
+    # Inicializamos sin parámetros (Picamera2 gestiona el hardware automáticamente)
+    vision = VisionController()
 
     # Create Main Window with trackbars at top
     cv.namedWindow(WINDOW_NAME)
@@ -244,7 +251,8 @@ def run_test():
             print(f"Lower: {lower}, Upper: {upper}")
             break
 
-    vision.camera_cap.release()
+    # Detenemos Picamera2 en lugar de liberar un VideoCapture de OpenCV
+    vision.picam2.stop()
     cv.destroyAllWindows()
 # --------------------Test Loop------------------------
 
