@@ -22,19 +22,23 @@ Kd = 0.8   # Derivativo: Predice y suaviza el movimiento (evita el zig-zag)
 
 prev_error = 0.0
 integral = 0.0
-
+girando = False
 conteo = False
-
+orange_timer = time.time()
+time_lap = time.time()
+n = 0
 while running:
     try:
-        LNM.move_forward(speed = 75)  # Avanza siempre
         LNM.vision.receive_image()
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
+        LNM.debug_UI()
+        LNM.move_forward(speed = 75)  # Avanza siempre
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
-
         # 1. Obtener direcci�n general de giro de la pista
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
@@ -45,7 +49,7 @@ while running:
         # ==========================================
         # 2. SISTEMA DE CENTRADO PID (Solo en rectas)
         # ==========================================
-        if not states["girando"] and LNM.turning_direction == 2:
+        if not girando and LNM.turning_direction == 2:
             # Calculamos el error. 
             # Si left_dist < 25 (ej. 15): error es +10 (muy cerca, hay que alejarse)
             # Si left_dist > 25 (ej. 35): error es -10 (muy lejos, hay que acercarse)
@@ -80,9 +84,17 @@ while running:
         # ==========================================
         # 3. LOGICA DE ESQUINAS Y VUELTAS
         # ==========================================
-        if right_dist > 100 and girando and conteo == False:
+        current_time = time.time()
+        print(LNM.orange_area)
+
+        if LNM.orange_area > 500 and n == 0 :  # Evitamos múltiples detecciones de la misma línea naranja
+            orange_timer = current_time
+            n = 1
             loops += 1
-            conteo = True
+
+        if current_time - orange_timer > 3:  # Reiniciamos el contador después de 1 segundo
+            n = 0
+            print("Timer reset, ready for next orange line detection.")
 
         if front_dist < 80 and not girando and LNM.black_area > 9000 and LNM.turning_direction != 0:
             LNM.turn_direction()
@@ -98,8 +110,8 @@ while running:
 
         print("Loop count:", loops)
 
-            
-        if loops == 13 and LNM.black_area < 6000 and front_dist  < 100 :
+
+        if loops == 12:
             break
         
     except Exception as e:
