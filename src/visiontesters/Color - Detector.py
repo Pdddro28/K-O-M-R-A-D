@@ -29,7 +29,7 @@ class VisionController():
         
         self.picam2 = Picamera2()
         config = self.picam2.create_video_configuration(
-            main={"size": (self.image_width, self.image_height), "format": "BGR888"}
+            main={"size": (self.image_width, self.image_height), "format": "RGB888"}
         )
         self.picam2.configure(config)
         self.picam2.start()
@@ -37,10 +37,12 @@ class VisionController():
     def receive_image(self):
         try:
             self.frame = self.picam2.capture_array()
+            self.frame = cv.flip(self.frame, 0)
+            self.frame = cv.flip(self.frame, 1)
             if self.frame is None:
                 return False
                 
-            self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
+            self.image_lab = cv.cvtColor(self.frame, cv.COLOR_RGB2LAB)
             self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
             return True
         except Exception as e:
