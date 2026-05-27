@@ -25,7 +25,7 @@ class VisionController():
         self.camera = Picamera2()
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
-        config = self.camera.create_video_configuration(main={"format": 'RGB888', 'size': (self.image_width, self.image_height)})
+        config = self.camera.create_video_configuration(main={"format": 'BGR888', 'size': (self.image_width, self.image_height)})
         self.camera.configure(config)
         self.camera.start()
         
