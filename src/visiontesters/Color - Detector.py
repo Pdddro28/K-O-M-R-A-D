@@ -42,7 +42,7 @@ class VisionController():
             if self.frame is None:
                 return False
                 
-            self.image_lab = cv.cvtColor(self.frame, cv.COLOR_RGB2LAB)
+            self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
             self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
             return True
         except Exception as e:

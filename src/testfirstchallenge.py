@@ -33,10 +33,10 @@ while running:
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
-        LNM.debug_UI()
+        #LNM.debug_UI()
         LNM.move_forward(speed = 75)  # Avanza siempre
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        #if cv2.waitKey(1) & 0xFF == ord('q'):
+            #break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
         # 1. Obtener direcci�n general de giro de la pista

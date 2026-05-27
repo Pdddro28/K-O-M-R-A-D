@@ -25,7 +25,7 @@ class VisionController():
         self.camera = Picamera2()
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
-        config = self.camera.create_video_configuration(main={"format": 'BGR888', 'size': (self.image_width, self.image_height)})
+        config = self.camera.create_video_configuration(main={"format": 'RGB888', 'size': (self.image_width, self.image_height)})
         self.camera.configure(config)
         self.camera.start()
         
@@ -43,7 +43,7 @@ class VisionController():
             return
 
         # 1. CORRECCIÓN: Convertir de RGB (no BGR) a LAB
-        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_RGB2LAB)
+        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
        
         # 2. SEPARAR CANALES PARA APLICAR CLAHE EN 'L'
         l_channel, a_channel, b_channel = cv2.split(self.image_lab)
