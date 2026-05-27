@@ -113,10 +113,11 @@ class VisionApp(ctk.CTk):
         self.sliders = {}
         self.labels = {}
 
-        # Helper to generate UI sliders
+# Helper to generate UI sliders
         def create_slider(name, default_val):
             lbl = ctk.CTkLabel(self.controls_frame, text=f"{name}: {default_val}", font=("Arial", 14, "bold"))
-            lbl.pack(padx=20, pady=(5, 0), sticky="w")
+            # AQUÍ ESTÁ LA CORRECCIÓN: cambiamos sticky="w" por anchor="w"
+            lbl.pack(padx=20, pady=(5, 0), anchor="w")
             
             sl = ctk.CTkSlider(
                 self.controls_frame, from_=0, to=255, 
