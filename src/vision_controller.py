@@ -33,10 +33,7 @@ class VisionController():
         time.sleep(0.1)
 
     def receive_image(self):
-        """Receive image array from PiCamera and convert it to LAB format"""
-        
-
-        # Obtenemos la imagen como un array de numpy (formato OpenCV)
+        """Receive image array from PiCamera and convert it to LAB format con CLAHE"""
         self.frame = self.camera.capture_array('main')
         self.frame = cv2.flip(self.frame, 0)
         self.frame = cv2.flip(self.frame, 1)
@@ -45,9 +42,21 @@ class VisionController():
             print("No se pudo obtener imagen de la PiCamera.")
             return
 
-        # Procesamiento
-        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
-        self.image_lab = cv2.GaussianBlur(self.image_lab, (7,7), 0)
+        # 1. CORRECCIÓN: Convertir de RGB (no BGR) a LAB
+        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_RGB2LAB)
+       
+        # 2. SEPARAR CANALES PARA APLICAR CLAHE EN 'L'
+        l_channel, a_channel, b_channel = cv2.split(self.image_lab)
+       
+        # Crear el objeto CLAHE (puedes ajustar el clipLimit si necesitas más/menos agresividad)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl_channel = clahe.apply(l_channel)
+       
+        # Volver a fusionar los canales con la luminosidad corregida
+        self.image_lab = cv2.merge((cl_channel, a_channel, b_channel))
+       
+        # 3. FILTRADO DE RUIDO
+        self.image_lab = cv2.GaussianBlur(self.image_lab, (7, 7), 0)
 
     def draw_roi(self, roi):
         cv2.rectangle(self.frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
@@ -60,10 +69,15 @@ class VisionController():
         lower_mask = np.array(range_colors[0])
         upper_mask = np.array(range_colors[1])
         mask = cv2.inRange(img_segmented, lower_mask, upper_mask)
+       
+        # Reemplazamos la erosión/dilatación manual por una clausura morfológica
         kernel = np.ones((5, 5), np.uint8)
-        eroded_mask = cv2.erode(mask, kernel, iterations=1)
-        dilated_mask = cv2.dilate(eroded_mask, kernel, iterations=1)
-        contours = cv2.findContours(dilated_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        smoothed_mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+       
+        # Opcional: una apertura rápida para quitar ruidos aislados del suelo
+        smoothed_mask = cv2.morphologyEx(smoothed_mask, cv2.MORPH_OPEN, kernel)
+       
+        contours = cv2.findContours(smoothed_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         return contours
     
     def max_contour(self, contours, roi: ROI):
