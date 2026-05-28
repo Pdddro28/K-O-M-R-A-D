@@ -15,10 +15,10 @@ loops = 0
 # ==========================================
 # VARIABLES Y CONSTANTES PARA EL PID
 # ==========================================
-TARGET_DIST = 30.0  # La distancia ideal que queremos mantener de la pared
-Kp = 1.5   # Proporcional: Que tan fuerte reacciona al error actual
-Ki = 0.0   # Integral: Corrige desviaciones constantes (dejalo en 0 por ahora)
-Kd = 0.8   # Derivativo: Predice y suaviza el movimiento (evita el zig-zag)
+TARGET_DIST = 30.0
+Kp = 1.5
+Ki = 0.0
+Kd = 0.8
 
 prev_error = 0.0
 integral = 0.0
