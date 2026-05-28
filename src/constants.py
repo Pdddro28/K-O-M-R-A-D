@@ -2,14 +2,12 @@ from dataclasses import dataclass
 
 # Region Of Interest:
 
-#
 
 #  x1,y1-----------------
 #  |                    |
 #  |                    |
 #  |                    |
 #  -------------------x2,y2   
-
 
 
 # --- DATA STRUCTURES ---
