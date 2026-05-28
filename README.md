@@ -6,7 +6,7 @@ El Pedro.
 Team Members
 ====
 
-David Wang Wu, 15 years old, davidwangwu104@gmail.com
+I am David Wang, I am a fourth year student in Eduardo Blanco, I was born on January 4th 2011, I want to study Computer Engineering, I speak four languages (English, Spanish, Chinese and Taiwanese). 
 
 Pedro Catamo, 17 years old, pedrocatamo.2009@gmail.com
 
