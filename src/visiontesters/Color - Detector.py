@@ -11,16 +11,14 @@ from PIL import Image
 from picamera2 import Picamera2
 
 # ====================================================
-# CLASSES
+# COMPUTER VISION SUBSYSTEM DATA STRUCTURES
 # ====================================================
 class ROI:
-    """Defines the rectangular area for color search."""
     def __init__(self, x1, y1, x2, y2):
         self.x1, self.y1 = x1, y1
         self.x2, self.y2 = x2, y2
 
 class VisionController():
-    """Handles Picamera2 stream and image processing."""
     def __init__(self):
         self.image_width  = 640
         self.image_height = 480
@@ -61,20 +59,20 @@ class VisionController():
         return mask
 
 # ====================================================
-# PRESETS
+# COLOR CALIBRATION PRESETS
 # ====================================================
 COLOR_PRESETS = {
     0: {"name": "RED",      "lower": [ 30, 170, 120], "upper": [255, 255, 170]},
-    1: {"name": "GREEN",    "lower": [ 30,   0, 100], "upper": [255, 100, 160]},
-    2: {"name": "BLUE",     "lower": [ 30, 110,   0], "upper": [255, 150, 110]},
-    3: {"name": "PURPLE",   "lower": [ 30, 160,   0], "upper": [255, 255, 110]},
+    1: {"name": "GREEN",    "lower": [ 30,    0, 100], "upper": [255, 100, 160]},
+    2: {"name": "BLUE",     "lower": [ 30, 110,    0], "upper": [255, 150, 110]},
+    3: {"name": "PURPLE",   "lower": [ 30, 160,    0], "upper": [255, 255, 110]},
     4: {"name": "ORANGE",   "lower": [ 50, 140, 150], "upper": [255, 255, 255]},
-    5: {"name": "BLACK",    "lower": [  0,   0,   0], "upper": [ 60, 255, 255]}
+    5: {"name": "BLACK",    "lower": [  0,    0,    0], "upper": [ 60, 255, 255]}
 }
 COLOR_NAMES_LIST = [COLOR_PRESETS[i]["name"] for i in range(len(COLOR_PRESETS))]
 
 # ====================================================
-# MAIN GUI
+# GRAPHICAL USER INTERFACE APPLICATION
 # ====================================================
 class VisionApp(ctk.CTk):
     def __init__(self):
@@ -87,9 +85,8 @@ class VisionApp(ctk.CTk):
 
         self.vision = VisionController()
 
-        # Main Layout
-        self.grid_columnconfigure(0, weight=1) # Video gets most space
-        self.grid_columnconfigure(1, weight=0) # Controls get fixed space
+        self.grid_columnconfigure(0, weight=1) 
+        self.grid_columnconfigure(1, weight=0) 
         self.grid_rowconfigure(0, weight=1)
 
         # --- VIDEO PANEL ---
@@ -102,7 +99,6 @@ class VisionApp(ctk.CTk):
         self.controls_frame = ctk.CTkFrame(self, width=350)
         self.controls_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
 
-        # Color Selector
         self.color_var = ctk.StringVar(value="RED")
         self.preset_menu = ctk.CTkOptionMenu(
             self.controls_frame, 
@@ -115,10 +111,8 @@ class VisionApp(ctk.CTk):
         self.sliders = {}
         self.labels = {}
 
-# Helper to generate UI sliders
         def create_slider(name, default_val):
             lbl = ctk.CTkLabel(self.controls_frame, text=f"{name}: {default_val}", font=("Arial", 14, "bold"))
-            # AQUÍ ESTÁ LA CORRECCIÓN: cambiamos sticky="w" por anchor="w"
             lbl.pack(padx=20, pady=(5, 0), anchor="w")
             
             sl = ctk.CTkSlider(
@@ -131,7 +125,6 @@ class VisionApp(ctk.CTk):
             self.labels[name] = lbl
             self.sliders[name] = sl
 
-        # Generate 6 sliders
         create_slider("L-min", 30)
         create_slider("L-max", 255)
         create_slider("A-min", 170)
@@ -139,7 +132,6 @@ class VisionApp(ctk.CTk):
         create_slider("B-min", 120)
         create_slider("B-max", 170)
 
-        # Save Button
         self.save_btn = ctk.CTkButton(self.controls_frame, text="SAVE JSON", command=self.save_json, fg_color="#28a745", hover_color="#218838")
         self.save_btn.pack(pady=20, padx=20)
 
@@ -150,11 +142,9 @@ class VisionApp(ctk.CTk):
         self.update_video_stream()
 
     def update_label_text(self, name, val):
-        """Updates the label above the slider dynamically."""
         self.labels[name].configure(text=f"{name}: {int(val)}")
 
     def load_preset(self, color_name):
-        """Loads preset values into the sliders."""
         preset = next(item for item in COLOR_PRESETS.values() if item["name"] == color_name)
         
         self.sliders["L-min"].set(preset["lower"][0])
@@ -194,14 +184,11 @@ class VisionApp(ctk.CTk):
                 self.status_label.configure(text="Error saving file", text_color="red")
 
     def update_video_stream(self):
-        """Main Loop: Reads frames, applies logic, updates GUI."""
         if self.vision.receive_image():
-            # Get integer values from sliders
             l_min, l_max = int(self.sliders["L-min"].get()), int(self.sliders["L-max"].get())
             a_min, a_max = int(self.sliders["A-min"].get()), int(self.sliders["A-max"].get())
             b_min, b_max = int(self.sliders["B-min"].get()), int(self.sliders["B-max"].get())
 
-            # Validate
             if l_min > l_max: l_max = l_min
             if a_min > a_max: a_max = a_min
             if b_min > b_max: b_max = b_min
@@ -209,17 +196,13 @@ class VisionApp(ctk.CTk):
             lower = [l_min, a_min, b_min]
             upper = [l_max, a_max, b_max]
 
-            # Process
             test_roi = ROI(0, 0, self.vision.image_width, self.vision.image_height)
             mask = self.vision.find_mask([lower, upper], test_roi)
             result = cv.bitwise_and(self.vision.frame, self.vision.frame, mask=mask)
             mask_color = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
 
-            # Combine (Original | Mask | Result)
             combined_video = np.hstack([self.vision.frame, mask_color, result])
             
-            # --- OVERLAY TEXT DIRECTLY ON VIDEO ---
-            # This guarantees you see the values even if the UI behaves weirdly
             overlay_text1 = f"COLOR: {self.color_var.get()}"
             overlay_text2 = f"MIN: L:{l_min} A:{a_min} B:{b_min}"
             overlay_text3 = f"MAX: L:{l_max} A:{a_max} B:{b_max}"
@@ -228,10 +211,8 @@ class VisionApp(ctk.CTk):
             cv.putText(combined_video, overlay_text2, (20, 80), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
             cv.putText(combined_video, overlay_text3, (20, 120), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 165, 255), 3)
 
-            # Resize to fit screen
             combined_video = cv.resize(combined_video, (960, 240))
             
-            # Convert for Tkinter
             combined_video_rgb = cv.cvtColor(combined_video, cv.COLOR_BGR2RGB)
             img_pil = Image.fromarray(combined_video_rgb)
             
@@ -246,6 +227,9 @@ class VisionApp(ctk.CTk):
         self.vision.picam2.stop()
         self.destroy()
 
+# ====================================================
+# ENTRY POINT
+# ====================================================
 if __name__ == "__main__":
     app = VisionApp()
     app.protocol("WM_DELETE_WINDOW", app.on_closing)
