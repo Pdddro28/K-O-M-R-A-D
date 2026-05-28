@@ -1,27 +1,25 @@
 import cv2
 import numpy as np
 from dataclasses import dataclass
-from picamera2 import Picamera2  # Librería necesaria
+from picamera2 import Picamera2  
 import time
 
+# --- DATA STRUCTURES ---
 @dataclass
 class ROI:
-    """Recive two points from the frame to extract the Region Of Interest"""
     x1: int; y1: int
     x2: int; y2: int
 
+# --- VISION SYSTEM CONTROLLER ---
 class VisionController():
-    """
-    Initialize the vision controller with the PiCamera
-    """
+    
+    # --- INITIALIZATION AND CAMERA SETUP ---
     def __init__(self):
-        # Configuraciones de resolución
         self.image_width  = 640
         self.image_height = 370
         self.image_lab = 0
         self.frame = None
 
-        # Inicialización de PiCamera
         self.camera = Picamera2()
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
@@ -29,11 +27,10 @@ class VisionController():
         self.camera.configure(config)
         self.camera.start()
         
-        # Tiempo de espera para que la cámara caliente (opcional pero recomendado)
         time.sleep(0.1)
 
+    # --- IMAGE ACQUISITION AND PROCESSING ---
     def receive_image(self):
-        """Receive image array from PiCamera and convert it to LAB format con CLAHE"""
         self.frame = self.camera.capture_array('main')
         self.frame = cv2.flip(self.frame, 0)
         self.frame = cv2.flip(self.frame, 1)
@@ -42,39 +39,34 @@ class VisionController():
             print("No se pudo obtener imagen de la PiCamera.")
             return
 
-        # 1. CORRECCIÓN: Convertir de RGB (no BGR) a LAB
         self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
        
-        # 2. SEPARAR CANALES PARA APLICAR CLAHE EN 'L'
         l_channel, a_channel, b_channel = cv2.split(self.image_lab)
        
-        # Crear el objeto CLAHE (puedes ajustar el clipLimit si necesitas más/menos agresividad)
         clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
         cl_channel = clahe.apply(l_channel)
        
-        # Volver a fusionar los canales con la luminosidad corregida
         self.image_lab = cv2.merge((cl_channel, a_channel, b_channel))
        
-        # 3. FILTRADO DE RUIDO
         self.image_lab = cv2.GaussianBlur(self.image_lab, (7, 7), 0)
 
+    # --- DRAWING UTILITIES ---
     def draw_roi(self, roi):
         cv2.rectangle(self.frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
 
     def draw_contours(self, cnt, roi, color):
         cv2.drawContours(self.frame[roi.y1:roi.y2, roi.x1:roi.x2], cnt, -1, color, 2)
 
+    # --- COMPUTER VISION ALGORITHMS ---
     def find_contours(self, range_colors, roi: ROI):
         img_segmented = self.image_lab[roi.y1:roi.y2, roi.x1:roi.x2]
         lower_mask = np.array(range_colors[0])
         upper_mask = np.array(range_colors[1])
         mask = cv2.inRange(img_segmented, lower_mask, upper_mask)
        
-        # Reemplazamos la erosión/dilatación manual por una clausura morfológica
         kernel = np.ones((5, 5), np.uint8)
         smoothed_mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
        
-        # Opcional: una apertura rápida para quitar ruidos aislados del suelo
         smoothed_mask = cv2.morphologyEx(smoothed_mask, cv2.MORPH_OPEN, kernel)
        
         contours = cv2.findContours(smoothed_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
