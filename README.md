@@ -60,7 +60,7 @@ Where:
 Mobility
 ====
 
-
+Our vehicle utilizes an Ackermann steering geometry to optimize cornering stability and eliminate tire scrubbing. By dynamically adjustments the front wheels, this configuration ensures the inner wheel turns at a sharper angle than the outer wheel to match their respective turning radii. Propulsion is managed via an electronic differential setup, which is broken down in full detail below.
 
 Software
 ====
