@@ -6,9 +6,19 @@ El Pedro.
 Team Members
 ====
 
-I am David Wang, I am a 3rd year student in U.E.C.Eduardo Blanco , I was born on January 4th 2011, I want to study Computer Engineering, I speak four languages (English, Spanish, Chinese and Taiwanese). My gmail address: davidwangwu104@gmail.com
+I am David Wang:
+Birth date: 01/04/2011(15y/o)
+Studying: 3rd year at U.E.C.Eduardo Blanco
+Misc: I speak English,Spanish,Mandarin and Taiwanese
+Aspirations: Computer Science at the UGMA
+Gmail: davidwangwu104@gmail.com
 
-Pedro Catamo, I'm 17 years old, I was born on jan 28th 2009, I'll study biomaterials engineering at the UNC in Miranda Vzla, I'm a 5th year student at the U.E.C.Eduardo Blanco, I speak 2 languages(English,Spanish) and currently learning French. My Gmail adress: pedrocatamo.2009@gmail.com
+I am Pedro Catamo:
+Birth date: 01/28/2009(17y/o)
+Studying: 5th year at U.E.C.Eduardo Blanco
+Misc: I speak English and Spanish
+Aspirations: Biomaterials Engineering at the UNC Humberto Fernandez Moran
+Gmail: pedrocatamo.2009@gmail.com
 
 Folders Structure
 ====
