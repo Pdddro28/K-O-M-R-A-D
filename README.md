@@ -48,6 +48,15 @@ LNM/
 
 ```
 
+Where:
+
+- `other`: Every 3D/CAD file used in the car. [view](./other/README.md)
+- `schemes`: Wiring diagram, assembly explanation and components description. [view](./schemes/README.md)
+- `src`: All code necessary to control the robot. [view](./src/README.md) 
+- `t-photos`: team photos. [view](./t-photos/README.md)
+- `v-photos`: vehicle photos. [view](./v-photos/README.md)
+- `videos`: performance videos of the robot. [view](./videos/README.md)
+
 Mobility
 ====
 
