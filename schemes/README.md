@@ -73,6 +73,5 @@ Three HC-SR04 ultrasonic sensors are arranged in a strategic tri-array configura
 * **Independent Routing:** Each sensor is assigned its own dedicated Trigger (Output) and Echo (Input) pins on the MegaPi.
 * **Cross-Talk Prevention:** The navigation code fires and samples each sensor independently in sequence, creating an overlapping web of spatial awareness without signal collision.
 
-```
 
 <img width="2960" height="1625" alt="L-N-M@1 25x" src="https://github.com/user-attachments/assets/13e15df3-6f13-4d22-9dfd-a9a075e6561c" />
