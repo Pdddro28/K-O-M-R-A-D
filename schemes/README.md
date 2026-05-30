@@ -1,7 +1,6 @@
 Electromechanical diagrams
 ====
 
-```
 # Hardware Architecture and Mechanical Engineering
 
 Our autonomous vehicle splits its operational workload into two dedicated subsystems: The Mechanical Muscle and Geometry (chassis physics, Ackermann steering, and raw propulsion) and The Electronic Brain and Perception (dual controllers and high-bandwidth sensor feedback).
