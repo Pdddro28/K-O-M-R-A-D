@@ -65,7 +65,7 @@ To survive massive current spikes when accelerating from a dead stop, the robot 
 * **Why it matters:** Eliminates external power wiring and bypasses the microcontroller entirely. It streams raw image data at high frame rates with zero latency, completely shielded from electromagnetic interference (EMI) from the motors below.
 
 ### Ultrasonic Tri-Array Spatial Awareness
-Three HC-SR04 ultrasonic sensors are arranged in a strategic tri-array configuration (Left, Center, Right) to handle obstacle avoidance.
+Three HC-SR04 ultrasonic sensors are arranged in a strategic tri-array configuration (Left, Center, Right) to handle wall avoidance.
 
 * **5V CMOS Logic:** Powered by a clean 5V rail to ensure maximum acoustic transducer strength.
 * **Independent Routing:** Each sensor is assigned its own dedicated Trigger (Output) and Echo (Input) pins on the MegaPi.
