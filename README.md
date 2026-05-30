@@ -60,7 +60,7 @@ Where:
 Mobility
 ====
 
-El Pedro.
+
 
 Software
 ====
