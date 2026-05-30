@@ -35,10 +35,7 @@ Gmail: pedrocatamo.2009@gmail.com
 Folders Structure
 ====
 
-El Pedro.
 
-Komrad
-====
 
 El Pedro.
 
