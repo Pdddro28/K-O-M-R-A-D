@@ -14,7 +14,7 @@ The vehicle utilizes the Ackermann Steering Principle to conquer sharp cornering
 
 * **The Physics:** When cornering, the inner front wheel must follow a tighter radius than the outer wheel.
 * **The Execution:** An MG996R digital servo (11 kg·cm torque) is mounted onto an L-shaped bracket. It drives a system of mechanical linkages, rudder arms, and asymmetrical connecting rods. This geometry forces the inner wheel to turn more sharply than the outer one automatically.
-* **The Control:** Driven by a continuous, jitter-free 50Hz hardware PWM pulse from the MegaPi, keeping the steering stable at a calibrated center of 84°.
+* **The Control:** Driven by a continuous, jitter-free 50Hz hardware PWM pulse from the MegaPi, keeping the steering stable at a calibrated center of 90°.
 
 ### Electronic 4WD Propulsion (Differential-Free)
 Propulsion is delivered via a high-speed RS380 DC geared motor configuration.
