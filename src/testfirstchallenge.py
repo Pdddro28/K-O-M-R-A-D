@@ -15,10 +15,10 @@ loops = 0
 # ==========================================
 # VARIABLES Y CONSTANTES PARA EL PID
 # ==========================================
-TARGET_DIST = 30.0  # La distancia ideal que queremos mantener de la pared
-Kp = 1.5   # Proporcional: Que tan fuerte reacciona al error actual
-Ki = 0.0   # Integral: Corrige desviaciones constantes (dejalo en 0 por ahora)
-Kd = 0.8   # Derivativo: Predice y suaviza el movimiento (evita el zig-zag)
+TARGET_DIST = 30.0
+Kp = 1.5
+Ki = 0.0
+Kd = 0.8
 
 prev_error = 0.0
 integral = 0.0
@@ -33,10 +33,10 @@ while running:
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
-        LNM.debug_UI()
+        #LNM.debug_UI()
         LNM.move_forward(speed = 75)  # Avanza siempre
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        #if cv2.waitKey(1) & 0xFF == ord('q'):
+            #break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
         # 1. Obtener direcci�n general de giro de la pista
