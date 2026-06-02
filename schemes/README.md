@@ -32,11 +32,11 @@ To eliminate latency and prevent system crashes, high-level computational tasks 
 
 ```
 
-[ Arducam IMX219 ] ──(MIPI CSI-2)──►  [ Raspberry Pi 4 ]  (High-Level Vision / OpenCV)
+[ Arducam IMX219 ] ──(MIPI CSI-2)──►  [ Raspberry Pi 4 ]  (High-Level Vision / OpenCV)
 │
 (Isolated USB Serial)
 ▼
-[ Actuators & Sensors ] ◄───────────  [ MegaPi Board ]    (Low-Level Real-Time Core)
+[ Actuators & Sensors ] ◄───────────  [ MegaPi Board ]    (Low-Level Real-Time Core)
 
 ```
 

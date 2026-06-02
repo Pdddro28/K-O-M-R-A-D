@@ -52,7 +52,7 @@ while running:
             if LNM.orange_area > 1200:
                 LNM.turning_direction = 2  
                 print("¡Pista NARANJA detectada! Configurando giros a la derecha.")
-            elif LNM.blue_area > 900:
+            elif LNM.upper_orange_area > 900:
                 LNM.turning_direction = 1  
                 print("¡Pista AZUL detectada! Configurando giros a la izquierda.")
 
@@ -103,7 +103,7 @@ while running:
         # 3. CORNER LOGIC AND LAP COUNTER
         current_time = time.time()
         
-        area_actual = LNM.orange_area if LNM.turning_direction == 2 else LNM.blue_area
+        area_actual = LNM.orange_area if LNM.turning_direction == 2 else LNM.upper_orange_area
 
         # Active track line detection filter
         if LNM.turning_direction != 0 and area_actual > 500 and n == 0: 
@@ -129,7 +129,7 @@ while running:
             conteo = False
 
         # Race finish condition
-        if loops == 18:
+        if loops == 13:
             print("¡Carrera terminada! 18 vueltas completadas.")
             break
         
