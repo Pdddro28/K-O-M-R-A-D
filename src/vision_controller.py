@@ -31,6 +31,7 @@ class VisionController():
 
     # --- IMAGE ACQUISITION AND PROCESSING ---
     def receive_image(self):
+        #self.frame = self.camera.read()[1]
         self.frame = self.camera.capture_array('main')
         self.frame = cv2.flip(self.frame, 0)
         self.frame = cv2.flip(self.frame, 1)
@@ -56,6 +57,34 @@ class VisionController():
 
     def draw_contours(self, cnt, roi, color):
         cv2.drawContours(self.frame[roi.y1:roi.y2, roi.x1:roi.x2], cnt, -1, color, 2)
+
+    def draw_centroid_line(self, max_contour_data, roi: ROI, color=(255, 0, 0), thickness=2):
+        """
+        Recibe el resultado de max_contour [max_area, max_x, max_y, max_cnt].
+        Calcula el centroide del contorno más grande y dibuja la línea vertical.
+        """
+        # Extraer el contorno del arreglo de datos
+        max_cnt = max_contour_data[3]
+        
+        # Si no se encontró ningún contorno válido, salimos de la función
+        if max_cnt is None:
+            return
+
+        # Calcular los momentos del contorno más grande
+        M = cv2.moments(max_cnt)
+        if M["m00"] != 0:
+            # Calcular X local de la ROI y transformarlo a la imagen global
+            global_cx = int(M["m10"] / M["m00"]) + roi.x1
+            
+            # Dibujar línea vertical contenida en el alto de la ROI
+            cv2.line(self.frame, (global_cx, roi.y1), (global_cx, roi.y2), color, thickness)
+            
+            # Extra: Calcular Y para pintar el punto del centroide
+            global_cy = int(M["m01"] / M["m00"]) + roi.y1
+            cv2.circle(self.frame, (global_cx, global_cy), 5, color, -1)
+            return (global_cx, global_cy)
+        else:
+            return None
 
     # --- COMPUTER VISION ALGORITHMS ---
     def find_contours(self, range_colors, roi: ROI):
