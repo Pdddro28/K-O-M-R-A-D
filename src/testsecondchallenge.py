@@ -4,7 +4,7 @@ import cv2
 import time
 
 # --- INITIALIZATION AND CONFIGURATION ---
-LNM = MegaPiController("/dev/ttyUSB0", 115200)
+LNM = ("/dev/ttyUSB0", 115200)
 
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 

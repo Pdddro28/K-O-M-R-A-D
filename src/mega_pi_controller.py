@@ -47,14 +47,15 @@ class MegaPiController:
 
             self.black_area = 0
             self.black_area_derecha = 0
-            self.blue_area = 0
+            self.upper_orange_area = 0
             self.orange_area = 0
             self.green_area = 0
             self.red_area = 0
             
             self.rois = [
                 ROI(200, 50, 430, 200),
-                ROI(200, 300, 440, 350)
+                ROI(200, 300, 440, 350),
+                ROI(200, 50, 430, 95)
             ]
 
         except Exception as e:
@@ -114,8 +115,8 @@ class MegaPiController:
         self.orange_area = self.vision.max_contour(self.cnt_orange_line, self.rois[1])[0]
 
     def obtener_linea_azul(self):
-        self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1])
-        self.blue_area = self.vision.max_contour(self.cnt_blue_line, self.rois[1])[0]
+        self.cnt_blue_line = self.vision.find_contours(self.mask_orange, self.rois[2])
+        self.upper_orange_area = self.vision.max_contour(self.cnt_blue_line, self.rois[2])[0]
 
     def debug_UI(self):
         for item in self.rois:
