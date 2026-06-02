@@ -173,6 +173,8 @@ class MegaPiController:
     def get_distances(self):
         return (self.dist_front, self.dist_left, self.dist_right)
 
+
+    # MAKE: Una funcion que establezca el sensor que vas leer y las variables del PID
     # --- SYSTEM EXITS AND RESOURCE MANAGEMENT ---
     def save_data_to_csv(self, filename='training_data.csv'):
         if not self.data_log:

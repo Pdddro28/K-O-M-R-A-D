@@ -42,8 +42,11 @@ while running:
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
                  LNM.turning_direction = 2
-            elif LNM.blue_area > 1200:
+                 #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
+            elif LNM.upper_orange_area > 1200 and front_dist < 80:
                  LNM.turning_direction = 1
+                 #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
+
 
         # 2. PID WALL-CENTERING SYSTEM
         if not girando and LNM.turning_direction == 2:
