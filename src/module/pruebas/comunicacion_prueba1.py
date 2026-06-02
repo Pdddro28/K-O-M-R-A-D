@@ -1,45 +1,45 @@
 import serial
 import time
 
-PUERTO = 'COM9' 
+# --- CONFIGURATION ---
+PORT = 'COM9' 
+BAUDRATE = 115200
 
+# --- SERIAL INTERFACE INITIALIZATION ---
 try:
-    # Aumentamos el timeout a 0.1 para que no bloquee pero sea rápido
-    arduino = serial.Serial(port=PUERTO, baudrate=115200, timeout=0.1)
-    time.sleep(3) # Aumentamos a 3 segundos (algunas MegaPi tardan en reiniciar)
+    arduino = serial.Serial(port=PORT, baudrate=BAUDRATE, timeout=0.1)
+    time.sleep(3) 
     
-    # Limpiar buffer inicial (leer el "SISTEMA_LISTO")
     if arduino.in_waiting > 0:
-        saludo = arduino.read_all().decode('utf-8', errors='ignore')
-        print(f"Inicio Arduino: {saludo.strip()}")
+        greeting = arduino.read_all().decode('utf-8', errors='ignore')
+        print(f"Arduino Boot Message: {greeting.strip()}")
         
-    print(f"--- Conectado exitosamente a {PUERTO} ---")
+    print(f"--- Successfully connected to {PORT} ---")
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"❌ Connection Error: {e}")
     exit()
 
-def enviar_comando(texto):
-    if texto.strip():
-        # Enviamos y forzamos el vaciado del buffer de salida
-        arduino.write(f"{texto}\n".encode('utf-8'))
+# --- TRANSMISSION AND RECEPTION PROTOCOL ---
+def send_command(text):
+    if text.strip():
+        arduino.write(f"{text}\n".encode('utf-8'))
         arduino.flush() 
         
-        print(f"Saliendo hacia Arduino: {texto}")
-        
-        # Esperamos un poco más para que el hardware procese
+        print(f"Tx -> Arduino: {text}")
         time.sleep(0.5) 
         
-        # Intentamos leer varias líneas si las hay
         while arduino.in_waiting > 0:
-            linea = arduino.readline().decode('utf-8', errors='ignore').strip()
-            if linea:
-                print(f"Arduino dice: {linea}")
+            line = arduino.readline().decode('utf-8', errors='ignore').strip()
+            if line:
+                print(f"Rx <- Arduino: {line}")
 
-print("--- Consola de Control ---")
+# --- USER COMMAND INTERACTION ---
+print("--- Control Console ---")
 while True:
-    usuario = input("Escribe tu comando > ") 
-    if usuario.lower() == 'salir':
+    user_input = input("Enter command > ") 
+    if user_input.lower() == 'exit':
         break
-    enviar_comando(usuario)
+    send_command(user_input)
 
+# --- RESOURCE CLEANUP ---
 arduino.close()

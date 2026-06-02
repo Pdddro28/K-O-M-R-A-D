@@ -3,21 +3,13 @@ from dataclasses import dataclass
 import tkinter as tk
 from tkinter import filedialog
 
-# =========================
-# ROI STRUCTURE
-# =========================
-
+# --- DATA STRUCTURES ---
 @dataclass
 class ROI:
-    """Recibe dos puntos del frame para extraer la Region Of Interest"""
     x1: int; y1: int
     x2: int; y2: int
 
-
-# =========================
-# VARIABLES
-# =========================
-
+# --- GLOBAL VARIABLES ---
 drawing = False
 ix, iy = -1, -1
 rois = []
@@ -25,21 +17,15 @@ rois = []
 window_width = 800
 window_height = 600
 
-
-# =========================
-# GUARDAR CON DIÁLOGO
-# =========================
-
+# --- FILE MANAGEMENT AND EXPORT ---
 def save_rois_dialog():
     if not rois:
         print("No hay ROIs para guardar")
         return
 
-    # Ocultar ventana principal de tkinter
     root = tk.Tk()
     root.withdraw()
 
-    # Abrir diálogo "Guardar como"
     file_path = filedialog.asksaveasfilename(
         defaultextension=".py",
         filetypes=[("Python files", "*.py")],
@@ -52,34 +38,19 @@ def save_rois_dialog():
 
     with open(file_path, "w") as f:
         f.write("from dataclasses import dataclass\n\n")
-        f.write("# Region Of Interest:\n")
-        f.write("#\n")
-        f.write("#  x1,y1----------------\n")
-        f.write("#  |                    |\n")
-        f.write("#  |                    |\n")
-        f.write("#  |                    |\n")
-        f.write("#  -------------------x2,y2\n\n")
-
         f.write("@dataclass\n")
         f.write("class ROI:\n")
-        f.write('    """Recive two points from the frame  to extract the Region Of Interest"""\n\n')
         f.write("    x1: int; y1: int\n")
         f.write("    x2: int; y2: int\n\n\n")
 
         f.write("rois = [\n")
-
         for (x1, y1, x2, y2) in rois:
             f.write(f"    ROI({x1}, {y1}, {x2}, {y2}),\n")
-
         f.write("]\n")
 
     print(f"ROIs guardadas en: {file_path}")
 
-
-# =========================
-# MOUSE
-# =========================
-
+# --- MOUSE INTERACTION CALLBACK ---
 def mouse_callback(event, x, y, flags, param):
     global ix, iy, drawing, rois
 
@@ -96,11 +67,7 @@ def mouse_callback(event, x, y, flags, param):
         rois.append((ix, iy, x, y))
         param["temp_rect"] = None
 
-
-# =========================
-# MAIN
-# =========================
-
+# --- MAIN EXECUTION APPLICATION ---
 def main():
     global rois
 
@@ -123,7 +90,6 @@ def main():
             if not ret:
                 break
 
-            # Detectar cierre de ventana
             if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) < 1:
                 break
 
@@ -149,7 +115,6 @@ def main():
 
             display = framed.copy()
 
-            # Dibujar ROIs
             for i, (x1, y1, x2, y2) in enumerate(rois):
                 x1_, y1_ = min(x1, x2), min(y1, y2)
                 x2_, y2_ = max(x1, x2), max(y1, y2)
@@ -179,10 +144,7 @@ def main():
     finally:
         cap.release()
         cv2.destroyAllWindows()
-
-        # 🔥 AQUÍ se abre el "Guardar como"
         save_rois_dialog()
-
 
 if __name__ == "__main__":
     main()

@@ -13,7 +13,7 @@ states = {"straight": False, "girando": False}
 running = True
 loops = 0
 
-# --- PID CONTROLLER VARIABLES ---
+# --- PID CONTROLLER VARIABLES (WALL CENTERING) ---
 TARGET_DIST = 30.0  
 Kp = 1.5   
 Ki = 0.0   
@@ -23,6 +23,12 @@ prev_error = 0.0
 integral = 0.0
 girando = False
 conteo = False
+
+# --- OBSTACLE EVASION CONFIGURATION ---
+# Umbral de área para considerar que un obstáculo está lo suficientemente cerca para esquivarlo
+UMBRAL_OBSTACULO = 1500  
+tiempo_esquiva = 0.0
+esquivando = False
 
 # --- TIMERS AND FLAGS ---
 color_timer = time.time()
@@ -37,8 +43,17 @@ while running:
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
+        
+        # --- NUEVAS DETECCIONES PARA OBSTÁCULOS ---
+        # Se asume que tu controlador tiene implementadas estas funciones de visión
+        LNM.obtener_obstaculo_rojo()    
+        LNM.obtener_obstaculo_verde()   
+        
         LNM.debug_UI()
-        LNM.move_forward(speed = 75)  
+        
+        # Velocidad base por defecto (si no está esquivando o girando fuerte)
+        velocidad_actual = 75
+        LNM.move_forward(speed = velocidad_actual)  
         
         # Emergency break condition
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -46,7 +61,7 @@ while running:
 
         front_dist, left_dist, right_dist = LNM.get_distances()
         
-        # 1. AUTOMATIC TRACK TYPE DETECTION
+        # 1. AUTOMATIC TRACK TYPE DETECTION (Líneas de salida/meta)
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
                 LNM.turning_direction = 2  
@@ -55,8 +70,38 @@ while running:
                 LNM.turning_direction = 1  
                 print("¡Pista AZUL detectada! Configurando giros a la izquierda.")
 
-        # 2. DYNAMIC PID WALL-CENTERING SYSTEM
-        if not girando and LNM.turning_direction != 0:
+        # 2. OBSTACLE DETECT AND EVADE (PRIORIDAD ALTA)
+        # Si estamos esquivando, mantenemos la maniobra por un breve instante (ej. 0.6 segundos)
+        if esquivando:
+            if time.time() - tiempo_esquiva > 0.6:
+                esquivando = False
+                print("Maniobra de esquiva completada. Volviendo a centrado.")
+                LNM.turn_center()
+            else:
+                # Continúa ejecutando la evasión sin evaluar el PID de las paredes
+                continue
+
+        # Si no estamos esquivando activamente, buscamos nuevos obstáculos en el frente
+        if not girando and not esquivando:
+            # OBSTÁCULO ROJO -> Esquivar por la DERECHA
+            if LNM.red_area > UMBRAL_OBSTACULO:
+                print(f"¡Obstáculo ROJO detectado! (Área: {LNM.red_area}). Esquivando por la DERECHA.")
+                LNM.turn_right(angle=110, speed=55) # Ángulo pronunciado a la derecha
+                esquivando = True
+                tiempo_esquiva = time.time()
+                continue
+            
+            # OBSTÁCULO VERDE -> Esquivar por la IZQUIERDA
+            elif LNM.green_area > UMBRAL_OBSTACULO:
+                print(f"¡Obstáculo VERDE detectado! (Área: {LNM.green_area}). Esquivando por la IZQUIERDA.")
+                LNM.turn_left(angle=50, speed=55)  # Ángulo pronunciado a la izquierda
+                esquivando = True
+                tiempo_esquiva = time.time()
+                continue
+
+        # 3. DYNAMIC PID WALL-CENTERING SYSTEM
+        # Solo se ejecuta si no estamos girando en una esquina y no estamos esquivando un pilar
+        if not girando and not esquivando and LNM.turning_direction != 0:
             
             # Dynamic wall assignment based on track type
             if LNM.turning_direction == 2:    
@@ -86,9 +131,8 @@ while running:
             elif steering_angle < 75:
                 LNM.turn_left(angle=steering_angle, speed=50)
 
-        # 3. CORNER LOGIC AND LAP COUNTER
+        # 4. CORNER LOGIC AND LAP COUNTER
         current_time = time.time()
-        
         area_actual = LNM.orange_area if LNM.turning_direction == 2 else LNM.blue_area
 
         # Active track line detection filter
@@ -102,8 +146,9 @@ while running:
         if current_time - color_timer > 3: 
             n = 0
 
-        # Cornering handling execution
-        if front_dist < 80 and not girando and LNM.black_area > 9000 and LNM.turning_direction != 0:
+        # Cornering handling execution (Curvas cerradas)
+        # Se añade "not esquivando" para evitar que confunda una esquina con la maniobra de un pilar
+        if front_dist < 80 and not girando and not esquivando and LNM.black_area > 9000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
@@ -114,9 +159,9 @@ while running:
             girando = False
             conteo = False
 
-        # Race finish condition
-        if loops == 12:
-            print("¡Carrera terminada! 12 vueltas completadas.")
+        # Race finish condition (En el reto 2 suelen ser menos vueltas, ajusta según necesites, ej: 3 vueltas)
+        if loops == 3:
+            print("¡Reto de obstáculos terminado! Vueltas completadas.")
             break
         
     except Exception as e:
@@ -125,4 +170,4 @@ while running:
         break
 
 # --- SAFETY SHUTDOWN ---
-LNM.stop()  
+LNM.stop()

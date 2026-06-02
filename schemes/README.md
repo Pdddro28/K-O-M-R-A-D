@@ -1,16 +1,75 @@
 Electromechanical diagrams
 ====
 
-The architectural design of our autonomous vehicle relies on a dual-controller system where high-level computational tasks and low-level hardware execution are strictly separated. The Raspberry Pi 4 serves as the main single-board computer, running complex python scripts and OpenCV computer vision algorithms to analyze the track ahead. However, a single-board computer cannot safely drive high-current motors or manage multiple real-time sensor loops without experiencing severe latency or timing issues. To bridge this gap, we selected the Makeblock MegaPi as our central microcontroller layer, executing low-level motor movements and sensor readings instantly via its ATmega2560 core. Instead of stacking the boards directly, we established a dedicated USB serial connection between them. This approach optimizes physical space within the custom chassis and guarantees a stable data stream while completely isolating the logic power supplies, ensuring that any electrical anomalies on the hardware side cannot feedback and destroy the sensitive processing cores of the Raspberry Pi.
+Our autonomous vehicle splits its operational workload into two dedicated subsystems: The Mechanical Muscle and Geometry (chassis physics, Ackermann steering, and raw propulsion) and The Electronic Brain and Perception (dual controllers and high-bandwidth sensor feedback).
 
-Power distribution and signal integrity are maintained by utilizing two separate 11.1V LiPo batteries and a shared grounding framework across the entire vehicle. The first battery powers the primary processing unit by routing its 11.1V output through an on/off switch into a 15W Type-C buck converter. The buck converter steps down the variable battery voltage to a rock-solid 5V supply at 3A, which is the exact power requirement for the Raspberry Pi 4's Type-C input port; skipping this regulator and connecting the battery directly would instantly destroy the Pi. The second 11.1V battery connects directly to the power terminal jack of the MegaPi to drive the heavy actuation systems. Crucially, every single component in the entire circuit—including the sensors, the servo, and the motor drivers—must share a common Ground (GND) path back to the MegaPi. Without a unified ground connection, the individual components would lack a zero-volt reference point, causing the electrical control signals to float, which results in corrupt sensor data, erratic steering, and catastrophic signal noise. The MegaPi safely manages this by distributing a regulated 5V VCC logic rail to the sensors and peripherals while keeping the raw 11.1V power isolated strictly to the motor driving chips.
+---
 
-To handle the primary physical propulsion of the vehicle, the high-speed RS380 DC geared motor is wired directly into the heavy-duty green screw terminals of Port 1 on the MegaPi. The MegaPi architecture uses modular slots designed to house dedicated plug-and-play motor driver chips directly over its physical ports. By choosing Port 1, we map our motor lines to an onboard H-bridge driver capable of handling the massive current spikes that occur when the vehicle accelerates from a complete stop. When the MegaPi receives a speed command, it does not alter the voltage directly; instead, it uses internal timers to pulse the current on and off at varying frequencies. Routing the motor through the Port 1 terminals allows these high-current surges to draw power straight from the 11.1V battery rail, bypassing the delicate micro-traces of the microcontroller and preventing the processor from resetting due to voltage drops during heavy loads.
+## Subsystem 1: Mechanical Muscle and Geometry
 
-Steering control is managed by the high-torque MG996R digital servo, which requires precise electrical mapping to execute stable turns. The servo utilizes a standard three-wire layout consisting of VCC, GND, and a signal line, which we connect to the multi-function pin headers on the MegaPi. The red VCC line is connected specifically to the 5V rail because the MG996R requires a 5V potential to generate its necessary 11 kg·cm torque capacity; attempting to power it with a 3.3V line would leave the servo heavily underpowered, causing the steering mechanism to stall under the friction of the wheels. The orange signal wire is connected to a specific hardware-timed pin labeled as an Analog/PWM pin on the board. This choice is vital because Ackermann steering requires micro-adjustments that can only be achieved via hardware Pulse Width Modulation (PWM). By utilizing a hardware-timed pin instead of a standard software-driven digital pin, the MegaPi outputs a continuous, jitter-free 50Hz control pulse, ensuring the front wheels maintain their exact directed angle without being affected by processing delays in the main code loop.
+Instead of standard differential (tank-style) spin turns, this platform is engineered around true automotive physics using a modified YFROBOT 4WD chassis.
 
-The spatial awareness of the vehicle is provided by an array of three HC-SR04 ultrasonic sensors mapped to separate input/output pin channels on the MegaPi to prevent data cross-talk. All three sensors share the central 5V VCC power rail because the HC-SR04 acoustic transceivers are designed around 5V CMOS logic; running them on 3.3V would weaken the ultrasonic transducers, severely degrading the detection range or causing the sensors to fail completely. Each individual sensor requires its own distinct Trigger and Echo pin connections to the general-purpose digital input/output (GPIO) section of the MegaPi. The Trigger pin must be configured as an output so the microcontroller can send a precise 10-microsecond high signal to force the sensor to emit its ultrasonic sound burst. The Echo pin must be configured as an input to listen for the returning acoustic reflection, measuring the exact microsecond duration that the line remains high to calculate distance. Giving each of the three sensors its own dedicated digital lines allows our navigation software to fire and read the left, center, and right sensors independently, providing simultaneous obstacle detection without overlapping signals.
+### Ackermann Steering Mechanism
+The vehicle utilizes the Ackermann Steering Principle to conquer sharp cornering with minimal tire slip.
 
-The vision subsystem bypasses the microcontroller layer entirely, connecting the Arducam IMX219 wide-angle camera directly to the Raspberry Pi 4 via the native MIPI CSI-2 ribbon cable interface. This specialized 15-pin ribbon connection is required because an 8-megapixel camera sensor generates a massive high-bandwidth raw data stream that the 16 MHz processor of the MegaPi is physically incapable of processing. The CSI bus facilitates a direct, ultra-fast pipeline to the Raspberry Pi's Graphical Processing Unit (GPU), enabling real-time image capture at high frame rates with negligible latency. Furthermore, the CSI interface eliminates external power wiring by supplying a highly regulated 3.3V operating voltage and a clean digital ground path directly from the Pi's internal power management chip. This internal isolation ensures that the delicate CMOS sensor inside the camera remains completely shielded from the massive electromagnetic interference and voltage ripples generated by the drive motor and steering servo operating on the main chassis below.
+* **The Physics:** When cornering, the inner front wheel must follow a tighter radius than the outer wheel.
+* **The Execution:** An MG996R digital servo (11 kg·cm torque) is mounted onto an L-shaped bracket. It drives a system of mechanical linkages, rudder arms, and asymmetrical connecting rods. This geometry forces the inner wheel to turn more sharply than the outer one automatically.
+* **The Control:** Driven by a continuous, jitter-free 50Hz hardware PWM pulse from the MegaPi, keeping the steering stable at a calibrated center of 90°.
+
+### Electronic 4WD Propulsion (Differential-Free)
+Propulsion is delivered via a high-speed RS380 DC geared motor configuration.
+
+* **The Setup:** Instead of a complex, heavy mechanical differential, power is routed directly to the wheels.
+* **The Challenge:** Without a mechanical differential, wheels can slip or fight each other during tight turns.
+* **The Software Solution:** Wheel speed coordination is managed entirely via code by applying varied Duty Cycles through an onboard H-bridge driver on MegaPi's Port 1. This bypasses delicate micro-traces and draws raw surges straight from the motor battery rail.
+
+---
+
+## Subsystem 2: Electronic Brain and Perception
+
+To eliminate latency and prevent system crashes, high-level computational tasks and real-time hardware execution are completely isolated.
+
+
+```
+
+[ Arducam IMX219 ] ──(MIPI CSI-2)──►  [ Raspberry Pi 4 ]  (High-Level Vision / OpenCV)
+│
+(Isolated USB Serial)
+▼
+[ Actuators & Sensors ] ◄───────────  [ MegaPi Board ]    (Low-Level Real-Time Core)
+
+```
+
+### Dual-Controller Split
+1. **The Brain (Raspberry Pi 4):** A high-performance single-board computer running Python and OpenCV algorithms to analyze the track ahead.
+2. **The Reflexes (Makeblock MegaPi):** Powered by an ATmega2560 core (16 MHz), handling time-critical hardware tasks, instantaneous motor movements, and sensor reads.
+3. **The Link:** Connected via a high-speed USB Serial connection (115200 baud) to optimize chassis space and isolate sensitive processing cores.
+
+### Dual-Battery Isolation and Power Distribution
+To survive massive current spikes when accelerating from a dead stop, the robot completely separates logic power from mechanical loads:
+
+| Power Source | System Group | Regulation Layer | Engineering Purpose |
+| :--- | :--- | :--- | :--- |
+| **11.1V LiPo Pack A** | Logic & Vision | **15W Type-C Buck Converter** (Steps down to 5V @ 3A) | Keeps the Raspberry Pi 4 fed with rock-solid power; guards against data corruption. |
+| **11.1V LiPo Pack B** | Motors & Servos | **Direct Power Jack** (Raw 11.1V input) | Feeds high-current inductive loads directly so they do not drain the microprocessors. |
+
+> **The Ground Rule:** Every single component shares a unified Common Ground (GND) path back to the MegaPi. Without this zero-volt reference, control signals would float, causing erratic steering, corrupted ultrasonic echoes, and catastrophic signal noise.
+
+---
+
+## Sensor Array and Spatial Awareness
+
+### High-Bandwidth Vision
+* **Hardware:** Arducam IMX219 8-Megapixel wide-angle camera.
+* **Pipeline:** Connected directly to the Raspberry Pi's GPU via a native MIPI CSI-2 15-pin ribbon cable.
+* **Why it matters:** Eliminates external power wiring and bypasses the microcontroller entirely. It streams raw image data at high frame rates with zero latency, completely shielded from electromagnetic interference (EMI) from the motors below.
+
+### Ultrasonic Tri-Array Spatial Awareness
+Three HC-SR04 ultrasonic sensors are arranged in a strategic tri-array configuration (Left, Center, Right) to handle wall avoidance.
+
+* **5V CMOS Logic:** Powered by a clean 5V rail to ensure maximum acoustic transducer strength.
+* **Independent Routing:** Each sensor is assigned its own dedicated Trigger (Output) and Echo (Input) pins on the MegaPi.
+* **Cross-Talk Prevention:** The navigation code fires and samples each sensor independently in sequence, creating an overlapping web of spatial awareness without signal collision.
+
 
 <img width="2960" height="1625" alt="L-N-M@1 25x" src="https://github.com/user-attachments/assets/13e15df3-6f13-4d22-9dfd-a9a075e6561c" />

@@ -13,7 +13,7 @@ const int pinServo = A6;
 void setup()
 {
   servo1.attach(pinServo);
-  moverServo(SERVO_RECTO); // Centro
+  moverServo(SERVO_RECTO);
 }
 
 void loop()
