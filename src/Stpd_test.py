@@ -96,19 +96,19 @@ while running:
         # Condición de curva: proximidad frontal y suficiente masa de obstáculo (área negra)
         if front_dist < 80 and not girando and LNM.black_area > 9000:
             
-            # --- COMPARACIÓN CORREGIDA DE ULTRASONIDOS LATERALES ---
-            # Si el lado IZQUIERDO está más despejado -> GIRO INMEDIATO A LA IZQUIERDA
+            # --- COMPENSACIÓN DE INVERSIÓN FÍSICA DE GIRO ---
+            # Si el US Izquierdo ve más espacio libre -> Ejecutamos acción contraria para corregir el hardware
             if left_dist > right_dist:
-                LNM.turning_direction = 1  # Se configura para seguir pared derecha en las rectas (Modo Azul)
-                LNM.turn_left(angle=40, speed=50) # Giro físico inmediato a la izquierda
-                print(f"¡Curva detectada! US Izquierdo ({left_dist}) > US Derecho ({right_dist}). Girando a la IZQUIERDA.")
+                LNM.turning_direction = 2  # Cambia la referencia de recta para adaptarse a la inversión
+                LNM.turn_right(angle=120, speed=50) # Forzamos giro físico derecho
+                print(f"¡Curva! Espacio en US Izq ({left_dist}) > US Der ({right_dist}). Corrigiendo inversión física -> Girando a la DERECHA.")
                 girando = True
             
-            # Si el lado DERECHO está más despejado (o son iguales) -> GIRO INMEDIATO A LA DERECHA
+            # Si el US Derecho ve más espacio libre -> Ejecutamos acción contraria para corregir el hardware
             else:
-                LNM.turning_direction = 2  # Se configura para seguir pared izquierda en las rectas (Modo Naranja)
-                LNM.turn_right(angle=120, speed=50) # Giro físico inmediato a la derecha
-                print(f"¡Curva detectada! US Derecho ({right_dist}) >= US Izquierdo ({left_dist}). Girando a la DERECHA.")
+                LNM.turning_direction = 1  # Cambia la referencia de recta para adaptarse a la inversión
+                LNM.turn_left(angle=40, speed=50) # Forzamos giro físico izquierdo
+                print(f"¡Curva! Espacio en US Der ({right_dist}) >= US Izq ({left_dist}). Corrigiendo inversión física -> Girando a la IZQUIERDA.")
                 girando = True
             
             # Reset de variables PID tras ejecutar el giro inmediato
