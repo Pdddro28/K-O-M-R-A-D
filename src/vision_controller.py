@@ -40,7 +40,7 @@ class VisionController():
             print("No se pudo obtener imagen de la PiCamera.")
             return
 
-        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
+        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_RGB2LAB)
        
         l_channel, a_channel, b_channel = cv2.split(self.image_lab)
        
@@ -86,6 +86,39 @@ class VisionController():
         else:
             return None
 
+    def draw_parallel_lane_line(self, centroid_coords, roi: ROI, offset=80, avoid_right=True, color=(0, 255, 255), thickness=2):
+        """
+        Dibuja una l�nea paralela al centroide a una distancia fija (offset).
+        
+        :param centroid_coords: Tupla (global_cx, global_cy) devuelta por draw_centroid_line.
+        :param roi: El objeto ROI actual.
+        :param offset: Distancia en p�xeles hacia la izquierda o derecha desde el centroide.
+        :param avoid_right: Si es True, dibuja la l�nea a la derecha. Si es False, a la izquierda.
+        :param color: Color BGR para la l�nea (por defecto Amarillo).
+        """
+        # Validar que tengamos un centroide v�lido
+        if centroid_coords is None:
+            return None
+
+        global_cx, global_cy = centroid_coords
+
+        # Determinar la direcci�n del desplazamiento
+        if avoid_right:
+            lane_x = global_cx + offset
+        else:
+            lane_x = global_cx - offset
+
+        # Asegurar que la l�nea no se dibuje fuera de los l�mites de la imagen (640 de ancho)
+        lane_x = max(0, min(lane_x, self.image_width))
+
+        # Dibuja la l�nea paralela (desde el l�mite superior al inferior de la ROI)
+        cv2.line(self.frame, (lane_x, roi.y1), (lane_x, roi.y2), color, thickness)
+        
+        # Opcional: Dibujar una flecha indicando la direcci�n de evasi�n
+        arrow_direction = 30 if avoid_right else -30
+        cv2.arrowedLine(self.frame, (global_cx, global_cy), (global_cx + arrow_direction, global_cy), color, 2, tipLength=0.3)
+
+        return lane_x
     # --- COMPUTER VISION ALGORITHMS ---
     def find_contours(self, range_colors, roi: ROI):
         img_segmented = self.image_lab[roi.y1:roi.y2, roi.x1:roi.x2]

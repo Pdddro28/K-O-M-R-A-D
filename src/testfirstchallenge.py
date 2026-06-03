@@ -34,6 +34,7 @@ while running:
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
+        LNM.debug_UI()
         LNM.move_forward(speed = 75) 
 
         front_dist, left_dist, right_dist = LNM.get_distances()
