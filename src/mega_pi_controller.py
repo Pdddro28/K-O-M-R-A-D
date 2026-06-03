@@ -104,7 +104,7 @@ class MegaPiController:
     def load_masks(self):
         self.mask_red = self.get_masks('rojo')
         self.mask_green = self.get_masks('verde')
-        self.mask_blue = self.get_masks('azul')
+        self.mask_blue = self.get_masks('rojo')
         self.mask_orange = self.get_masks('naranja')
         self.mask_black = self.get_masks('negro')
 
@@ -113,15 +113,14 @@ class MegaPiController:
         self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[0])
         self.black_area = self.vision.max_contour(self.cnt_front_wall, self.rois[0])[0]
 
-    def obtener_linea_naranja(self):
-        # Adaptado para que procese explícitamente en el canal RGB paralelo
-        self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1], frame_mode='rgb')
-        self.orange_area = self.vision.max_contour(self.cnt_orange_line, self.rois[1])[0]
-
     def obtener_linea_azul(self):
-        # MODIFICACIÓN CLAVE: Cambiado de 'lab/rgb' a 'bgr' como solicitaste
-        self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1], frame_mode='bgr')
+        self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1])
         self.blue_area = self.vision.max_contour(self.cnt_blue_line, self.rois[1])[0]
+
+
+    def obtener_linea_naranja(self):
+        self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1])
+        self.orange_area = self.vision.max_contour(self.cnt_orange_line, self.rois[1])[0]
 
     def debug_UI(self):
         for item in self.rois:
@@ -130,7 +129,7 @@ class MegaPiController:
         self.vision.draw_contours(self.cnt_orange_line, self.rois[1], (0, 165, 255))  
         self.vision.draw_contours(self.cnt_front_wall, self.rois[0], (0, 0, 255))  
 
-        cv2.imshow('Vision HD - Posicion Corregida', self.vision.frame)
+        cv2.imshow('Vision HD - Posicion Corregida', self.vision.raw_frame)
 
     # --- TELEMETRY DATA LOGGING ---
     def log_step(self, action_code):

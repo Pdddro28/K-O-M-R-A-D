@@ -38,19 +38,19 @@ class VisionController():
     # --- IMAGE ACQUISITION AND PROCESSING ---
     def receive_image(self):
         # 1. Captura del array nativo (viene en orden RGB)
-        raw_frame = self.camera.capture_array('main')
-        raw_frame = cv2.flip(raw_frame, 0)
-        raw_frame = cv2.flip(raw_frame, 1)
+        self.raw_frame = self.camera.capture_array('main')
+        self.raw_frame = cv2.flip(self.raw_frame, 0)
+        self.raw_frame = cv2.flip(self.raw_frame, 1)
 
         # 2. Guardado y producción de los frames paralelos
-        self.frame_rgb = raw_frame.copy()                           
-        self.frame_bgr = cv2.cvtColor(raw_frame, cv2.COLOR_RGB2BGR) 
+        self.frame_rgb = self.raw_frame.copy()                           
+        self.frame_bgr = cv2.cvtColor(self.raw_frame, cv2.COLOR_RGB2BGR) 
         
         # Inicializamos el lienzo de dibujo usando el formato compatible de OpenCV
         self.frame = self.frame_bgr.copy()
 
         # 3. Pipeline original convertido correctamente desde RGB a LAB
-        self.image_lab = cv2.cvtColor(self.frame_rgb, cv2.COLOR_RGB2LAB)
+        self.image_lab = cv2.cvtColor(self.raw_frame, cv2.COLOR_RGB2LAB)
        
         l_channel, a_channel, b_channel = cv2.split(self.image_lab)
        
@@ -62,10 +62,10 @@ class VisionController():
 
     # --- DRAWING UTILITIES ---
     def draw_roi(self, roi):
-        cv2.rectangle(self.frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
+        cv2.rectangle(self.raw_frame, (roi.x1, roi.y1), (roi.x2, roi.y2), (0,255,0), 2)
 
     def draw_contours(self, cnt, roi, color):
-        cv2.drawContours(self.frame[roi.y1:roi.y2, roi.x1:roi.x2], cnt, -1, color, 2)
+        cv2.drawContours(self.raw_frame[roi.y1:roi.y2, roi.x1:roi.x2], cnt, -1, color, 2)
 
     def draw_centroid_line(self, max_contour_data, roi: ROI, color=(255, 0, 0), thickness=2):
         max_cnt = max_contour_data[3]
@@ -150,3 +150,20 @@ class VisionController():
                     max_cnt = c
 
         return [max_area, max_x, max_y, max_cnt]
+
+if "__main__" == __name__:
+    vision = VisionController()
+
+    # Definición de ROIs
+
+
+    while True:
+        try:
+            vision.receive_image()
+            cv2.imshow('Vision HD - Posicion Corregida', vision.frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        except Exception as e:
+            print(f"Error en el bucle principal: {e}")
+    
+    cv2.destroyAllWindows()

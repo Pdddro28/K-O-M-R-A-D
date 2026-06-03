@@ -39,7 +39,7 @@ while running:
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
         LNM.debug_UI()
-        LNM.move_forward(speed = 75)  
+        LNM.move_forward(speed = 65)  
         
         # Emergency break condition
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -52,7 +52,7 @@ while running:
             if LNM.orange_area > 1200:
                 LNM.turning_direction = 2  
                 print("¡Pista NARANJA detectada! Configurando giros a la derecha.")
-            elif LNM.blue_area > 900:
+            elif LNM.blue_area > 1200:
                 LNM.turning_direction = 1  
                 print("¡Pista AZUL detectada! Configurando giros a la izquierda.")
 
