@@ -98,15 +98,21 @@ To optimize performance and drastically reduce latency, high-level computer visi
 * **Total Required Power ($P_{\text{total}}$):**
   * *Stationary Logic Consumption:* The Raspberry Pi 4 draws approx. 1.2A @ 5V = 6W.
   * *Dynamic Power Consumption:* Four RS380 motors under race conditions draw an average of 1.5A each at 11.1V, and the MG996R servo averages 0.5A under continuous motion.
-  $$I_{\text{power\_total}} = (4 \times 1.5\text{A}) + 0.5\text{A} = 6.5\text{A}$$
-  $$P_{\text{power\_rail}} = 6.5\text{A} \times 11.1\text{V} = 72.15\text{W}$$
-  $$P_{\text{total}} = 6\text{W} + 72.15\text{W} = \mathbf{78.15\text{W}}$$
+
+$$I_{\text{power total}} = (4 \times 1.5\text{A}) + 0.5\text{A} = 6.5\text{A}$$
+
+$$P_{\text{power rail}} = 6.5\text{A} \times 11.1\text{V} = 72.15\text{W}$$
+
+$$P_{\text{total}} = 6\text{W} + 72.15\text{W} = 78.15\text{W}$$
 
 * **Battery Autonomy Calculation:**
   Since the battery packs are rated at 2200mAh (2.2Ah) and applying a standard 20% safety margin to protect the LiPo cell chemistry (never discharging past 80%):
-  $$\text{Runtime}_{\text{Logic}} = \frac{2.2\text{Ah} \times 0.8}{1.2\text{A}} \approx 1.46\text{ hours} \approx \mathbf{88\text{ minutes}}$$
-  $$\text{Runtime}_{\text{Power}} = \frac{2.2\text{Ah} \times 0.8}{6.5\text{A}} \approx 0.27\text{ hours} \approx \mathbf{16.2\text{ minutes}}$$
-  *The critical battery life during a race is dictated entirely by the motor power battery, guaranteeing **16 minutes of non-stop, high-demand running**.*
+
+$$\text{Runtime}_{\text{Logic}} = \frac{2.2\text{Ah} \times 0.8}{1.2\text{A}} \approx 1.46\text{ hours} \approx \mathbf{88\text{ minutes}}$$
+
+$$\text{Runtime}_{\text{Power}} = \frac{2.2\text{Ah} \times 0.8}{6.5\text{A}} \approx 0.27\text{ hours} \approx \mathbf{16.2\text{ minutes}}$$
+
+*The critical battery life during a race is dictated entirely by the motor power battery, guaranteeing **16 minutes of non-stop, high-demand running**.*
 
 > **⚠️ The Golden Rule of Grounding:** Both batteries must share a unified **Common Ground (GND)** rail on the MegaPi board. Without this single 0V reference point, PWM control signals would float, creating devastating electromagnetic interference (EMI), corrupted ultrasonic readings, and erratic servo twitches.
 
