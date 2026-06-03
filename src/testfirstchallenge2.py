@@ -16,7 +16,7 @@ loops = 0
 # --- PID CONTROLLER VARIABLES (Ajustados para mayor suavidad) ---
 TARGET_DIST = 30.0  
 Kp = 1.8    # Incrementado ligeramente para reaccionar más rápido
-Ki = 0.01   # Se añade una pizca de integral para eliminar el error estático
+Ki = 0.0   # Se añade una pizca de integral para eliminar el error estático
 Kd = 1.2    # Incrementado para amortiguar oscilaciones bruscas
 
 prev_error = 0.0
@@ -39,7 +39,7 @@ while running:
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
         LNM.debug_UI()
-        LNM.move_forward(speed = 50)  
+        LNM.move_forward(speed = 75)  
         
         # Emergency break condition
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -52,7 +52,7 @@ while running:
             if LNM.orange_area > 1200:
                 LNM.turning_direction = 2  
                 print("¡Pista NARANJA detectada! Configurando giros a la derecha.")
-            elif LNM.upper_orange_area > 900:
+            elif LNM.blue_area > 900:
                 LNM.turning_direction = 1  
                 print("¡Pista AZUL detectada! Configurando giros a la izquierda.")
 
