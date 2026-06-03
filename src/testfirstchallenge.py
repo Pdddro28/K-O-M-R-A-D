@@ -41,19 +41,32 @@ while running:
             break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
-        
+        print(LNM.black_area)
+        #qprint(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
         # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
                  LNM.turning_direction = 2
+                
                  #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
-            elif LNM.upper_orange_area > 1200 and front_dist < 80:
+            elif LNM.blue_area > 1200 :
                  LNM.turning_direction = 1
                  #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
 
 
+        if front_dist < 90 and not girando and LNM.black_area > 9000 and LNM.turning_direction != 0:
+            LNM.turn_direction()
+            girando = True
+            prev_error = 0.0
+            integral = 0.0
+              
+        if LNM.black_area < 9000 and girando and front_dist > 100:
+           LNM.turn_center()
+           girando = False
+           conteo = False
+
         # 2. PID WALL-CENTERING SYSTEM
-        if not girando and LNM.turning_direction == 2:
+        if not girando and LNM.turning_direction == 2 and loops > 1:
             current_dist = min(left_dist, 60.0)
             
             error = TARGET_DIST - current_dist 
@@ -75,7 +88,6 @@ while running:
 
         # 3. CORNER LOGIC AND LAP COUNTER
         current_time = time.time()
-        print(LNM.orange_area)
 
         if LNM.orange_area > 500 and n == 0: 
             orange_timer = current_time
@@ -86,16 +98,6 @@ while running:
             n = 0
             print("Timer reset, ready for next orange line detection.")
 
-        if front_dist < 80 and not girando and LNM.black_area > 9000 and LNM.turning_direction != 0:
-            LNM.turn_direction()
-            girando = True
-            prev_error = 0.0
-            integral = 0.0
-              
-        if LNM.black_area < 8000 and girando and front_dist > 100:
-           LNM.turn_center()
-           girando = False
-           conteo = False
 
         print("Loop count:", loops)
 

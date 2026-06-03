@@ -115,21 +115,23 @@ class MegaPiController:
 
     def obtener_linea_azul(self):
         self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1])
-        self.blue_area = self.vision.max_contour(self.cnt_blue_line, self.rois[1])[0]
+        self.blue_max = self.vision.max_contour(self.cnt_blue_line, self.rois[1])
+        self.blue_area = self.blue_max[0]
 
 
     def obtener_linea_naranja(self):
         self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1])
-        self.orange_area = self.vision.max_contour(self.cnt_orange_line, self.rois[1])[0]
+        self.orange_max = self.vision.max_contour(self.cnt_orange_line, self.rois[1])
+        self.orange_area = self.orange_max[0]
 
     def debug_UI(self):
         for item in self.rois:
             self.vision.draw_roi(item)  
-        self.vision.draw_contours(self.cnt_blue_line, self.rois[1], (255, 0, 0))  
-        self.vision.draw_contours(self.cnt_orange_line, self.rois[1], (0, 165, 255))  
+        self.vision.draw_contours(self.blue_max[3], self.rois[1], (255, 0, 0))  
+        self.vision.draw_contours(self.orange_max[3], self.rois[1], (0, 165, 255))  
         self.vision.draw_contours(self.cnt_front_wall, self.rois[0], (0, 0, 255))  
 
-        cv2.imshow('Vision HD - Posicion Corregida', self.vision.raw_frame)
+        cv2.imshow('Vision HD - Posicion Corregida', self.vision.frame)
 
     # --- TELEMETRY DATA LOGGING ---
     def log_step(self, action_code):
@@ -157,7 +159,7 @@ class MegaPiController:
         if self.turning_direction == 1:
             self.turn_left(angle=40, speed=50, log=True) 
         elif self.turning_direction == 2:
-            self.turn_right(angle=120, speed=50, log=True) 
+            self.turn_left(angle=120, speed=50, log=True) 
 
     def turn_left(self, angle, speed, log=True):
         self._send_command(3, v1=angle, v2=speed)
