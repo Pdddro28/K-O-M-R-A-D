@@ -18,11 +18,17 @@ class VisionController():
         self.image_width  = 640
         self.image_height = 370
         self.image_lab = 0
-        self.frame = None
+        
+        # Almacenamiento de frames paralelos
+        self.frame = None       # Frame de trabajo para dibujo (OpenCV usa BGR)
+        self.frame_rgb = None   # Frame crudo en formato RGB nativo
+        self.frame_bgr = None   # Frame limpio convertido a BGR
 
         self.camera = Picamera2()
         self.camera.resolution = (self.image_width, self.image_height)
         self.camera.framerate = 32
+        
+        # Configuración de Picamera2 en RGB888 nativo
         config = self.camera.create_video_configuration(main={"format": 'RGB888', 'size': (self.image_width, self.image_height)})
         self.camera.configure(config)
         self.camera.start()
@@ -31,12 +37,20 @@ class VisionController():
 
     # --- IMAGE ACQUISITION AND PROCESSING ---
     def receive_image(self):
-        #self.frame = self.camera.read()[1]
-        self.frame = self.camera.capture_array('main')
-        self.frame = cv2.flip(self.frame, 0)
-        self.frame = cv2.flip(self.frame, 1)
+        # 1. Captura del array nativo (viene en orden RGB)
+        raw_frame = self.camera.capture_array('main')
+        raw_frame = cv2.flip(raw_frame, 0)
+        raw_frame = cv2.flip(raw_frame, 1)
 
-        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
+        # 2. Guardado y producción de los frames paralelos
+        self.frame_rgb = raw_frame.copy()                           
+        self.frame_bgr = cv2.cvtColor(raw_frame, cv2.COLOR_RGB2BGR) 
+        
+        # Inicializamos el lienzo de dibujo usando el formato compatible de OpenCV
+        self.frame = self.frame_bgr.copy()
+
+        # 3. Pipeline original convertido correctamente desde RGB a LAB
+        self.image_lab = cv2.cvtColor(self.frame_rgb, cv2.COLOR_RGB2LAB)
        
         l_channel, a_channel, b_channel = cv2.split(self.image_lab)
        
@@ -44,7 +58,6 @@ class VisionController():
         cl_channel = clahe.apply(l_channel)
        
         self.image_lab = cv2.merge((cl_channel, a_channel, b_channel))
-       
         self.image_lab = cv2.GaussianBlur(self.image_lab, (7, 7), 0)
 
     # --- DRAWING UTILITIES ---
@@ -55,27 +68,15 @@ class VisionController():
         cv2.drawContours(self.frame[roi.y1:roi.y2, roi.x1:roi.x2], cnt, -1, color, 2)
 
     def draw_centroid_line(self, max_contour_data, roi: ROI, color=(255, 0, 0), thickness=2):
-        """
-        Recibe el resultado de max_contour [max_area, max_x, max_y, max_cnt].
-        Calcula el centroide del contorno más grande y dibuja la línea vertical.
-        """
-        # Extraer el contorno del arreglo de datos
         max_cnt = max_contour_data[3]
-        
-        # Si no se encontró ningún contorno válido, salimos de la función
         if max_cnt is None:
-            return
+            return None
 
-        # Calcular los momentos del contorno más grande
         M = cv2.moments(max_cnt)
         if M["m00"] != 0:
-            # Calcular X local de la ROI y transformarlo a la imagen global
             global_cx = int(M["m10"] / M["m00"]) + roi.x1
-            
-            # Dibujar línea vertical contenida en el alto de la ROI
             cv2.line(self.frame, (global_cx, roi.y1), (global_cx, roi.y2), color, thickness)
             
-            # Extra: Calcular Y para pintar el punto del centroide
             global_cy = int(M["m01"] / M["m00"]) + roi.y1
             cv2.circle(self.frame, (global_cx, global_cy), 5, color, -1)
             return (global_cx, global_cy)
@@ -83,48 +84,46 @@ class VisionController():
             return None
 
     def draw_parallel_lane_line(self, centroid_coords, roi: ROI, offset=80, avoid_right=True, color=(0, 255, 255), thickness=2):
-        """
-        Dibuja una l�nea paralela al centroide a una distancia fija (offset).
-        
-        :param centroid_coords: Tupla (global_cx, global_cy) devuelta por draw_centroid_line.
-        :param roi: El objeto ROI actual.
-        :param offset: Distancia en p�xeles hacia la izquierda o derecha desde el centroide.
-        :param avoid_right: Si es True, dibuja la l�nea a la derecha. Si es False, a la izquierda.
-        :param color: Color BGR para la l�nea (por defecto Amarillo).
-        """
-        # Validar que tengamos un centroide v�lido
         if centroid_coords is None:
             return None
 
         global_cx, global_cy = centroid_coords
 
-        # Determinar la direcci�n del desplazamiento
         if avoid_right:
             lane_x = global_cx + offset
         else:
             lane_x = global_cx - offset
 
-        # Asegurar que la l�nea no se dibuje fuera de los l�mites de la imagen (640 de ancho)
         lane_x = max(0, min(lane_x, self.image_width))
-
-        # Dibuja la l�nea paralela (desde el l�mite superior al inferior de la ROI)
         cv2.line(self.frame, (lane_x, roi.y1), (lane_x, roi.y2), color, thickness)
         
-        # Opcional: Dibujar una flecha indicando la direcci�n de evasi�n
         arrow_direction = 30 if avoid_right else -30
         cv2.arrowedLine(self.frame, (global_cx, global_cy), (global_cx + arrow_direction, global_cy), color, 2, tipLength=0.3)
 
         return lane_x
+
     # --- COMPUTER VISION ALGORITHMS ---
-    def find_contours(self, range_colors, roi: ROI):
-        img_segmented = self.image_lab[roi.y1:roi.y2, roi.x1:roi.x2]
+    def find_contours(self, range_colors, roi: ROI, frame_mode='lab'):
+        """
+        Busca contornos permitiendo escoger qué frame paralelo/espacio utilizar.
+        :param frame_mode: 'lab', 'rgb' o 'bgr'
+        """
+        # Sentencia de selección para determinar el origen del procesamiento
+        if frame_mode.lower() == 'rgb':
+            img_source = self.frame_rgb
+        elif frame_mode.lower() == 'bgr':
+            img_source = self.frame_bgr
+        else:
+            img_source = self.image_lab 
+            
+        img_segmented = img_source[roi.y1:roi.y2, roi.x1:roi.x2]
+        
         lower_mask = np.array(range_colors[0])
         upper_mask = np.array(range_colors[1])
         mask = cv2.inRange(img_segmented, lower_mask, upper_mask)
        
         kernel = np.ones((5, 5), np.uint8)
         smoothed_mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-       
         smoothed_mask = cv2.morphologyEx(smoothed_mask, cv2.MORPH_OPEN, kernel)
        
         contours = cv2.findContours(smoothed_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
