@@ -90,48 +90,25 @@ To optimize performance and drastically reduce latency, high-level computer visi
 ### Power Supply System
 
 | Power Source | System Group | Regulation Layer | Engineering Purpose |
-| --- | --- | --- | --- |
-| **LiPo Battery Pack A**<br>
-
-<br>($11.1\text{V}$ - $3$ Cells, $2200\text{mAh}$) | Logic & Vision | **15W Type-C Buck Converter**<br>
-
-<br>(Steps down to $5\text{V} \pm 0.1\text{V}$ @ $3\text{A}$) | Feeds the Raspberry Pi 4 with clean, linear power. Prevents voltage drops and SD card data corruption. |
-| **LiPo Battery Pack B**<br>
-
-<br>($11.1\text{V}$ - $3$ Cells, $2200\text{mAh}$) | Motors & Servo | **Direct Injected Rail**<br>
-
-<br>(MegaPi Power Terminals) | Delivers massive current spikes demanded by the RS380 motors without dropping logic rails. |
+| :--- | :--- | :--- | :--- |
+| **LiPo Battery Pack A**<br>(11.1V - 3 Cells, 2200mAh) | Logic & Vision | **15W Type-C Buck Converter**<br>(Steps down to 5V $\pm$ 0.1V @ 3A) | Feeds the Raspberry Pi 4 with clean, linear power. Prevents voltage drops and SD card data corruption. |
+| **LiPo Battery Pack B**<br>(11.1V - 3 Cells, 2200mAh) | Motors & Servo | **Direct Injected Rail**<br>(MegaPi Power Terminals) | Delivers massive current spikes demanded by the RS380 motors without dropping logic rails. |
 
 ### Electrical Calculations: Power and Battery Life
-
 * **Total Required Power ($P_{\text{total}}$):**
-* *Stationary Logic Consumption:* The Raspberry Pi 4 draws approx. $1.2\text{A}$ @ $5\text{V} = 6\text{W}$.
-* *Dynamic Power Consumption:* Four RS380 motors under race conditions draw an average of $1.5\text{A}$ each at $11.1\text{V}$, and the MG996R servo averages $0.5\text{A}$ under continuous motion.
-
-$$I_{\text{power\_total}} = (4 \times 1.5\text{A}) + 0.5\text{A} = 6.5\text{A}$$
-
-
-$$P_{\text{power\_rail}} = 6.5\text{A} \times 11.1\text{V} = 72.15\text{W}$$
-
-
-$$P_{\text{total}} = 6\text{W} + 72.15\text{W} = \mathbf{78.15\text{W}}$$
-
-
-
+  * *Stationary Logic Consumption:* The Raspberry Pi 4 draws approx. 1.2A @ 5V = 6W.
+  * *Dynamic Power Consumption:* Four RS380 motors under race conditions draw an average of 1.5A each at 11.1V, and the MG996R servo averages 0.5A under continuous motion.
+  $$I_{\text{power\_total}} = (4 \times 1.5\text{A}) + 0.5\text{A} = 6.5\text{A}$$
+  $$P_{\text{power\_rail}} = 6.5\text{A} \times 11.1\text{V} = 72.15\text{W}$$
+  $$P_{\text{total}} = 6\text{W} + 72.15\text{W} = \mathbf{78.15\text{W}}$$
 
 * **Battery Autonomy Calculation:**
-Since the battery packs are rated at $2200\text{mAh}$ ($2.2\text{Ah}$) and applying a standard $20\%$ safety margin to protect the LiPo cell chemistry (never discharging past $80\%$):
+  Since the battery packs are rated at 2200mAh (2.2Ah) and applying a standard 20% safety margin to protect the LiPo cell chemistry (never discharging past 80%):
+  $$\text{Runtime}_{\text{Logic}} = \frac{2.2\text{Ah} \times 0.8}{1.2\text{A}} \approx 1.46\text{ hours} \approx \mathbf{88\text{ minutes}}$$
+  $$\text{Runtime}_{\text{Power}} = \frac{2.2\text{Ah} \times 0.8}{6.5\text{A}} \approx 0.27\text{ hours} \approx \mathbf{16.2\text{ minutes}}$$
+  *The critical battery life during a race is dictated entirely by the motor power battery, guaranteeing **16 minutes of non-stop, high-demand running**.*
 
-$$\text{Runtime}_{\text{Logic}} = \frac{2.2\text{Ah} \times 0.8}{1.2\text{A}} \approx 1.46\text{ hours} \approx \mathbf{88\text{ minutes}}$$
-
-
-$$\text{Runtime}_{\text{Power}} = \frac{2.2\text{Ah} \times 0.8}{6.5\text{A}} \approx 0.27\text{ hours} \approx \mathbf{16.2\text{ minutes}}$$
-
-
-
-*The critical battery life during a race is dictated entirely by the motor power battery, guaranteeing **16 minutes of non-stop, high-demand running**.*
-
-> **⚠️ The Golden Rule of Grounding:** Both batteries must share a unified **Common Ground (GND)** rail on the MegaPi board. Without this single $0\text{V}$ reference point, PWM control signals would float, creating devastating electromagnetic interference (EMI), corrupted ultrasonic readings, and erratic servo twitches.
+> **⚠️ The Golden Rule of Grounding:** Both batteries must share a unified **Common Ground (GND)** rail on the MegaPi board. Without this single 0V reference point, PWM control signals would float, creating devastating electromagnetic interference (EMI), corrupted ultrasonic readings, and erratic servo twitches.
 
 <img width="2960" height="1625" alt="L-N-M@1 25x" src="https://github.com/user-attachments/assets/13e15df3-6f13-4d22-9dfd-a9a075e6561c" />
 
