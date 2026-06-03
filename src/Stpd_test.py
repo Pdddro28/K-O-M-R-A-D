@@ -33,7 +33,7 @@ n = 0
 # --- MAIN CONTROL LOOP ---
 while running:
     try:
-        # Sensors and data acquisition (Mantenidos sin eliminar, pero no deciden la pista)
+        # Sensors and data acquisition (Se mantienen activos pero no deciden la pista)
         LNM.vision.receive_image()
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
@@ -47,43 +47,48 @@ while running:
 
         front_dist, left_dist, right_dist = LNM.get_distances()
         
-        # 1. AUTOMATIC TRACK TYPE DETECTION (ANULADO: Ahora se define dinámicamente en la primera curva)
-        # Se mantienen las variables intactas por compatibilidad, pero la lógica de color no actúa.
+        # 1. AUTOMATIC TRACK TYPE DETECTION (ANULADO: Se define dinámicamente en la primera curva)
         pass
 
-        # 2. DYNAMIC PID WALL-CENTERING SYSTEM
+        # 2. DYNAMIC PID WALL-CENTERING SYSTEM (Activo solo a partir del 2do Loop)
         if not girando and LNM.turning_direction != 0:
             
-            # Pista Naranja / Modo 2: Sigue pared IZQUIERDA. 
-            if LNM.turning_direction == 2:    
-                current_dist = min(left_dist, 60.0)   
-                error = TARGET_DIST - current_dist  
-                lado_correccion = 1                 
-            
-            # Pista Azul / Modo 1: Sigue pared DERECHA.
-            elif LNM.turning_direction == 1:  
-                current_dist = min(right_dist, 60.0)  
-                error = TARGET_DIST - current_dist  
-                lado_correccion = -1                
+            if loops >= 2:
+                # --- El PID se ejecuta normalmente a partir de la segunda vuelta ---
+                # Pista Naranja / Modo 2: Sigue pared IZQUIERDA. 
+                if LNM.turning_direction == 2:    
+                    current_dist = min(left_dist, 60.0)   
+                    error = TARGET_DIST - current_dist  
+                    lado_correccion = 1                 
+                
+                # Pista Azul / Modo 1: Sigue pared DERECHA.
+                elif LNM.turning_direction == 1:  
+                    current_dist = min(right_dist, 60.0)  
+                    error = TARGET_DIST - current_dist  
+                    lado_correccion = -1                
 
-            # PID Math calculations
-            integral += error
-            integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
+                # PID Math calculations
+                integral += error
+                integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
+                
+                derivative = error - prev_error
+                correction = (Kp * error) + (Ki * integral) + (Kd * derivative)
+                prev_error = error
+                
+                steering_angle = int(80 + (correction * lado_correccion))
+                steering_angle = max(40, min(120, steering_angle))
+                
+                # Aplicar dirección calculada por el PID
+                if abs(error) < 1.5: 
+                    LNM.turn_center()
+                elif steering_angle > 80:
+                    LNM.turn_right(angle=steering_angle, speed=50)
+                elif steering_angle < 80:
+                    LNM.turn_left(angle=steering_angle, speed=50)
             
-            derivative = error - prev_error
-            correction = (Kp * error) + (Ki * integral) + (Kd * derivative)
-            prev_error = error
-            
-            steering_angle = int(80 + (correction * lado_correccion))
-            steering_angle = max(40, min(120, steering_angle))
-            
-            # Aplicar dirección en recta
-            if abs(error) < 1.5: 
+            else:
+                # --- Vuelta 0 y Vuelta 1: El robot va completamente recto sin corregir ---
                 LNM.turn_center()
-            elif steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=50)
-            elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=50)
 
         # 3. CORNER LOGIC AND LAP COUNTER (Basado puramente en Distancia Frontal + Área Negra + US Laterales)
         current_time = time.time()
@@ -91,19 +96,19 @@ while running:
         # Condición de curva: proximidad frontal y suficiente masa de obstáculo (área negra)
         if front_dist < 80 and not girando and LNM.black_area > 9000:
             
-            # COMPARACIÓN INMEDIATA DE ULTRASONIDOS LATERALES:
-            # Si el lado derecho está mucho más despejado que el izquierdo -> GIRO INMEDIATO A LA DERECHA
-            if right_dist > left_dist:
-                LNM.turning_direction = 2  # Se configura para seguir pared izquierda en las rectas
-                LNM.turn_right(angle=120, speed=50) # Giro físico inmediato a la derecha
-                print(f"¡Curva detectada! US Derecho ({right_dist}) > US Izquierdo ({left_dist}). Girando a la DERECHA.")
+            # --- COMPARACIÓN CORREGIDA DE ULTRASONIDOS LATERALES ---
+            # Si el lado IZQUIERDO está más despejado -> GIRO INMEDIATO A LA IZQUIERDA
+            if left_dist > right_dist:
+                LNM.turning_direction = 1  # Se configura para seguir pared derecha en las rectas (Modo Azul)
+                LNM.turn_left(angle=40, speed=50) # Giro físico inmediato a la izquierda
+                print(f"¡Curva detectada! US Izquierdo ({left_dist}) > US Derecho ({right_dist}). Girando a la IZQUIERDA.")
                 girando = True
             
-            # Si el lado izquierdo está mucho más despejado que el derecho -> GIRO INMEDIATO A LA IZQUIERDA
+            # Si el lado DERECHO está más despejado (o son iguales) -> GIRO INMEDIATO A LA DERECHA
             else:
-                LNM.turning_direction = 1  # Se configura para seguir pared derecha en las rectas
-                LNM.turn_left(angle=40, speed=50) # Giro físico inmediato a la izquierda
-                print(f"¡Curva detectada! US Izquierdo ({left_dist}) >= US Derecho ({right_dist}). Girando a la IZQUIERDA.")
+                LNM.turning_direction = 2  # Se configura para seguir pared izquierda en las rectas (Modo Naranja)
+                LNM.turn_right(angle=120, speed=50) # Giro físico inmediato a la derecha
+                print(f"¡Curva detectada! US Derecho ({right_dist}) >= US Izquierdo ({left_dist}). Girando a la DERECHA.")
                 girando = True
             
             # Reset de variables PID tras ejecutar el giro inmediato
