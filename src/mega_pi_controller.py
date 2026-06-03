@@ -102,6 +102,8 @@ class MegaPiController:
         return [lower, upper]
 
     def load_masks(self):
+        self.mask_red = self.get_masks('rojo')
+        self.mask_green = self.get_masks('verde')
         self.mask_blue = self.get_masks('azul')
         self.mask_orange = self.get_masks('naranja')
         self.mask_black = self.get_masks('negro')

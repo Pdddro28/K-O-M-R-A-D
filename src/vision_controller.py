@@ -40,7 +40,7 @@ class VisionController():
             print("No se pudo obtener imagen de la PiCamera.")
             return
 
-        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_RGB2LAB)
+        self.image_lab = cv2.cvtColor(self.frame, cv2.COLOR_BGR2LAB)
        
         l_channel, a_channel, b_channel = cv2.split(self.image_lab)
        
