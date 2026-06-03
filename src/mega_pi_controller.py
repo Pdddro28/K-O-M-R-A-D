@@ -109,15 +109,18 @@ class MegaPiController:
         self.mask_black = self.get_masks('negro')
 
     def obtenerarea_frontal(self):
+        # Mantiene la máscara negra por defecto (o 'lab' según tu VisionController)
         self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[0])
         self.black_area = self.vision.max_contour(self.cnt_front_wall, self.rois[0])[0]
 
     def obtener_linea_naranja(self):
-        self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1])
+        # Adaptado para que procese explícitamente en el canal RGB paralelo
+        self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1], frame_mode='rgb')
         self.orange_area = self.vision.max_contour(self.cnt_orange_line, self.rois[1])[0]
 
     def obtener_linea_azul(self):
-        self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1])
+        # MODIFICACIÓN CLAVE: Cambiado de 'lab/rgb' a 'bgr' como solicitaste
+        self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1], frame_mode='bgr')
         self.blue_area = self.vision.max_contour(self.cnt_blue_line, self.rois[1])[0]
 
     def debug_UI(self):
@@ -175,8 +178,6 @@ class MegaPiController:
     def get_distances(self):
         return (self.dist_front, self.dist_left, self.dist_right)
 
-
-    # MAKE: Una funcion que establezca el sensor que vas leer y las variables del PID
     # --- SYSTEM EXITS AND RESOURCE MANAGEMENT ---
     def save_data_to_csv(self, filename='training_data.csv'):
         if not self.data_log:
