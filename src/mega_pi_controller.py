@@ -54,7 +54,7 @@ class MegaPiController:
             self.red_area = 0
             
             self.rois = [
-                ROI(200, 50, 430, 200),
+                ROI(200, 20, 430, 200),
                 ROI(200, 300, 440, 350),
             ]
 
@@ -127,8 +127,8 @@ class MegaPiController:
     def debug_UI(self):
         for item in self.rois:
             self.vision.draw_roi(item)  
-        self.vision.draw_contours(self.blue_max[3], self.rois[1], (255, 0, 0))  
-        self.vision.draw_contours(self.orange_max[3], self.rois[1], (0, 165, 255))  
+        #self.vision.draw_contours(self.blue_max[3], self.rois[1], (255, 0, 0))  
+        self.vision.draw_contours(self.orange_max[3], self.rois[1], (0, 255, 255))  
         self.vision.draw_contours(self.cnt_front_wall, self.rois[0], (0, 0, 255))  
 
         cv2.imshow('Vision HD - Posicion Corregida', self.vision.frame)

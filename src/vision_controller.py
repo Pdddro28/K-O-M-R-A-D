@@ -166,6 +166,8 @@ if "__main__" == __name__:
     while True:
         try:
             vision.receive_image()
+            ctn = vision.find_contours([[50,140,150],[255,255,255]], ROI(200, 300, 440, 350))
+            vision.draw_contours(ctn, ROI(200, 300, 440, 350), (0, 255, 255))
             cv2.imshow('Vision HD - Posicion Corregida', vision.frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

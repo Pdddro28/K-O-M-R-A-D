@@ -41,7 +41,7 @@ while running:
             break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
-        print(LNM.black_area)
+        print(LNM.turning_direction)
         #qprint(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
         # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
@@ -54,51 +54,18 @@ while running:
                  #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
 
 
-        if front_dist < 90 and not girando and LNM.black_area > 9000 and LNM.turning_direction != 0:
+        if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
             integral = 0.0
               
-        if LNM.black_area < 9000 and girando and front_dist > 100:
+        if LNM.black_area < 8000 and girando and front_dist > 100:
            LNM.turn_center()
            girando = False
            conteo = False
 
-        # 2. PID WALL-CENTERING SYSTEM
-        if not girando and LNM.turning_direction == 2 and loops > 1:
-            current_dist = min(left_dist, 60.0)
-            
-            error = TARGET_DIST - current_dist 
-            integral += error
-            derivative = error - prev_error
-            
-            correction = (Kp * error) + (Ki * integral) + (Kd * derivative)
-            prev_error = error
-            
-            steering_angle = int(80 + correction)
-            steering_angle = max(40, min(120, steering_angle))
-            
-            if abs(error) < 2:
-                LNM.turn_center()
-            elif steering_angle > 85:
-                LNM.turn_right(angle=steering_angle, speed=50)
-            elif steering_angle < 75:
-                LNM.turn_left(angle=steering_angle, speed=50)
-
-        # 3. CORNER LOGIC AND LAP COUNTER
-        current_time = time.time()
-
-        if LNM.orange_area > 500 and n == 0: 
-            orange_timer = current_time
-            n = 1
-            loops += 1
-
-        if current_time - orange_timer > 3: 
-            n = 0
-            print("Timer reset, ready for next orange line detection.")
-
-
+ 
         print("Loop count:", loops)
 
         if loops == 12:
