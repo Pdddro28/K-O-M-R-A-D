@@ -48,7 +48,7 @@ try:
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
-        LNM.debug_UI()
+        #LNM.debug_UI()
         
         # Avanzar por defecto, la dirección se corregirá abajo
         LNM.move_forward(speed=75) 

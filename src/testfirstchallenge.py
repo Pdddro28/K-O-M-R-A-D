@@ -37,6 +37,9 @@ while running:
         LNM.debug_UI()
         LNM.move_forward(speed = 75) 
 
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
         front_dist, left_dist, right_dist = LNM.get_distances()
         
         # 1. TRACK TYPE DETECTION
