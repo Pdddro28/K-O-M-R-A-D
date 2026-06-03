@@ -1,211 +1,175 @@
 import cv2
 import time
-from mega_pi_controller import *
-from constants import *
 from vision_controller import ROI, VisionController
 from PID_class import PIDController
+from mega_pi_controller import *
+from constants import *
 
 # --- INITIALIZATION AND CONFIGURATION ---
 LNM = MegaPiController("/dev/ttyUSB0", 115200)
-picam2 = LNM.vision  # Instancia única de la cámara integrada en tu controlador
+picam2 = LNM.vision  # Instancia única de la cámara vinculada al controlador
 
-# Configuración de ROIs
-roi_obstaculos = ROI(100, 100, picam2.image_width - 100, picam2.image_height - 100)
+# Configuración de la Región de Interés (ROI)
+roi = ROI(100, 100, picam2.image_width - 100, picam2.image_height - 100)
+print("System started. Press 'q' to quit.")
 
-states = {"straight": False, "girando": False}
-running = True
-loops = 0
-BASE_SPEED = 50
-
-# --- PID 1: SEGUIDOR DE PAREDES (Variables del código 1) ---
-TARGET_DIST = 30.0  
-Kp_wall = 1.8    
-Ki_wall = 0.01   
-Kd_wall = 1.2    
+# --- PID CONTROLLER FOR WALL-CENTERING ---
+TARGET_DIST = 30.0
+Kp_wall, Ki_wall, Kd_wall = 1.5, 0.0, 0.8
 prev_error_wall = 0.0
 integral_wall = 0.0
-MAX_INTEGRAL_WALL = 15.0
 
-girando = False
-n = 0
-color_timer = time.time()
-
-# --- PID 2: EVASIÓN DE OBSTÁCULOS (Variables del código 2) ---
-SET_POINT_RED_X = 155
-SET_POINT_GREEN_X = 516
-
+# --- PID CONTROLLERS FOR OBSTACLES ---
+set_point_red = (155, 120)
+set_point_green = (516, 125)
 pid_red = PIDController(kp=0.5, ki=0.00, kd=0.1)
 pid_green = PIDController(kp=0.5, ki=0.00, kd=0.1)
 
-# Umbral mínimo de pixeles para ignorar ruido de fondo de los bloques
-MIN_BLOB_AREA = 300 
+# --- VARIABLES DE CONTROL GENERAL ---
+SERVO_CENTER = 90
+MIN_SERVO_LIMIT = 40
+MAX_SERVO_LIMIT = 120
+MIN_AREA_OBSTACLE = 1500  # Área mínima en píxeles para activar la evasión visual
 
-SERVO_CENTER = 80  # Tu código 1 define 80 como el centro neutral físico del servo
-print("Sistema Iniciado. Presiona 'q' en la ventana de video para salir.")
+running = True
+loops = 0
+girando = False
+n = 0
+orange_timer = time.time()
 
 # --- MAIN CONTROL LOOP ---
 try:
     while running:
-        # 1. ACQUISITION AND PROCESSING
+        # 1. DATA ACQUISITION & PROCESSING
         picam2.receive_image()
         if picam2.frame is None:
             continue
-            
+
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
         LNM.debug_UI()
         
+        # Avanzar por defecto, la dirección se corregirá abajo
+        LNM.move_forward(speed=75) 
         front_dist, left_dist, right_dist = LNM.get_distances()
-        current_time = time.time()
 
-        # Emergency break condition via window
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-        # 2. AUTOMATIC TRACK TYPE DETECTION (Líneas de la pista)
+        # 2. TRACK TYPE DETECTION (Lógica Original)
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
-                LNM.turning_direction = 2  
-                print("¡Pista NARANJA detectada! Configurando giros a la derecha.")
-            elif LNM.upper_orange_area > 900:
-                LNM.turning_direction = 1  
-                print("¡Pista AZUL detectada! Configurando giros a la izquierda.")
+                LNM.turning_direction = 2
+            elif LNM.upper_orange_area > 1200 and front_dist < 80:
+                LNM.turning_direction = 1
 
-        # 3. DETECCIÓN DE OBSTÁCULOS POR COLOR (CÁMARA)
-        red_ctn = picam2.find_contours(LNM.mask_red, roi_obstaculos) 
-        green_ctn = picam2.find_contours(LNM.mask_green, roi_obstaculos)
+        # 3. COMPUTER VISION: OBSTACLE DETECTION (Red & Green)
+        red_ctn = picam2.find_contours(LNM.mask_red, roi) 
+        green_ctn = picam2.find_contours(LNM.mask_green, roi)
         
-        max_red = picam2.max_contour(red_ctn, roi_obstaculos)
-        max_green = picam2.max_contour(green_ctn, roi_obstaculos)
-
-        # Variables bandera para determinar qué acción tomar
-        obstaculo_detectado = False
-        steering_angle = SERVO_CENTER
-
-        # Verificar si hay obstáculos válidos basados en el tamaño de su área
-        rojo_valido = max_red[3] is not None and max_red[0] > MIN_BLOB_AREA
-        verde_valido = max_green[3] is not None and max_green[0] > MIN_BLOB_AREA
-
-        # --- LÓGICA DE CONTROL DE CONDUCCIÓN (Prioridades) ---
+        max_red = picam2.max_contour(red_ctn, roi)
+        max_green = picam2.max_contour(green_ctn, roi)
         
-        # PRIORIDAD 1: Esquivar Esquinas Críticas de la pista (Código 1)
-        if front_dist < 80 and not girando and LNM.black_area > 9000 and LNM.turning_direction != 0:
-            LNM.turn_direction()
-            girando = True
-            prev_error_wall = 0.0
-            integral_wall = 0.0
-            
-        elif LNM.black_area < 8000 and girando and front_dist > 100:
-            LNM.turn_center()
-            girando = False
+        # Bandera para saber si el control visual toma el mando
+        evading_obstacle = False
+        servo_angle = SERVO_CENTER
 
-        # PRIORIDAD 2: Evasión Activa de Bloques (Código 2) si no está en un giro forzado de esquina
-        elif not girando and (rojo_valido or verde_valido):
-            obstaculo_detectado = True
+        # Verificar si hay algún obstáculo válido y lo suficientemente grande cerca
+        has_red = max_red[3] is not None and max_red[0] > MIN_AREA_OBSTACLE
+        has_green = max_green[3] is not None and max_green[0] > MIN_AREA_OBSTACLE
+
+        # 4. PRIORITIZATION & STEERING LOGIC
+        if has_red and (not has_green or max_red[0] > max_green[0]):
+            # --- EVASIÓN OBSTÁCULO ROJO ---
+            evading_obstacle = True
+            picam2.draw_contours(red_ctn, roi, (0, 0, 255))  
+            centroid_coords = picam2.draw_centroid_line(max_red, roi)
             
-            # Decidir qué bloque evadir (el que tenga mayor área visible en pantalla)
-            if rojo_valido and (not verde_valido or max_red[0] > max_green[0]):
-                # --- EVADIR ROJO ---
-                picam2.draw_contours(red_ctn, roi_obstaculos, (0, 0, 255))  
-                centroid_coords = picam2.draw_centroid_line(max_red, roi_obstaculos)
+            if centroid_coords:
+                current_x = centroid_coords[0]
+                pid_output = pid_red.compute(set_point_red[0], current_x)
                 
-                if centroid_coords:
-                    current_x = centroid_coords[0]
-                    pid_output = pid_red.compute(SET_POINT_RED_X, current_x)
-                    
-                    # Inversión de dirección matemática para esquivar adecuadamente
-                    steering_angle = SERVO_CENTER - pid_output 
-                    picam2.draw_parallel_lane_line(centroid_coords, roi_obstaculos, offset=200, avoid_right=True)
-                    print(f"[OBSTÁCULO ROJO] Área: {max_red[0]} | X: {current_x} | Servo Target: {steering_angle:.1f}")
-                    
-            elif verde_valido:
-                # --- EVADIR VERDE ---
-                picam2.draw_contours(green_ctn, roi_obstaculos, (0, 255, 0))  
-                centroid_coords = picam2.draw_centroid_line(max_green, roi_obstaculos)
+                # Inversión de signo corregida para tu lógica: 
+                # Si el bloque rojo está a la derecha, el coche debe ir a la derecha (hacia 40°)
+                servo_angle = SERVO_CENTER - pid_output 
+                picam2.draw_parallel_lane_line(centroid_coords, roi, offset=200, avoid_right=True)
+                print(f"[视觉 ROJO] X: {current_x} | Servo: {servo_angle:.2f}")
+
+        elif has_green:
+            # --- EVASIÓN OBSTÁCULO VERDE ---
+            evading_obstacle = True
+            picam2.draw_contours(green_ctn, roi, (0, 255, 0))  
+            centroid_coords = picam2.draw_centroid_line(max_green, roi)
+            
+            if centroid_coords:
+                current_x = centroid_coords[0]
+                pid_output = pid_green.compute(set_point_green[0], current_x)
                 
-                if centroid_coords:
-                    current_x = centroid_coords[0]
-                    pid_output = pid_green.compute(SET_POINT_GREEN_X, current_x)
-                    
-                    steering_angle = SERVO_CENTER - pid_output
-                    picam2.draw_parallel_lane_line(centroid_coords, roi_obstaculos, offset=200, avoid_right=False)
-                    print(f"[OBSTÁCULO VERDE] Área: {max_green[0]} | X: {current_x} | Servo Target: {steering_angle:.1f}")
+                # Si el bloque verde está a la izquierda, el coche debe ir a la izquierda (hacia 120°)
+                servo_angle = SERVO_CENTER - pid_output
+                picam2.draw_parallel_lane_line(centroid_coords, roi, offset=200, avoid_right=False)
+                print(f"[视觉 VERDE] X: {current_x} | Servo: {servo_angle:.2f}")
 
-            # Ajustar límites físicos de seguridad del carro (Límites 40 a 120 de tu MegaPi)
-            steering_angle = max(40, min(120, int(steering_angle)))
+        # Si la cámara está evadiendo, ejecutamos el giro visual de inmediato
+        if evading_obstacle:
+            servo_angle = max(MIN_SERVO_LIMIT, min(servo_angle, MAX_SERVO_LIMIT))
+            LNM.turn_left(angle=int(servo_angle), speed=50)
             
-            # Enviar comando de ejecución de movimiento basado en el ángulo calculado
-            if steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=BASE_SPEED)
-            elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=BASE_SPEED)
-            else:
-                LNM.turn_center()
-
-        # PRIORIDAD 3: Centrado de Paredes Dinámico con Sensores Ultrasonido (Código 1)
-        elif not girando and LNM.turning_direction != 0:
+        # 5. WALL CENTERING SYSTEM (Solo si NO hay obstáculos al frente)
+        elif not girando and LNM.turning_direction == 2:
+            current_dist = min(left_dist, 60.0)
             
-            # Pista Naranja: Sigue pared IZQUIERDA
-            if LNM.turning_direction == 2:    
-                current_dist = min(left_dist, 60.0)   
-                error_wall = TARGET_DIST - current_dist  
-                lado_correccion = 1                   
-            
-            # Pista Azul: Sigue pared DERECHA
-            elif LNM.turning_direction == 1:  
-                current_dist = min(right_dist, 60.0)  
-                error_wall = TARGET_DIST - current_dist  
-                lado_correccion = -1                  
-
-            # Cálculos del PID de las Paredes
+            error_wall = TARGET_DIST - current_dist 
             integral_wall += error_wall
-            integral_wall = max(-MAX_INTEGRAL_WALL, min(MAX_INTEGRAL_WALL, integral_wall))
             derivative_wall = error_wall - prev_error_wall
             
             correction_wall = (Kp_wall * error_wall) + (Ki_wall * integral_wall) + (Kd_wall * derivative_wall)
             prev_error_wall = error_wall
             
-            steering_angle = int(SERVO_CENTER + (correction_wall * lado_correccion))
-            steering_angle = max(40, min(120, steering_angle))
+            steering_angle = int(80 + correction_wall)
+            steering_angle = max(MIN_SERVO_LIMIT, min(MAX_SERVO_LIMIT, steering_angle))
             
-            # Ejecución del movimiento de paredes
-            if abs(error_wall) < 1.5: 
+            if abs(error_wall) < 2:
                 LNM.turn_center()
-            elif steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=BASE_SPEED)
-            elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=BASE_SPEED)
+            elif steering_angle > 85:
+                LNM.turn_right(angle=steering_angle, speed=50)
+            elif steering_angle < 75:
+                LNM.turn_left(angle=steering_angle, speed=50)
 
-        # Si el robot no está bajo ninguna condición de las anteriores, avanza recto por seguridad
-        else:
-            LNM.move_forward(speed=BASE_SPEED)
+        # 6. CORNER LOGIC & LAP COUNTER (Lógica Original)
+        current_time = time.time()
 
-        # 4. CONTADOR DE VUELTAS (LAP COUNTER - Código 1)
-        area_actual = LNM.orange_area if LNM.turning_direction == 2 else LNM.upper_orange_area
-        
-        if LNM.turning_direction != 0 and area_actual > 500 and n == 0: 
-            color_timer = current_time
+        if LNM.orange_area > 500 and n == 0: 
+            orange_timer = current_time
             n = 1
             loops += 1
-            print(f"--> ¡Línea de Meta Detectada! Vueltas: {loops}/13")
 
-        if current_time - color_timer > 3: 
+        if current_time - orange_timer > 3: 
             n = 0
 
-        if loops == 13:
-            print("¡Carrera terminada! 13 vueltas completadas con éxito.")
+        if front_dist < 80 and not girando and LNM.black_area > 9000 and LNM.turning_direction != 0:
+            LNM.turn_direction()
+            girando = True
+            prev_error_wall = 0.0
+            integral_wall = 0.0
+              
+        if LNM.black_area < 8000 and girando and front_dist > 100:
+            LNM.turn_center()
+            girando = False
+
+        print(f"Loops: {loops} | Orange Area: {LNM.orange_area} | Front Dist: {front_dist}")
+
+        if loops == 12:
             break
 
-        # Renderizado visual en tiempo real
-        picam2.draw_roi(roi_obstaculos)  
+        # UI Rendering
+        picam2.draw_roi(roi)  
         cv2.imshow('Picamera2 + OpenCV Stream', picam2.frame)
 
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+            
 except Exception as e:
-    print("Ocurrió una excepción durante la ejecución:", e)
-
+    print("Exception occurred:", e)
 finally:
-    # 5. CLEAN UP & SAFETY SHUTDOWN
-    print("Deteniendo motores y limpiando recursos...")
+    # --- SAFETY SHUTDOWN ---
     LNM.stop()
     cv2.destroyAllWindows()
