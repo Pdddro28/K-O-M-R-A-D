@@ -1,75 +1,179 @@
-Electromechanical diagrams
-====
+# Technical Documentation: Autonomous Electromechanical System
 
-Our autonomous vehicle splits its operational workload into two dedicated subsystems: The Mechanical Muscle and Geometry (chassis physics, Ackermann steering, and raw propulsion) and The Electronic Brain and Perception (dual controllers and high-bandwidth sensor feedback).
+Our autonomous vehicle splits its operational workload into two dedicated, coordinated subsystems: **The Mechanical Muscle** (chassis physics, Ackermann steering, and raw propulsion) and **The Electronic Brain** (distributed parallel processing and high-bandwidth sensor perception).
 
 ---
 
-## Subsystem 1: Mechanical Muscle and Geometry
+## 1. Mechanics (Chassis, Steering, and Propulsion)
 
-Instead of standard differential (tank-style) spin turns, this platform is engineered around true automotive physics using a modified YFROBOT 4WD chassis.
+To ensure stability at high speeds and predictable handling, the platform rejects tank-style differential spin turns and is built around true automotive physics using a modified **YFROBOT 4WD** chassis.
 
 ### Ackermann Steering Mechanism
-The vehicle utilizes the Ackermann Steering Principle to conquer sharp cornering with minimal tire slip.
 
-* **The Physics:** When cornering, the inner front wheel must follow a tighter radius than the outer wheel.
-* **The Execution:** An MG996R digital servo (11 kg·cm torque) is mounted onto an L-shaped bracket. It drives a system of mechanical linkages, rudder arms, and asymmetrical connecting rods. This geometry forces the inner wheel to turn more sharply than the outer one automatically.
-* **The Control:** Driven by a continuous, jitter-free 50Hz hardware PWM pulse from the MegaPi, keeping the steering stable at a calibrated center of 90°.
+The vehicle utilizes the **Ackermann Steering Principle** to conquer sharp cornering with minimal tire slip.
+
+* **The Physics Behind It:** When cornering, the inner front wheel must follow a tighter radius than the outer wheel. To prevent the tires from scrubbing and losing grip, the wheels must pivot at different angles.
+* **The Mechanical Execution:** An **MG996R** digital servo ($11 \text{ kg}\cdot\text{cm}$ torque) mounted onto an L-shaped aluminum bracket drives a system of mechanical linkages, steering arms, and asymmetrical tie rods. This geometry automatically forces the inner wheel to turn more sharply than the outer one.
+* **The Digital Control:** Driven by continuous, jitter-free $50\text{Hz}$ hardware PWM pulses from the MegaPi board, keeping the steering stable at a rigidly calibrated center of $90^\circ$.
 
 ### Electronic 4WD Propulsion (Differential-Free)
-Propulsion is delivered via a high-speed RS380 DC geared motor configuration.
 
-* **The Setup:** Instead of a complex, heavy mechanical differential, power is routed directly to the wheels.
-* **The Challenge:** Without a mechanical differential, wheels can slip or fight each other during tight turns.
-* **The Software Solution:** Wheel speed coordination is managed entirely via code by applying varied Duty Cycles through an onboard H-bridge driver on MegaPi's Port 1. This bypasses delicate micro-traces and draws raw surges straight from the motor battery rail.
+Propulsion is delivered via a configuration of four **RS380** DC geared motors.
+
+* **Motor Specifications (Per Unit):**
+* Nominal Voltage: $12\text{V}$ (Operating at $11.1\text{V}$)
+* No-load Current: $0.4\text{A}$ | Stall Current: $4.5\text{A}$
+* No-load Speed: $15000\text{ RPM}$ (Output speed after gearbox: approx. $450\text{ RPM}$)
+
+
+* **Average Vehicle Speed Calculation:**
+With a wheel diameter of $6.5\text{ cm}$ ($0.065\text{ m}$), we calculate the wheel circumference ($C$) and the theoretical maximum velocity ($V$):
+
+$$C = \pi \times 0.065\text{ m} \approx 0.2041\text{ m}$$
+
+
+$$V = \frac{450\text{ RPM}}{60} \times 0.2041\text{ m} \approx 1.53\text{ m/s}$$
+
+
+
+*The actual average speed on the track, accounting for friction losses and vehicle weight, is approximately **$1.2\text{ m/s}$**.*
+
+### Configuration Analysis (Pros & Cons)
+
+* **Reason for Selection:** By avoiding a heavy, bulky mechanical central differential, wheel speed coordination during turns is managed entirely in **software**. By applying varied Duty Cycles through the MegaPi's H-bridge drivers, the algorithm reduces power to the inner wheels during a turn so they do not fight each other.
+* **Disadvantages:** Aggressive dynamic braking generates reverse currents (counter-electromotive force) that heat up the motor drivers if not dissipated properly. Additionally, lacking a physical differential limits raw mechanical traction if one wheel loses total contact with the track surface.
+
+> **📍 [INSERT HERE: Detailed Photo of the Steering System and Chassis]**
+> *(Note for the team: Take a clean top-down photo of the front suspension showing the Ackermann angle when the wheels are turned at their maximum).*
 
 ---
 
-## Subsystem 2: Electronic Brain and Perception
+## 2. Electronics (Power System and Computational Control)
 
-To eliminate latency and prevent system crashes, high-level computational tasks and real-time hardware execution are completely isolated.
+The most common issue in competition robotics is unexpected micro-controller resetting ("brownouts") caused by voltage drops when motors draw massive startup current. To solve this, the car completely isolates processing logic from inductive motor loads.
 
+### Processing Workflow Redesign
+
+To optimize performance and drastically reduce latency, high-level computer vision tasks and low-level real-time hardware execution run asynchronously:
+
+```
+                  ┌─────────────────────────────────────────┐
+                  │       ARDUCAM IMX219 CAMERA (8 MP)      │
+                  └────────────────────┬────────────────────┘
+                                       │ Native MIPI CSI-2 Link (Low Noise)
+                                       ▼
+                  ┌─────────────────────────────────────────┐
+                  │            RASPBERRY PI 4               │
+                  │   - High-Level Computation Core         │
+                  │   - RGB / BGR / LAB Image Segmentation  │
+                  │   - OpenCV Vision Algorithm Pipeline    │
+                  └────────────────────┬────────────────────┘
+                                       │
+                                       │ Isolated USB Serial Link (115200 baud)
+                                       │ High-speed cinematic movement commands
+                                       ▼
+                  ┌─────────────────────────────────────────┐
+                  │             MAKEBLOCK MEGAPI            │
+                  │   - ATmega2560 Microcontroller (16MHz)  │
+                  │   - Real-Time Critical Interrupts Core  │
+                  │   - Hardware PWM Generation for Motors  │
+                  └────────────────────┬────────────────────┘
+                                       │
+             ┌─────────────────────────┴─────────────────────────┐
+             ▼                                                   ▼
+┌─────────────────────────┐                         ┌─────────────────────────┐
+│    HC-SR04 SENSORS      │                         │ ACTUATORS & DC MOTORS   │
+│ (Sequential Sampling)   │                         │  (H-Bridge Port Control)│
+└─────────────────────────┘                         └─────────────────────────┘
 
 ```
 
-[ Arducam IMX219 ] ──(MIPI CSI-2)──►  [ Raspberry Pi 4 ]  (High-Level Vision / OpenCV)
-│
-(Isolated USB Serial)
-▼
-[ Actuators & Sensors ] ◄───────────  [ MegaPi Board ]    (Low-Level Real-Time Core)
-
-```
-
-### Dual-Controller Split
-1. **The Brain (Raspberry Pi 4):** A high-performance single-board computer running Python and OpenCV algorithms to analyze the track ahead.
-2. **The Reflexes (Makeblock MegaPi):** Powered by an ATmega2560 core (16 MHz), handling time-critical hardware tasks, instantaneous motor movements, and sensor reads.
-3. **The Link:** Connected via a high-speed USB Serial connection (115200 baud) to optimize chassis space and isolate sensitive processing cores.
-
-### Dual-Battery Isolation and Power Distribution
-To survive massive current spikes when accelerating from a dead stop, the robot completely separates logic power from mechanical loads:
+### Power Supply System
 
 | Power Source | System Group | Regulation Layer | Engineering Purpose |
-| :--- | :--- | :--- | :--- |
-| **11.1V LiPo Pack A** | Logic & Vision | **15W Type-C Buck Converter** (Steps down to 5V @ 3A) | Keeps the Raspberry Pi 4 fed with rock-solid power; guards against data corruption. |
-| **11.1V LiPo Pack B** | Motors & Servos | **Direct Power Jack** (Raw 11.1V input) | Feeds high-current inductive loads directly so they do not drain the microprocessors. |
+| --- | --- | --- | --- |
+| **LiPo Battery Pack A**<br>
 
-> **The Ground Rule:** Every single component shares a unified Common Ground (GND) path back to the MegaPi. Without this zero-volt reference, control signals would float, causing erratic steering, corrupted ultrasonic echoes, and catastrophic signal noise.
+<br>($11.1\text{V}$ - $3$ Cells, $2200\text{mAh}$) | Logic & Vision | **15W Type-C Buck Converter**<br>
+
+<br>(Steps down to $5\text{V} \pm 0.1\text{V}$ @ $3\text{A}$) | Feeds the Raspberry Pi 4 with clean, linear power. Prevents voltage drops and SD card data corruption. |
+| **LiPo Battery Pack B**<br>
+
+<br>($11.1\text{V}$ - $3$ Cells, $2200\text{mAh}$) | Motors & Servo | **Direct Injected Rail**<br>
+
+<br>(MegaPi Power Terminals) | Delivers massive current spikes demanded by the RS380 motors without dropping logic rails. |
+
+### Electrical Calculations: Power and Battery Life
+
+* **Total Required Power ($P_{\text{total}}$):**
+* *Stationary Logic Consumption:* The Raspberry Pi 4 draws approx. $1.2\text{A}$ @ $5\text{V} = 6\text{W}$.
+* *Dynamic Power Consumption:* Four RS380 motors under race conditions draw an average of $1.5\text{A}$ each at $11.1\text{V}$, and the MG996R servo averages $0.5\text{A}$ under continuous motion.
+
+$$I_{\text{power\_total}} = (4 \times 1.5\text{A}) + 0.5\text{A} = 6.5\text{A}$$
+
+
+$$P_{\text{power\_rail}} = 6.5\text{A} \times 11.1\text{V} = 72.15\text{W}$$
+
+
+$$P_{\text{total}} = 6\text{W} + 72.15\text{W} = \mathbf{78.15\text{W}}$$
+
+
+
+
+* **Battery Autonomy Calculation:**
+Since the battery packs are rated at $2200\text{mAh}$ ($2.2\text{Ah}$) and applying a standard $20\%$ safety margin to protect the LiPo cell chemistry (never discharging past $80\%$):
+
+$$\text{Runtime}_{\text{Logic}} = \frac{2.2\text{Ah} \times 0.8}{1.2\text{A}} \approx 1.46\text{ hours} \approx \mathbf{88\text{ minutes}}$$
+
+
+$$\text{Runtime}_{\text{Power}} = \frac{2.2\text{Ah} \times 0.8}{6.5\text{A}} \approx 0.27\text{ hours} \approx \mathbf{16.2\text{ minutes}}$$
+
+
+
+*The critical battery life during a race is dictated entirely by the motor power battery, guaranteeing **16 minutes of non-stop, high-demand running**.*
+
+> **⚠️ The Golden Rule of Grounding:** Both batteries must share a unified **Common Ground (GND)** rail on the MegaPi board. Without this single $0\text{V}$ reference point, PWM control signals would float, creating devastating electromagnetic interference (EMI), corrupted ultrasonic readings, and erratic servo twitches.
+
+<img width="2960" height="1625" alt="L-N-M@1 25x" src="https://github.com/user-attachments/assets/13e15df3-6f13-4d22-9dfd-a9a075e6561c" />
 
 ---
 
-## Sensor Array and Spatial Awareness
+## 3. Space Distribution (Chassis Layout)
 
-### High-Bandwidth Vision
-* **Hardware:** Arducam IMX219 8-Megapixel wide-angle camera.
-* **Pipeline:** Connected directly to the Raspberry Pi's GPU via a native MIPI CSI-2 15-pin ribbon cable.
-* **Why it matters:** Eliminates external power wiring and bypasses the microcontroller entirely. It streams raw image data at high frame rates with zero latency, completely shielded from electromagnetic interference (EMI) from the motors below.
+To maximize mechanical traction grip and lower the vehicle's moment of inertia during fast cornering, all heavy components are strategically arranged across multiple levels:
 
-### Ultrasonic Tri-Array Spatial Awareness
-Three HC-SR04 ultrasonic sensors are arranged in a strategic tri-array configuration (Left, Center, Right) to handle wall avoidance.
+```
++-------------------------------------------------------------------+
+| [UPPER LEVEL(Cam Base)]   IMX219 Camera (Elevated front mount for clear FOV)
++-------------------------------------------------------------------+
+| [MID LEVEL]     Raspberry Pi 4  |  MegaPi Core  | Buck Regulator
+|                 Logic LiPo Pack |  Power LiPo Pack
++-------------------------------------------------------------------+
+| [LOWER LEVEL]   4x RS380 Motors |  MG996R Servo | Ultrasonic Tri-Array
++-------------------------------------------------------------------+
 
-* **5V CMOS Logic:** Powered by a clean 5V rail to ensure maximum acoustic transducer strength.
-* **Independent Routing:** Each sensor is assigned its own dedicated Trigger (Output) and Echo (Input) pins on the MegaPi.
-* **Cross-Talk Prevention:** The navigation code fires and samples each sensor independently in sequence, creating an overlapping web of spatial awareness without signal collision.
+```
+
+* **Battery Placement:** Slotted into the lowest and most central portion of the chassis to pull the center of gravity as low as possible, preventing high-speed body rolls or flipping in tight turns.
+* **Camera Isolation:** The Arducam is housed on an elevated front tower. By routing its native MIPI CSI-2 ribbon cable directly into the Raspberry Pi's GPU, the pixel data travels completely shielded from the electromagnetic noise (EMI) radiating from the motors below.
+* **Ultrasonic Tri-Array:** The three HC-SR04 sensors are locked into the front bumper at specific angles ($0^\circ, -45^\circ, +45^\circ$). This spatial layout creates an overlapping field of view without cross-talk interference, because our navigation code pings and samples them sequentially one by one.
+
+---
+
+## 4. Considerations & Future Enhancements
+
+By benchmarking our vehicle against top international competition strategies, we have identified key areas for future development:
+
+1. **Closed-Loop Speed Control (Quadrature Encoders):**
+* *Current Issue:* The software adjusts motor speed by scaling voltage blindly based on estimated track requirements. If a wheel slips over a low-friction patch, the vehicle drifts off course.
+* *Solution:* Install magnetic quadrature encoders on the rear motor shafts to implement a feedback PID controller, ensuring the wheels rotate at the exact RPM requested by the navigation script.
 
 
-<img width="2960" height="1625" alt="L-N-M@1 25x" src="https://github.com/user-attachments/assets/13e15df3-6f13-4d22-9dfd-a9a075e6561c" />
+2. **Upgraded Communication Interface (SPI / Direct GPIO UART):**
+* *Current Issue:* The physical USB-to-Serial cable occupies chassis space, adds dead weight through bulky connectors, and is vulnerable to disconnecting under high-frequency mechanical vibration.
+* *Solution:* Rewire the interface to utilize the native GPIO pins directly via SPI or a soldered direct UART bus, cutting data transmission latency in half.
+
+
+3. **Hardware-Level Automatic Regenerative Braking:**
+* *Current Issue:* Excess kinetic energy from sudden braking dumps directly back into the MegaPi's H-bridge MOSFETs as heat.
+* *Solution:* Design a protection circuit equipped with fast-switching Schottky diodes to channel residual voltage back into the power battery pack, shielding the IC chips and extending overall race runtime.nal collision.
