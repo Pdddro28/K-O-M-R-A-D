@@ -104,7 +104,7 @@ class MegaPiController:
     def load_masks(self):
         self.mask_red = self.get_masks('rojo')
         self.mask_green = self.get_masks('verde')
-        self.mask_blue = self.get_masks('rojo')
+        self.mask_blue = self.get_masks('azul')
         self.mask_orange = self.get_masks('naranja')
         self.mask_black = self.get_masks('negro')
 
@@ -127,7 +127,7 @@ class MegaPiController:
     def debug_UI(self):
         for item in self.rois:
             self.vision.draw_roi(item)  
-        #self.vision.draw_contours(self.blue_max[3], self.rois[1], (255, 0, 0))  
+        self.vision.draw_contours(self.blue_max[3], self.rois[1], (255, 255, 0))  
         self.vision.draw_contours(self.orange_max[3], self.rois[1], (0, 255, 255))  
         self.vision.draw_contours(self.cnt_front_wall, self.rois[0], (0, 0, 255))  
 
@@ -157,9 +157,9 @@ class MegaPiController:
 
     def turn_direction(self):
         if self.turning_direction == 1:
-            self.turn_left(angle=40, speed=50, log=True) 
+            self.turn_left(angle=40, speed=70, log=True) 
         elif self.turning_direction == 2:
-            self.turn_left(angle=120, speed=50, log=True) 
+            self.turn_left(angle=120, speed=70, log=True) 
 
     def turn_left(self, angle, speed, log=True):
         self._send_command(3, v1=angle, v2=speed)
