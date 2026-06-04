@@ -41,7 +41,7 @@ while running:
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
-        #LNM.debug_UI()
+        LNM.debug_UI()
         LNM.move_forward(speed = 85) 
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -49,7 +49,7 @@ while running:
 
         front_dist, left_dist, right_dist = LNM.get_distances()
         print(f"Turning: {LNM.turning_direction}, black_area: {LNM.black_area}, blue_area: {LNM.blue_area}, orange_area: {LNM.orange_area}")
-        #qprint(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
+        #print(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
         # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
