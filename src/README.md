@@ -17,18 +17,7 @@ Folders structure
 
 ```
 K-O-M-R-A-D/src/
-├── Colors/
-|    ├── mask_azul.json
-|    ├── mask_azul0.json
-|    ├── mask_azul1.json
-|    ├── mask_azul2.json
-|    ├── mask_magenta.json
-|    ├── mask_naranja.json
-|    ├── mask_naranja1.json
-|    ├── mask_negro.json
-|    ├── mask_rojo.json
-|    ├── mask_verde.json
-|    └── mask_verde1.json   
+├── Colors/ 
 ├── visiontesters/
 |    ├── Color-Detector.py
 |    └── ROI-Detector.py
