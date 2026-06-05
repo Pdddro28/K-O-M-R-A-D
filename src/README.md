@@ -1,21 +1,41 @@
-Early code development
+Software documentation
 ====
-libcam pasa a rpicam 
+This section provides an overview of the software architecture used in our autonomous vehicle for the WRO 2026 Future Engineers competition. It includes:
 
-Cam Starting Development
+- The programming languages and tools used
 
-In this module, we developed a computer vision tool that allows us to define and manage Regions of Interest (ROIs) directly from a live camera feed. The purpose of this system is to serve as a foundational component for the WRO 2026 Future Engineers competition, designed to be used across all rounds.
+- A high-level description of the system's modules
 
-When we run the program, it initializes the onboard camera and displays a real-time video stream within a single interface. From there, we can interactively select multiple regions by clicking and dragging with the mouse. Each selected region is immediately visualized, labeled, and dimensioned on screen, allowing us to clearly understand its position and size within the frame.
+- How the robot processes sensor data, camera data, makes decisions, and controls hardware
 
-Once we finish defining the regions and close the camera window, the system prompts us to save the configuration. The ROIs are then exported in a structured Python format using a dataclass, making them easy to reuse and integrate into other modules of our system.
+- Integration with vision systems (e.g., line detection, obstacle recognition)
 
-ped ped ped ped ped ped
+- Communication between controllers (e.g., Raspberry Pi ↔ MegaPi)
 
 Folders structure
 ====
 
-ped ped ped ped ped ped
+```
+K-O-M-R-A-D/src/
+├── module/
+|    ├── pruebas/
+|    |      ├── camera_test.py
+|    |      ├── comunicacion_prueba1.py
+|    |      └── comunicacion_serial.py
+|    └── constants.py
+├── test/test-firstchallenge/
+|    └── test-firstchallenge.ino
+├── visiontesters/
+|    ├── Color-Detector.py
+|    └── ROI-Detector.py
+├── PID_class.py
+├── arduino.controller.ino
+├── constants.py
+├── mega_pi_controller.py
+├── obstacle_challenge.py
+├── open_challenge.py
+└── vision_controller.py
+```
 
 Table of contents
 ====
