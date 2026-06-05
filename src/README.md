@@ -41,6 +41,10 @@ K-O-M-R-A-D/src/
 └── vision_controller.py
 ```
 
+Where:
+
+
+
 Table of contents
 ====
 
