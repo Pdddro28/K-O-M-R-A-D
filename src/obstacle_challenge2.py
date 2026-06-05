@@ -11,25 +11,27 @@ picam2 = LNM.vision
 roi = ROI(0, 50, picam2.image_width , picam2.image_height - 100)
 print("Camera started. Press 'q' to quit.")
 
-# UN SOLO PID PARA LAS PAREDES (Optimizado)
-pid_dist = PIDController(kp=2, ki=0.0, kd=1.0)
+# --- PID SEPARADOS POR LADO ---
+# Como al verde (lado izquierdo) le cuesta más, aumentamos su Kp a 3.5 (ajusta según pruebes)
+pid_dist_izq = PIDController(kp=3.5, ki=0.0, kd=1.2) 
+# Al rojo (lado derecho) lo dejamos con tus valores base que ya funcionaban bien
+pid_dist_der = PIDController(kp=2.9, ki=0.0, kd=1.0) 
 
 # Configuraciones de distancia objetivo
 DIST_NORMAL = 20.0
-DIST_PEGADO = 12.0  # Distancia corta cuando quiere arrimarse a una pared
+DIST_PEGADO = 12.0  
 
 girando = False
-SERVO_CENTER = 80   # Centro neutral fÃ­sico de tu robot de acuerdo a tus funciones
+SERVO_CENTER = 80   
 
 def get_color_signal():
-    """ Analiza la cÃ¡mara y retorna el color detectado si pasa el umbral """
+    """ Analiza la cámara y retorna el color detectado """
     red_ctn = picam2.find_contours(LNM.mask_red, roi) 
     green_ctn = picam2.find_contours(LNM.mask_green, roi)
     
     max_red = picam2.max_contour(red_ctn, roi)
     max_green = picam2.max_contour(green_ctn, roi)
     
-    # Prioridad por tamaÃ±o de Ã¡rea
     if max_red[3] is not None and (max_green[3] is None or max_red[0] > max_green[0]):
         if max_red[0] > 1700:
             picam2.draw_contours(red_ctn, roi, (0, 0, 255))
@@ -56,20 +58,17 @@ try:
         if cv2.waitKey(1) & 0xFF == ord('q'):
              break
 
-        LNM.move_forward(60)
+        LNM.move_forward(65)
         front_dist, left_dist, right_dist = LNM.get_distances()
 
-        # 1. DetecciÃ³n del sentido inicial de la pista si no se conoce
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
-                LNM.turning_direction = 2  # Pista naranja
+                LNM.turning_direction = 2  
             elif LNM.blue_area > 1200:
-                LNM.turning_direction = 1  # Pista azul
+                LNM.turning_direction = 1  
 
-        # 2. Leer seÃ±al actual de los bloques
         color_detectado = get_color_signal()
 
-        # 3. Control de esquinas (Prioridad de seguridad ante curvas)
         if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
@@ -78,42 +77,43 @@ try:
             LNM.turn_center()
             girando = False
 
-        # 4. Control de NavegaciÃ³n en Rectas (PID dinÃ¡mico basado en tu peticiÃ³n)
+        # --- NAVEGACIÓN EN RECTAS CON PID SEPARADOS ---
         if not girando and LNM.turning_direction != 0:
             
-            # Valores por defecto (Seguimiento estÃ¡ndar en el medio)
             target_dinamico = DIST_NORMAL
             
             if color_detectado == "ROJO":
-                # REGLA: Pegarse a la pared DERECHA
+                # Regla Rojo: Pegarse a la derecha -> Usa PID Derecho
                 current_dist = min(right_dist, 60.0)
                 target_dinamico = DIST_PEGADO
-                lado_correccion = -1  # GeometrÃ­a del servo para pared derecha
+                lado_correccion = -1  
+                pid_activo = pid_dist_der
                 
             elif color_detectado == "VERDE":
-                # REGLA: Pegarse a la pared IZQUIERDA
+                # Regla Verde: Pegarse a la izquierda -> Usa PID Izquierdo
                 current_dist = min(left_dist, 60.0)
-                target_dinamico = DIST_PEGADO +20
-                lado_correccion = 1   # GeometrÃ­a del servo para pared izquierda
+                target_dinamico = DIST_PEGADO
+                lado_correccion = 1   
+                pid_activo = pid_dist_izq
                 
             else:
-                # Si no ve bloques, conserva el comportamiento original de la pista
+                # Comportamiento por defecto según la línea detectada en el suelo
                 if LNM.turning_direction == 2:  # Naranja -> Sigue izquierda
                     current_dist = min(left_dist, 60.0)
                     lado_correccion = 1
+                    pid_activo = pid_dist_izq
                 else:                           # Azul -> Sigue derecha
                     current_dist = min(right_dist, 60.0)
                     lado_correccion = -1
+                    pid_activo = pid_dist_der
 
-            # Calcular el PID con el objetivo ajustado en tiempo real
-            correction = pid_dist.compute(target_dinamico, current_dist)
+            # Calcular la corrección usando el objeto PID seleccionado dinámicamente
+            correction = pid_activo.compute(target_dinamico, current_dist)
             steering_angle = int(80 + (correction * lado_correccion))
             
-            # LÃ­mites de seguridad mecÃ¡nica del servo
             steering_angle = max(40, min(120, steering_angle))
             
-            # ActuaciÃ³n de movimiento directo
-            if abs(pid_dist.error) < 1.5: 
+            if abs(pid_activo.error) < 1.5: 
                 LNM.turn_center()
             elif steering_angle > 80:
                 LNM.turn_right(angle=steering_angle, speed=50)
