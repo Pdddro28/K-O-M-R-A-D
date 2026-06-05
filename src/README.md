@@ -22,7 +22,7 @@ K-O-M-R-A-D/src/
 |    ├── Color-Detector.py
 |    └── ROI-Detector.py
 ├── PID_class.py
-├── arduino.controller.ino
+├── arduino_controller.ino
 ├── constants.py
 ├── mega_pi_controller.py
 ├── obstacle_challenge.py
@@ -40,7 +40,7 @@ Where:
 
 - PID_class.py: Implements the Proportional-Integral-Derivative (PID) controller algorithm to handle precise steering corrections and smooth track alignment.
 
-- arduino.controller.ino: The Arduino low-level firmware responsible for reading sensor inputs and directly managing actuators like servos, DC motors, and indicator LEDs.
+- arduino_controller.ino: The Arduino low-level firmware responsible for reading sensor inputs and directly managing actuators like servos, DC motors, and indicator LEDs.
 
 - constants.py: Contains all the hardcoded configuration values that remain unchanged during execution, including Arduino pin maps, target steering angles, ROI definitions, and LAB color-space masks.
 
