@@ -20,18 +20,20 @@ set_point_green = (490, 125)
 
 # Asegúrate de que tu clase PID reciba los parámetros así, o adapta el constructor a como lo tengas escrito
 pid_red = PIDController(kp=0.5, ki=0.0, kd=0.1)
-pid_green = PIDController(kp=3, ki=0.0, kd=0.1)
+pid_green = PIDController(kp=10, ki=0.0, kd=0.1)
 pid_dist = PIDController(kp=2.9, ki=0.0, kd=1)
 
 obstacle_detected = False
-
+obstacle_detected_red = False
+obstacle_detected_green = False
+#LNM.vision.image_width = 1080
 girando = False
 
 TARGET_DIST = 20.0
 
 SERVO_CENTER = 90
 def obstacle_detection():
-        global obstacle_detected, girando, running
+        global obstacle_detected, girando, running, obstacle_detected_red, obstacle_detected_green
                 # 1. Buscar contornos para ambos colores
         red_ctn = picam2.find_contours(LNM.mask_red, roi) 
         green_ctn = picam2.find_contours(LNM.mask_green, roi)
@@ -49,6 +51,7 @@ def obstacle_detection():
             
             if centroid_coords and max_red[0] > 1700:
                 obstacle_detected = True
+                obstacle_detected_red = True
                 girando = False
                 current_x = centroid_coords[0]
                 # Calcular PID (Pasamos Setpoint X y el X actual)
@@ -70,14 +73,16 @@ def obstacle_detection():
             # --- CASO OBSTÁCULO VERDE ---
             picam2.draw_contours(green_ctn, roi, (0, 255, 0))  
             centroid_coords = picam2.draw_centroid_line(max_green, roi)
-            
-            if centroid_coords and max_green[0] > 1000:
+            if centroid_coords and max_green[0] > 100:
                 running = False
-                current_x = centroid_coords[0]
+                current_x = picam2.image_width - centroid_coords[0]
                 obstacle_detected = True
                 girando = False
-                pid_output = pid_green.compute(set_point_green[0], current_x)
-                print(f"[VERDE] Centroide X: {current_x} {centroid_coords[1]}")  # Debug: Imprime el output del PID para verde
+
+                
+
+                pid_output = pid_green.compute(picam2.image_width - set_point_green[0], current_x)
+                #print(f"[VERDE] Centroide X: {current_x} {centroid_coords[1]}")  # Debug: Imprime el output del PID para verde
 
                 
                 # Para el verde: si el objeto está muy a la izquierda, la salida es positiva.
@@ -85,7 +90,7 @@ def obstacle_detection():
                 print(pid_green.error)
 
                 if abs(pid_green.error) > 110:
-                    servo_angle = SERVO_CENTER - pid_output
+                    servo_angle = SERVO_CENTER + pid_output
                 
                 picam2.draw_parallel_lane_line(centroid_coords, roi, offset=200, avoid_right=False)
                 #print(f"[VERDE] Centroide X: {current_x} | Output PID: {pid_output:.2f}")
@@ -147,7 +152,7 @@ try:
            conteo = False
 
         if not girando and LNM.turning_direction != 0:
-            
+            print("ERROR PID RECALCULANDO")
             # Pista Naranja: Sigue pared IZQUIERDA. 
             # Si se acerca a la pared (dist < 30), debe ir a la Derecha.
             if LNM.turning_direction == 2:    
