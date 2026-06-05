@@ -28,7 +28,6 @@ obstacle_detected_red = False
 obstacle_detected_green = False
 #LNM.vision.image_width = 1080
 girando = False
-
 TARGET_DIST = 20.0
 
 SERVO_CENTER = 90
@@ -52,6 +51,7 @@ def obstacle_detection():
             if centroid_coords and max_red[0] > 1700:
                 obstacle_detected = True
                 obstacle_detected_red = True
+                obstacle_detected_green = False
                 girando = False
                 current_x = centroid_coords[0]
                 # Calcular PID (Pasamos Setpoint X y el X actual)
@@ -77,6 +77,8 @@ def obstacle_detection():
                 running = False
                 current_x = picam2.image_width - centroid_coords[0]
                 obstacle_detected = True
+                obstacle_detected_green = True
+                obstacle_detected_red = False
                 girando = False
 
                 
@@ -121,7 +123,7 @@ try:
              break
 
         #print(f"Max Red Area: {max_red[0]} | Max Green Area: {max_green[0]}")  # Debug: Imprime áreas máximas para ambos colores
-        LNM.move_forward(65)
+        LNM.move_forward(60)
         front_dist, left_dist, right_dist = LNM.get_distances()
         #print(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
 
@@ -155,13 +157,15 @@ try:
             print("ERROR PID RECALCULANDO")
             # Pista Naranja: Sigue pared IZQUIERDA. 
             # Si se acerca a la pared (dist < 30), debe ir a la Derecha.
-            if LNM.turning_direction == 2:    
+            current_dist = TARGET_DIST
+            lado_correccion = 0
+            if LNM.turning_direction == 2 or obstacle_detected_red:    
                 current_dist = min(left_dist, 60.0)   
                 lado_correccion = 1                 # (+) -> Derecha, (-) -> Izquierda
             
             # Pista Azul: Sigue pared DERECHA.
             # Si se acerca a la pared (dist < 30), debe ir a la Izquierda.
-            elif LNM.turning_direction == 1:  
+            elif LNM.turning_direction == 1 or obstacle_detected_green:  
                 current_dist = min(right_dist, 60.0)  
                 lado_correccion = -1                # (+) -> Izquierda, (-) -> Derecha
             
