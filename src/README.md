@@ -17,10 +17,6 @@ Folders structure
 
 ```
 K-O-M-R-A-D/src/
-├── module/
-|    └── constants.py
-├── test/test-firstchallenge/
-|    └── test-firstchallenge.ino
 ├── visiontesters/
 |    ├── Color-Detector.py
 |    └── ROI-Detector.py
