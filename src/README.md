@@ -18,10 +18,6 @@ Folders structure
 ```
 K-O-M-R-A-D/src/
 ├── module/
-|    ├── pruebas/
-|    |      ├── camera_test.py
-|    |      ├── comunicacion_prueba1.py
-|    |      └── comunicacion_serial.py
 |    └── constants.py
 ├── test/test-firstchallenge/
 |    └── test-firstchallenge.ino
