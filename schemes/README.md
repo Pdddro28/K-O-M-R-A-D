@@ -55,37 +55,7 @@ The most common issue in competition robotics is unexpected micro-controller res
 
 To optimize performance and drastically reduce latency, high-level computer vision tasks and low-level real-time hardware execution run asynchronously:
 
-```
-                  ┌─────────────────────────────────────────┐
-                  │       ARDUCAM IMX219 CAMERA (8 MP)      │
-                  └────────────────────┬────────────────────┘
-                                       │ Native MIPI CSI-2 Link (Low Noise)
-                                       ▼
-                  ┌─────────────────────────────────────────┐
-                  │            RASPBERRY PI 4               │
-                  │   - High-Level Computation Core         │
-                  │   - RGB / BGR / LAB Image Segmentation  │
-                  │   - OpenCV Vision Algorithm Pipeline    │
-                  └────────────────────┬────────────────────┘
-                                       │
-                                       │ Isolated USB Serial Link (115200 baud)
-                                       │ High-speed cinematic movement commands
-                                       ▼
-                  ┌─────────────────────────────────────────┐
-                  │             MAKEBLOCK MEGAPI            │
-                  │   - ATmega2560 Microcontroller (16MHz)  │
-                  │   - Real-Time Critical Interrupts Core  │
-                  │   - Hardware PWM Generation for Motors  │
-                  └────────────────────┬────────────────────┘
-                                       │
-             ┌─────────────────────────┴─────────────────────────┐
-             ▼                                                   ▼
-┌─────────────────────────┐                         ┌─────────────────────────┐
-│    HC-SR04 SENSORS      │                         │ ACTUATORS & DC MOTORS   │
-│ (Sequential Sampling)   │                         │  (H-Bridge Port Control)│
-└─────────────────────────┘                         └─────────────────────────┘
-
-```
+<img width="1726" height="1562" alt="untitled@1 5x" src="https://github.com/user-attachments/assets/4edd4e1d-c5a2-4dde-81da-3d31e9ca40ec" />
 
 ### Power Supply System
 
