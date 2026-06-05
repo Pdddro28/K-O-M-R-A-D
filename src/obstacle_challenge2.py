@@ -7,27 +7,27 @@ from constants import *
 # --- INITIALIZATION AND CONFIGURATION ---
 LNM = MegaPiController("/dev/ttyUSB0", 115200)
 
-# Inicializar Picamera2
+# Initialize Picamera2
 picam2 = LNM.vision  
 roi = ROI(0, 50, picam2.image_width, picam2.image_height - 100)
 print("Camera started. Press 'q' to quit.")
 
-# UN SOLO PID CONTROLADOR DE DISTANCIA (Maneja las paredes)
-# Ajusta tus constantes Kp y Kd aquí. Un Ki de 0 es ideal para evitar acumulación de error en rectas.
+# Eliminamos los PID individuales de los bloques. Solo necesitamos el de distancia.
+# Ajusta Kp, Ki, Kd para que el cambio de carril sea suave y no un volantazo brusco.
 pid_dist = PIDController(kp=2.5, ki=0.0, kd=0.8)
 
-# --- SETPOINTS REGLAMENTARIOS DE CARRIL (Modifica según el ancho real de tu pista) ---
-DIST_CENTRO = 20.0   # Trayectoria base (Centro del carril asignado)
-DIST_PEGADO = 12.0   # Desplazamiento hacia la pared (Carril correspondiente)
-DIST_ALEJADO = 45.0  # Desplazamiento opuesto a la pared (Cambio de carril completo)
+# Configuraciones de carril (Modifica estos valores según el ancho de tu pista)
+DIST_CENTRO = 20.0   # Distancia normal cuando no hay bloques
+DIST_CERCA = 12.0    # Distancia cuando debe pegarse a la pared
+DIST_LEJOS = 42.0    # Distancia cuando debe alejarse de la pared (ir al carril contrario)
 
 girando = False
-SERVO_CENTER = 80    # Centro físico configurado en tu robot
+SERVO_CENTER = 80    # Centralizado según tu lógica de abajo
 
-def check_traffic_signals():
-    """
-    Analiza la cámara como un lector de señales de tráfico WRO.
-    Retorna el color dominante si el bloque es real (área suficiente).
+def check_traffic_lights():
+    """ 
+    Esta función solo detecta qué color domina y define 
+    el carril. Ya no controla el servo directamente.
     """
     red_ctn = picam2.find_contours(LNM.mask_red, roi) 
     green_ctn = picam2.find_contours(LNM.mask_green, roi)
@@ -35,17 +35,18 @@ def check_traffic_signals():
     max_red = picam2.max_contour(red_ctn, roi)
     max_green = picam2.max_contour(green_ctn, roi)
     
-    # Umbrales para evitar falsos positivos con ruidos del fondo
-    UMBRAL_ROJO = 1700
-    UMBRAL_VERDE = 1200 
+    # Umbral de área para confirmar que el bloque es real y está lo suficientemente cerca
+    UMBRAL_AREA_ROJO = 1700
+    UMBRAL_AREA_VERDE = 1200 
 
+    # Prioridad al bloque con mayor área visible
     if max_red[3] is not None and (max_green[3] is None or max_red[0] > max_green[0]):
-        if max_red[0] > UMBRAL_ROJO:
+        if max_red[0] > UBRAL_AREA_ROJO:
             picam2.draw_contours(red_ctn, roi, (0, 0, 255))
             return "ROJO"
             
     elif max_green[3] is not None:
-        if max_green[0] > UMBRAL_VERDE:
+        if max_green[0] > UMBRAL_AREA_VERDE:
             picam2.draw_contours(green_ctn, roi, (0, 255, 0))
             return "VERDE"
             
@@ -69,17 +70,17 @@ try:
         LNM.move_forward(65)
         front_dist, left_dist, right_dist = LNM.get_distances()
 
-        # 1. DIRECCIÓN DEL SENTIDO DEL CIRCUITO (Líneas del suelo)
+        # 1. DETECCIÓN DE SENTIDO DE LA PISTA (Líneas del suelo)
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
-                LNM.turning_direction = 2  # Sentido horario (Sigue pared IZQUIERDA)
+                LNM.turning_direction = 2  # Pista Naranja (Sigue pared IZQUIERDA)
             elif LNM.blue_area > 1200:
-                LNM.turning_direction = 1  # Sentido antihorario (Sigue pared DERECHA)
+                LNM.turning_direction = 1  # Pista Azul (Sigue pared DERECHA)
 
-        # 2. EVALUACIÓN DE SEÑALES (CÁMARA)
-        bloque_actual = check_traffic_signals()
+        # 2. DETECCIÓN DE BLOQUES (SEÑALES DE TRÁFICO)
+        bloque_detectado = check_traffic_lights()
 
-        # 3. CONTROL DE ESQUINAS (Prioridad absoluta para evitar choques frontales)
+        # 3. CONTROL DE GIRO EN ESQUINAS (Giro fijo prioritario)
         if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
@@ -88,50 +89,46 @@ try:
             LNM.turn_center()
             girando = False
 
-        # 4. TRATAMIENTO DE CARRILES CON PID (Navegación en rectas)
+        # 4. NAVEGACIÓN POR PID EN RECTAS (Mantener carril dinámico)
         if not girando and LNM.turning_direction != 0:
             
-            # Variables de control por defecto
+            # Inicializamos variables de control
             current_dist = 20.0
             lado_correccion = 1
             target_dinamico = DIST_CENTRO
 
-            # --- CASO A: SENTIDO HORARIO (Control basado en Pared Izquierda) ---
+            # --- CASO PISTA NARANJA (Sigue Pared Izquierda) ---
             if LNM.turning_direction == 2:    
                 current_dist = min(left_dist, 60.0)   
-                lado_correccion = 1  # (+) -> Gira a la derecha, (-) -> Gira a la izquierda
+                lado_correccion = 1  # (+) -> Derecha, (-) -> Izquierda
                 
-                if bloque_actual == "VERDE":
-                    # Reglamento: Bloque verde se pasa por la DERECHA del bloque (Acercarse a la pared IZQUIERDA)
-                    target_dinamico = DIST_PEGADO  
-                elif bloque_actual == "ROJO":
-                    # Reglamento: Bloque rojo se pasa por la IZQUIERDA del bloque (Alejarse de la pared IZQUIERDA)
-                    target_dinamico = DIST_ALEJADO  
+                if bloque_detectado == "VERDE":
+                    target_dinamico = DIST_CERCA  # Carril Izquierdo: se pega a la izquierda
+                elif bloque_detectado == "ROJO":
+                    target_dinamico = DIST_LEJOS  # Carril Derecho: se aleja a la derecha
                 else:
-                    target_dinamico = DIST_CENTRO
+                    target_dinamico = DIST_CENTRO # Sin bloques: va al centro de su zona
 
-            # --- CASO B: SENTIDO ANTIHORARIO (Control basado en Pared Derecha) ---
+            # --- CASO PISTA AZUL (Sigue Pared Derecha) ---
             elif LNM.turning_direction == 1:  
                 current_dist = min(right_dist, 60.0)  
-                lado_correccion = -1 # Inversión geométrica para el servo
+                lado_correccion = -1 # (+) -> Izquierda, (-) -> Derecha
                 
-                if bloque_actual == "VERDE":
-                    # Reglamento: Bloque verde se pasa por la IZQUIERDA del bloque (Alejarse de la pared DERECHA)
-                    target_dinamico = DIST_ALEJADO  
-                elif bloque_actual == "ROJO":
-                    # Reglamento: Bloque rojo se pasa por la DERECHA del bloque (Acercarse a la pared DERECHA)
-                    target_dinamico = DIST_PEGADO  
+                if bloque_detectado == "VERDE":
+                    target_dinamico = DIST_LEJOS  # Carril Izquierdo: se aleja a la izquierda
+                elif bloque_detectado == "ROJO":
+                    target_dinamico = DIST_CERCA  # Carril Derecho: se pega a la derecha
                 else:
-                    target_dinamico = DIST_CENTRO
+                    target_dinamico = DIST_CENTRO # Sin bloques: va al centro de su zona
 
-            # Ejecución matemática del PID Único de Distancia
+            # Calcular la corrección basándonos en el Target Dinámico modificado por el bloque
             correction = pid_dist.compute(target_dinamico, current_dist)
             steering_angle = int(SERVO_CENTER + (correction * lado_correccion))
             
-            # Límites físicos de seguridad estructural de la dirección
+            # Limitación física por seguridad del servo
             steering_angle = max(40, min(120, steering_angle))
             
-            # Actuación sobre los motores del MegaPi
+            # Ejecutar el movimiento
             if abs(pid_dist.error) < 1.5: 
                 LNM.turn_center()
             elif steering_angle > 80:
