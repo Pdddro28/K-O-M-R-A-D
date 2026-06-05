@@ -3,192 +3,122 @@ from vision_controller import ROI, VisionController
 from PID_class import PIDController
 from mega_pi_controller import *
 from constants import *
-import cv2 
 
 # --- INITIALIZATION AND CONFIGURATION ---
 LNM = MegaPiController("/dev/ttyUSB0", 115200)
 
-
-# 1. Initialize Picamera2
-picam2 = LNM.vision  # This will initialize the camera and set it up for OpenCV processing
-
+picam2 = LNM.vision  
 roi = ROI(0, 50, picam2.image_width , picam2.image_height - 100)
 print("Camera started. Press 'q' to quit.")
 
-set_point_red = (155, 120)
-set_point_green = (490, 125)
+# UN SOLO PID PARA LAS PAREDES (Optimizado)
+pid_dist = PIDController(kp=2.9, ki=0.0, kd=1.0)
 
-# AsegÃºrate de que tu clase PID reciba los parÃ¡metros asÃ­, o adapta el constructor a como lo tengas escrito
-pid_red = PIDController(kp=0.5, ki=0.0, kd=0.1)
-pid_green = PIDController(kp=10, ki=0.0, kd=0.1)
-pid_dist = PIDController(kp=2.9, ki=0.0, kd=1)
+# Configuraciones de distancia objetivo
+DIST_NORMAL = 20.0
+DIST_PEGADO = 12.0  # Distancia corta cuando quiere arrimarse a una pared
 
-obstacle_detected = False
-obstacle_detected_red = False
-obstacle_detected_green = False
-#LNM.vision.image_width = 1080
 girando = False
-TARGET_DIST = 20.0
+SERVO_CENTER = 80   # Centro neutral físico de tu robot de acuerdo a tus funciones
 
-SERVO_CENTER = 90
-def obstacle_detection():
-        global obstacle_detected, girando, running, obstacle_detected_red, obstacle_detected_green
-                # 1. Buscar contornos para ambos colores
-        red_ctn = picam2.find_contours(LNM.mask_red, roi) 
-        green_ctn = picam2.find_contours(LNM.mask_green, roi)
-        
-        max_red = picam2.max_contour(red_ctn, roi)
-        max_green = picam2.max_contour(green_ctn, roi)
-        
-        servo_angle = SERVO_CENTER  # Por defecto va recto si no ve nada
-            # 2. LÃ³gica de control por prioridades (Prioriza el bloque que tenga mayor Ã¡rea en pantalla)
-        if max_red[3] is not None and (max_green[3] is None or max_red[0] > max_green[0]):
-            # --- CASO OBSTÃCULO ROJO ---
-            picam2.draw_contours(red_ctn, roi, (0, 0, 255))  
-            centroid_coords = picam2.draw_centroid_line(max_red, roi)
-            #print(max_red[0])
+def get_color_signal():
+    """ Analiza la cámara y retorna el color detectado si pasa el umbral """
+    red_ctn = picam2.find_contours(LNM.mask_red, roi) 
+    green_ctn = picam2.find_contours(LNM.mask_green, roi)
+    
+    max_red = picam2.max_contour(red_ctn, roi)
+    max_green = picam2.max_contour(green_ctn, roi)
+    
+    # Prioridad por tamaño de área
+    if max_red[3] is not None and (max_green[3] is None or max_red[0] > max_green[0]):
+        if max_red[0] > 1700:
+            picam2.draw_contours(red_ctn, roi, (0, 0, 255))
+            return "ROJO"
+    elif max_green[3] is not None:
+        if max_green[0] > 100:
+            picam2.draw_contours(green_ctn, roi, (0, 255, 0))
+            return "VERDE"
             
-            if centroid_coords and max_red[0] > 1700:
-                obstacle_detected = True
-                obstacle_detected_red = True
-                obstacle_detected_green = False
-                girando = False
-                current_x = centroid_coords[0]
-                # Calcular PID (Pasamos Setpoint X y el X actual)
-                pid_output = pid_red.compute(set_point_red[0], current_x)
-                
-                # Para el rojo: si el objeto estÃ¡ muy a la derecha, la salida es negativa. 
-                # Restar la salida hace que el Ã¡ngulo disminuya (gira a la derecha -> hacia 0Â°)
-                # print(pid_red.error)
+    return "NINGUNO"
 
-                if abs(pid_red.error) > 150:
-                    servo_angle = SERVO_CENTER - pid_output
-                
-                picam2.draw_parallel_lane_line(centroid_coords, roi, offset=200, avoid_right=True)
-                #print(f"[ROJO] Centroide X: {current_x} | Output PID: {pid_output:.2f}")
-            else: 
-                obstacle_detected = False
-
-        elif max_green[3] is not None:
-            # --- CASO OBSTÃCULO VERDE ---
-            picam2.draw_contours(green_ctn, roi, (0, 255, 0))  
-            centroid_coords = picam2.draw_centroid_line(max_green, roi)
-            if centroid_coords and max_green[0] > 100:
-                running = False
-                current_x = picam2.image_width - centroid_coords[0]
-                obstacle_detected = True
-                obstacle_detected_green = True
-                obstacle_detected_red = False
-                girando = False
-
-                
-
-                pid_output = pid_green.compute(picam2.image_width - set_point_green[0], current_x)
-                #print(f"[VERDE] Centroide X: {current_x} {centroid_coords[1]}")  # Debug: Imprime el output del PID para verde
-
-                
-                # Para el verde: si el objeto estÃ¡ muy a la izquierda, la salida es positiva.
-                # Sumar la salida hace que el Ã¡ngulo aumente (gira a la izquierda -> hacia 180Â°)
-                print(pid_green.error)
-
-                if abs(pid_green.error) > 110:
-                    servo_angle = SERVO_CENTER + pid_output
-                
-                picam2.draw_parallel_lane_line(centroid_coords, roi, offset=200, avoid_right=False)
-                #print(f"[VERDE] Centroide X: {current_x} | Output PID: {pid_output:.2f}")
-            else:
-                obstacle_detected = False
-        
-        # 3. Limitar fÃ­sicamente el rango del servo (Anti-rompimiento estructural)
-        if obstacle_detected:
-            servo_angle = max(40, min(servo_angle, 120))
-            LNM.turn_left(angle=int(servo_angle), speed=70)
-        
 try:
     while True:
-        # Capture the current frame as a NumPy array
         picam2.receive_image()
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
             
-        # Renderizar interfaz e imÃ¡genes
         picam2.draw_roi(roi) 
         LNM.vision.draw_roi(LNM.rois[0]) 
         LNM.vision.draw_roi(LNM.rois[1]) 
         cv2.imshow('Picamera2 + OpenCV Stream', picam2.frame)
 
-         # Wait for 1ms and check if 'q' is pressed to exit
         if cv2.waitKey(1) & 0xFF == ord('q'):
              break
 
-        #print(f"Max Red Area: {max_red[0]} | Max Green Area: {max_green[0]}")  # Debug: Imprime Ã¡reas mÃ¡ximas para ambos colores
-        LNM.move_forward(60)
+        LNM.move_forward(65)
         front_dist, left_dist, right_dist = LNM.get_distances()
-        #print(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
 
-        if LNM.turning_direction == 0 and obstacle_detected == False: 
+        # 1. Detección del sentido inicial de la pista si no se conoce
+        if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
-                 LNM.turning_direction = 2
-                 #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
-
+                LNM.turning_direction = 2  # Pista naranja
             elif LNM.blue_area > 1200:
-                 LNM.turning_direction = 1
-                 #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
+                LNM.turning_direction = 1  # Pista azul
 
-        
+        # 2. Leer señal actual de los bloques
+        color_detectado = get_color_signal()
 
-        obstacle_detection()
-
-        
-        # Realizar vuelta
-
-        if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0 and obstacle_detected == False:
+        # 3. Control de esquinas (Prioridad de seguridad ante curvas)
+        if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
-            print(girando)
               
-        if LNM.black_area < 8000 and girando and front_dist > 80 and obstacle_detected == False:
-           LNM.turn_center()
-           girando = False
-           conteo = False
+        if LNM.black_area < 8000 and girando and front_dist > 80:
+            LNM.turn_center()
+            girando = False
 
+        # 4. Control de Navegación en Rectas (PID dinámico basado en tu petición)
         if not girando and LNM.turning_direction != 0:
-            print("ERROR PID RECALCULANDO")
-            # Pista Naranja: Sigue pared IZQUIERDA. 
-            # Si se acerca a la pared (dist < 30), debe ir a la Derecha.
-            current_dist = TARGET_DIST
-            lado_correccion = 0
-            if LNM.turning_direction == 2 or obstacle_detected_red:    
-                current_dist = min(left_dist, 60.0)   
-                lado_correccion = 1                 # (+) -> Derecha, (-) -> Izquierda
             
-            # Pista Azul: Sigue pared DERECHA.
-            # Si se acerca a la pared (dist < 30), debe ir a la Izquierda.
-            elif LNM.turning_direction == 1 or obstacle_detected_green:  
-                current_dist = min(right_dist, 60.0)  
-                lado_correccion = -1                # (+) -> Izquierda, (-) -> Derecha
+            # Valores por defecto (Seguimiento estándar en el medio)
+            target_dinamico = DIST_NORMAL
             
-            correction = pid_dist.compute(TARGET_DIST, current_dist)
-            
-            # El centro fÃ­sico o neutral del servo es 80
-            # Aplicamos la correcciÃ³n con la direcciÃ³n correspondiente
+            if color_detectado == "ROJO":
+                # REGLA: Pegarse a la pared DERECHA
+                current_dist = min(right_dist, 60.0)
+                target_dinamico = DIST_PEGADO
+                lado_correccion = -1  # Geometría del servo para pared derecha
+                
+            elif color_detectado == "VERDE":
+                # REGLA: Pegarse a la pared IZQUIERDA
+                current_dist = min(left_dist, 60.0)
+                target_dinamico = DIST_PEGADO
+                lado_correccion = 1   # Geometría del servo para pared izquierda
+                
+            else:
+                # Si no ve bloques, conserva el comportamiento original de la pista
+                if LNM.turning_direction == 2:  # Naranja -> Sigue izquierda
+                    current_dist = min(left_dist, 60.0)
+                    lado_correccion = 1
+                else:                           # Azul -> Sigue derecha
+                    current_dist = min(right_dist, 60.0)
+                    lado_correccion = -1
+
+            # Calcular el PID con el objetivo ajustado en tiempo real
+            correction = pid_dist.compute(target_dinamico, current_dist)
             steering_angle = int(80 + (correction * lado_correccion))
             
-            # Restringimos el Ã¡ngulo entre los lÃ­mites seguros de tu robot (40 y 120)
+            # Límites de seguridad mecánica del servo
             steering_angle = max(40, min(120, steering_angle))
             
-            # --- CORRECCIÃ“N MEJORADA EN AMBOS SENTIDOS ---
-            # Si el error es mÃ­nimo, va recto.
+            # Actuación de movimiento directo
             if abs(pid_dist.error) < 1.5: 
                 LNM.turn_center()
-            # Si el Ã¡ngulo es mayor que el centro, fÃ­sicamente cruza a la derecha
             elif steering_angle > 80:
                 LNM.turn_right(angle=steering_angle, speed=50)
-            # Si el Ã¡ngulo es menor que el centro, fÃ­sicamente cruza a la izquierda
             elif steering_angle < 80:
                 LNM.turn_left(angle=steering_angle, speed=50)
 
 finally:
-    # 4. Clean up resources
     cv2.destroyAllWindows()
