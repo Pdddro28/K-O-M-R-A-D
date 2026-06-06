@@ -16,14 +16,16 @@ The vehicle utilizes the **Ackermann Steering Principle** to conquer sharp corne
 * **The Mechanical Execution:** An **MG996R** digital servo ($11 \text{ kg}\cdot\text{cm}$ torque) mounted onto an L-shaped aluminum bracket drives a system of mechanical linkages, steering arms, and asymmetrical tie rods. This geometry automatically forces the inner wheel to turn more sharply than the outer one.
 * **The Digital Control:** Driven by continuous, jitter-free $50\text{Hz}$ hardware PWM pulses from the MegaPi board, keeping the steering stable at a rigidly calibrated center of $90^\circ$.
 
-### Electronic 4WD Propulsion (Differential-Free)
+### Electronic 2WD Propulsion (Differential-Free)
 
-Propulsion is delivered via a configuration of four **RS380** DC geared motors.
+Propulsion is delivered via a configuration of four **RS380** DC geared motor.
 
-* **Motor Specifications (Per Unit):**
+* **Motor Specifications:**
 * Nominal Voltage: $12\text{V}$ (Operating at $11.1\text{V}$)
 * No-load Current: $0.4\text{A}$ | Stall Current: $4.5\text{A}$
 * No-load Speed: $15000\text{ RPM}$ (Output speed after gearbox: approx. $450\text{ RPM}$)
+
+<img width="515" height="218" alt="Rear_wheel_drive" src="https://github.com/user-attachments/assets/da8175e6-313d-42d6-bd3b-b1318082536f" />
 
 
 * **Average Vehicle Speed Calculation:**
