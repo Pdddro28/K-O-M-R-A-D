@@ -16,6 +16,9 @@ The vehicle utilizes the **Ackermann Steering Principle** to conquer sharp corne
 * **The Mechanical Execution:** An **MG996R** digital servo ($11 \text{ kg}\cdot\text{cm}$ torque) mounted onto an L-shaped aluminum bracket drives a system of mechanical linkages, steering arms, and asymmetrical tie rods. This geometry automatically forces the inner wheel to turn more sharply than the outer one.
 * **The Digital Control:** Driven by continuous, jitter-free $50\text{Hz}$ hardware PWM pulses from the MegaPi board, keeping the steering stable at a rigidly calibrated center of $90^\circ$.
 
+<img width="806" height="426" alt="ackermann_steering_system" src="https://github.com/user-attachments/assets/25611d01-fda5-4efb-8155-ce0bdbe7e73e" />
+
+
 ### Electronic 2WD Propulsion (Differential-Free)
 
 Propulsion is delivered via a configuration of four **RS380** DC geared motor.
