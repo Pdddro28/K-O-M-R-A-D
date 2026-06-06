@@ -6,7 +6,7 @@ These components extend the chassis vertically and provide secure, vibration-res
 
 ---
 
-<img width="3060" height="4080" alt="20260530_162359" src="https://github.com/user-attachments/assets/cc130bf0-8547-48cc-847e-28dbd9029fba" />
+<img width="1530" height="2040" alt="20260530_162359" src="https://github.com/user-attachments/assets/cc130bf0-8547-48cc-847e-28dbd9029fba" />
 
 
 ### Component Specifications and Layout
