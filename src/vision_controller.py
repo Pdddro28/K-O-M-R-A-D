@@ -162,13 +162,14 @@ if "__main__" == __name__:
 
     # Definición de ROIs
 
-
+    roi2 = ROI(0, 100, 320, 150)
+    roi = ROI(320, 100, 640, 150)
     while True:
         try:
             vision.receive_image()
-            ctn = vision.find_contours([[0,71,131],[255,255,209]], ROI(200, 300, 440, 350))
-            vision.draw_contours(ctn, ROI(200, 300, 440, 350), (0, 255, 255))
-            vision.draw_roi(ROI(200, 300, 440, 350))
+            ctn = vision.find_contours([[0,0,0],[60,255,209]], ROI(200, 300, 440, 350))
+            vision.draw_contours(ctn, ROI(0, 200, 40, 350), (0, 255, 255))
+            vision.draw_roi(roi)
             cv2.imshow('Vision HD - Posicion Corregida', vision.frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

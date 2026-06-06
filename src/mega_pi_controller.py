@@ -53,6 +53,7 @@ class MegaPiController:
             self.green_area = 0
             self.red_area = 0
             
+            
             self.rois = [
                 ROI(200, 20, 430, 200),
                 ROI(200, 300, 440, 350),
