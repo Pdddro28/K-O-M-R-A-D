@@ -66,10 +66,10 @@ try:
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
             
-        picam2.draw_roi(roi) 
-        LNM.vision.draw_roi(LNM.rois[0]) 
-        LNM.vision.draw_roi(LNM.rois[1]) 
-        cv2.imshow('Picamera2 + OpenCV Stream', picam2.frame)
+        # picam2.draw_roi(roi) 
+        # LNM.vision.draw_roi(LNM.rois[0]) 
+        # LNM.vision.draw_roi(LNM.rois[1]) 
+        # cv2.imshow('Picamera2 + OpenCV Stream', picam2.frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
              break
@@ -80,7 +80,7 @@ try:
         # =========================================================================
         # MANIOBRA DE EMERGENCIA (Usando tu nuevo método move_backward)
         # =========================================================================
-        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
+        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0 and color_detectado == "NINGUNO":  # Evita falsas alarmas por ruido extremo
             print(f"¡EMERGENCIA! Frente obstruido a {front_dist:.2f} cm.")
             
             # Calcular ángulo opuesto en espejo respecto al centro físico (80)

@@ -18,10 +18,10 @@ time_lap = time.time()
 n = 0
 
 # --- PID CONTROLLER VARIABLES (Ajustados para mayor suavidad) ---
-TARGET_DIST = 25.0  
+TARGET_DIST = 22.0  
 Kp = 3.1    # Incrementado ligeramente para reaccionar más rápido
 Ki = 0.0   # Se añade una pizca de integral para eliminar el error estático
-Kd = 1.2    # Incrementado para amortiguar oscilaciones bruscas
+Kd = 0.2   # Incrementado para amortiguar oscilaciones bruscas
 
 prev_error = 0.0
 integral = 0.0
@@ -43,14 +43,14 @@ while running:
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
         LNM.debug_UI()
-        LNM.move_forward(speed = 85) 
+        LNM.move_forward(speed = 60) 
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
         print(f"Turning: {LNM.turning_direction}, black_area: {LNM.black_area}, blue_area: {LNM.blue_area}, orange_area: {LNM.orange_area}")
-        #print(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
+        print(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
         # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
@@ -62,13 +62,13 @@ while running:
                  #LNM.configurar_PID_dis(Target_dist=30.0, Kp=1.5, Ki=0.0, Kd=0.8)
 
 
-        if front_dist < 80 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
+        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
             integral = 0.0
               
-        if LNM.black_area < 8000 and girando and front_dist > 70:
+        if LNM.black_area < 8000 and girando and front_dist > 100:
            LNM.turn_center()
            girando = False
            conteo = False
