@@ -13,27 +13,27 @@ The detailed engineering specifications, design purposes, and spatial distributi
 Battery Case
 ===
 
-- ```Design & Geometry:``` Designed as a low-profile dual compartment located on the central geometric axis of the lower chassis. It features 2.5 mm thick reinforced walls and passive side ventilation slots to prevent thermal stress on the LiPo cells during high discharge rates (C-rate).
+- ``` Design & Geometry:``` Designed as a vertical tower cage structured with four reinforced pillars on each side, integrated directly onto a solid mounting base with corner screw eyelets. The side walls feature large circular cutouts to minimize material weight while allowing maximum passive airflow to prevent thermal stress on the LiPo cells during high discharge rates. The top pillars include slotted retention eyelets for secure strap fastening.
 
-- ```Engineering Purpose:``` Centralises the combined mass of the two battery packs (2200 mAh each) at the lowest point of the vehicle. This drastically reduces the polar moment of inertia and prevents body roll in tight corners. It includes a quick-release tab fastening system and integrated guides for the secure routing of high-current wiring to the MegaPi terminals.
+- ```Engineering Purpose:``` Centralizes the combined mass of the battery cells vertically along the central geometric axis of the chassis. This open-cage design ensures quick access for battery replacement between runs while providing rigid structural containment against lateral inertia forces during high-speed cornering.
 
 Canera Case
 ===
 
-- ```Design & Geometry:``` An elevated tower structure rigidly attached to the front bumper using an M3 bolt pattern. The housing head features a precision-machined slot to house the IMX219 (Arducam) camera sensor and a 15-degree downward tilt angle optimised in Blender.
+- ```Design & Geometry:``` A compact, rectangular protective enclosure specifically tailored to encapsulate the IMX219 (Arducam) sensor. The bottom section integrates a robust cylindrical pivot hinge featuring external locking teeth (spur gear profile) designed to mesh perfectly with a matching mounting base for mechanical angle locking.
 
-- ```Engineering Purpose:``` Raises the camera’s line of sight to maximise the field of view (FOV) towards the ground, ensuring that OpenCV algorithms can detect track lines and obstacles in advance. By isolating the camera in a dedicated structure, chassis micro-vibrations are mitigated and the delicate MIPI CSI-2 ribbon cable is routed away from electromagnetic interference (EMI) from the rear motors.
+- ```Engineering Purpose:``` Shields the delicate camera PCB from external debris or direct track impacts. The interlocking geared hinge allows the camera's pitch to be adjusted and mechanically locked at a precise 15-degree downward tilt angle, preventing any unwanted lens shifting caused by high-frequency chassis vibrations during operation.
 
 MegaPi Case
 ===
 
-- ```Design & Geometry:``` A sealed module with 3 mm internal support towers (standoffs) integrated directly into the base plate to suspend the PCB and prevent contact with the chassis. It features calibrated perimeter openings to provide full access to the motor screw terminals, the ultrasonic sensor ports and the main power interface.
+- ```Design & Geometry:``` A robust low-profile tray equipped with four integrated, heavy-duty vertical standoffs positioned at the corners to secure the main PCB. The base plate features internal layout guides and structural clearance cuts to avoid components on the underside of the board while keeping the profile as close to the chassis as possible.
 
-- ```Engineering Purpose:``` It acts as a protective shield for low-level power electronics. It protects the H-bridges and microcontroller pins from accidental mechanical impacts or dislodgement caused by track vibrations. It also includes top grilles designed for the optional mounting of a passive heat sink or a 40 mm fan.
+- ```Engineering Purpose:``` Functions as a rigid mechanical cradle for the low-level power electronics. By elevating the PCB via the 3mm integrated standoffs, it prevents electrical short-circuits with the chassis while dampening vibrations. The completely open perimeter guarantees immediate access to the motor screw terminals, power rails, and sensor ports for field maintenance.
 
 RaspberryPi Base
 ===
 
-- ```Design & Geometry:``` A mid-level modular mounting platform that acts as a structural ‘bridge’ over the chassis. It uses elongated expansion slots that allow its longitudinal position to be adjusted with millimetre precision to calibrate the car’s centre of gravity.
+- ```Design & Geometry:``` A flat, mid-level modular platform featuring four integrated corner standoffs to mount the Raspberry Pi 4 safely. The front section of the base integrates a dual-ear hinge mount equipped with internal locking teeth that mate directly with the Camera Case hinge.
 
-- ```Engineering Purpose:``` Provides a rigid mount for the on-board computer (Raspberry Pi 4), keeping the computer vision processing hardware perfectly level. Its open design ensures optimal thermal dissipation via natural convection for the Broadcom processor, preventing thermal throttling during the execution of real-time detection models.
+- ```Engineering Purpose:``` Serves as a dual-purpose structural bridge. It provides a stable, elevated mount for the high-level on-board computer, ensuring optimal heat dissipation via natural convection to prevent CPU thermal throttling. Concurrently, its integrated geared mount firmly locks the camera assembly at the front, eliminating the need for extra components and saving valuable chassis space.
