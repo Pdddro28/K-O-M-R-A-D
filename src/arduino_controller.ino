@@ -87,9 +87,11 @@ class Carro {
       motorTraccion.run(velocidad);
     }
 
-    void retroceder(byte velocidad) {
+    void retroceder(byte angulo, byte velocidad) {
       servoDireccion.write(centro);
+      servoDireccion.write(angulo);
       motorTraccion.run(-velocidad);
+
     }
 
     void girarIzquierda(byte angulo, byte velocidad) {
@@ -132,7 +134,7 @@ void loop() {
 
       switch (accion) {
         case 1: miCarro.avanzar(v1); break;
-        case 2: miCarro.retroceder(v1); break;
+        case 2: miCarro.retroceder(v1,v2); break;
         case 3: miCarro.girarIzquierda(v1, v2); break;
         case 4: miCarro.girarDerecha(v1, v2); break;
         case 5: miCarro.detenerse(); break;

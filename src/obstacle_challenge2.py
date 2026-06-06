@@ -57,6 +57,8 @@ def get_color_signal():
             
     return "NINGUNO"
 
+steering_angle = 80  # Rastrea la última dirección calculada por el PID
+
 try:
     while True:
         picam2.receive_image()
@@ -72,24 +74,36 @@ try:
         if cv2.waitKey(1) & 0xFF == ord('q'):
              break
 
-        # Leer distancias de los sensores ultrasónicos/ToF
+        # Leer distancias de los sensores ToF
         front_dist, left_dist, right_dist = LNM.get_distances()
-        print(f"Distances - Front: {front_dist:.2f} cm, Left: {left_dist:.2f} cm, Right: {right_dist:.2f} cm")
 
         # =========================================================================
-        # MANIOBRA DE EMERGENCIA (Si está a punto de chocar de frente)
+        # MANIOBRA DE EMERGENCIA (Usando tu nuevo método move_backward)
         # =========================================================================
-        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0: # Evitamos lecturas erróneas de 0
-            print("¡EMERGENCIA! Distancia frontal crítica. Ejecutando retroceso...")
-            LNM.turn_center()
-            # Ajusta la velocidad en reversa (ej. velocidad negativa si lo maneja tu librería o función específica)
-            # Aquí usamos una rutina genérica de retroceso rápido de 0.6 segundos
-            LNM.move_backward(50) 
-            time.sleep(0.6)
-            LNM.turn_center()
-            continue # Salta el resto del ciclo para recalcular la posición en la siguiente iteración
+        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
+            print(f"¡EMERGENCIA! Frente obstruido a {front_dist:.2f} cm.")
+            
+            # Calcular ángulo opuesto en espejo respecto al centro físico (80)
+            angulo_escape_opuesto = 160 - steering_angle
+            angulo_escape_opuesto = max(40, min(120, angulo_escape_opuesto))
+            
+            # Si el robot venía totalmente recto, forzamos un quiebre hacia la izquierda
+            if angulo_escape_opuesto == 80:
+                angulo_escape_opuesto = 60
+                
+            print(f"Ángulo previo: {steering_angle} | Escapando en reversa con ángulo: {angulo_escape_opuesto}")
+            
+            # Llamamos a tu método modificado: primero el ángulo, luego la velocidad (positiva para la marcha)
+            LNM.move_backward(angle=angulo_escape_opuesto, speed=55)
+            time.sleep(0.7)  # Tiempo de ejecución de la reversa para despejar espacio
+            
+            # Enderezar ruedas antes de reanudar la marcha adelante
+            LNM.turn_center(log=False)
+            time.sleep(0.1)
+            
+            continue  # Reinicia el ciclo, evaluando la pista desde la nueva posición
 
-        # Marcha hacia adelante estándar si no hay emergencia de choque cercano
+        # Si el camino está despejado, marcha adelante normal
         LNM.move_forward(65)
 
         # 1. Detección del sentido inicial de la pista si no se conoce
@@ -99,7 +113,7 @@ try:
             elif LNM.blue_area > 1200:
                 LNM.turning_direction = 1  
 
-        # 2. Obtener el estado del tráfico filtrado
+        # 2. Obtener el estado del tráfico filtrado por la cámara
         color_detectado = get_color_signal()
 
         # 3. Control de giros en las esquinas de la pista
@@ -117,38 +131,35 @@ try:
             target_dinamico = DIST_NORMAL
             
             if color_detectado == "ROJO":
-                # Regla Rojo: Pegarse a la derecha -> Usa PID Derecho
                 current_dist = min(right_dist, 60.0)
                 target_dinamico = DIST_PEGADO
                 lado_correccion = -1  
                 pid_activo = pid_dist_der
                 
             elif color_detectado == "VERDE":
-                # Regla Verde: Pegarse a la izquierda -> Usa PID Izquierdo
                 current_dist = min(left_dist, 60.0)
                 target_dinamico = DIST_PEGADO
                 lado_correccion = 1   
                 pid_activo = pid_dist_izq
                 
             else:
-                # Comportamiento por defecto según el sentido de la pista si no hay bloques en rango válido
-                if LNM.turning_direction == 2:  # Naranja -> Sigue izquierda
+                if LNM.turning_direction == 2:
                     current_dist = min(left_dist, 60.0)
                     lado_correccion = 1
                     pid_activo = pid_dist_izq
-                else:                           # Azul -> Sigue derecha
+                else:
                     current_dist = min(right_dist, 60.0)
                     lado_correccion = -1
                     pid_activo = pid_dist_der
 
-            # Calcular la corrección usando el objeto PID seleccionado dinámicamente
+            # Calcular la corrección y actualizar la variable para el escape inteligente
             correction = pid_activo.compute(target_dinamico, current_dist)
             steering_angle = int(80 + (correction * lado_correccion))
-            
             steering_angle = max(40, min(120, steering_angle))
             
             if abs(pid_activo.error) < 1.5: 
                 LNM.turn_center()
+                steering_angle = 80  
             elif steering_angle > 80:
                 LNM.turn_right(angle=steering_angle, speed=50)
             elif steering_angle < 80:
