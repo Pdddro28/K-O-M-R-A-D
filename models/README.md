@@ -17,6 +17,8 @@ Battery Case
 
 - ```Engineering Purpose:``` Centralizes the combined mass of the battery cells vertically along the central geometric axis of the chassis. This open-cage design ensures quick access for battery replacement between runs while providing rigid structural containment against lateral inertia forces during high-speed cornering.
 
+<img width="605" height="648" alt="BatteryCase" src="https://github.com/user-attachments/assets/b3e6554a-211a-4241-bda4-a5d5db77534f" />
+
 Canera Case
 ===
 
@@ -24,12 +26,16 @@ Canera Case
 
 - ```Engineering Purpose:``` Shields the delicate camera PCB from external debris or direct track impacts. The interlocking geared hinge allows the camera's pitch to be adjusted and mechanically locked at a precise 15-degree downward tilt angle, preventing any unwanted lens shifting caused by high-frequency chassis vibrations during operation.
 
+<img width="308" height="395" alt="Camera" src="https://github.com/user-attachments/assets/21c54df1-dd10-4c78-a3e6-093260773084" />
+
 MegaPi Case
 ===
 
 - ```Design & Geometry:``` A robust low-profile tray equipped with four integrated, heavy-duty vertical standoffs positioned at the corners to secure the main PCB. The base plate features internal layout guides and structural clearance cuts to avoid components on the underside of the board while keeping the profile as close to the chassis as possible.
 
 - ```Engineering Purpose:``` Functions as a rigid mechanical cradle for the low-level power electronics. By elevating the PCB via the 3mm integrated standoffs, it prevents electrical short-circuits with the chassis while dampening vibrations. The completely open perimeter guarantees immediate access to the motor screw terminals, power rails, and sensor ports for field maintenance.
+
+
 
 RaspberryPi Base
 ===
