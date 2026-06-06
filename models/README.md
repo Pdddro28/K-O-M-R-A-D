@@ -22,7 +22,7 @@ Battery Case
 
 <img width="605" height="648" alt="BatteryCase" src="https://github.com/user-attachments/assets/b3e6554a-211a-4241-bda4-a5d5db77534f" />
 
-Canera Case
+Camera Case
 ===
 
 - ```Design & Geometry:``` A compact, rectangular protective enclosure specifically tailored to encapsulate the IMX219 (Arducam) sensor. The bottom section integrates a robust cylindrical pivot hinge featuring external locking teeth (spur gear profile) designed to mesh perfectly with a matching mounting base for mechanical angle locking.
