@@ -151,8 +151,8 @@ class MegaPiController:
         self._send_command(1, v1=speed)
         if log: self.log_step(self.ACTION_FORWARD)
 
-    def move_backward(self, speed, log=True):
-        self._send_command(2, v1=speed)
+    def move_backward(self, angle, speed, log=True):
+        self._send_command(2, v1=speed, v2=angle)
         if log: self.log_step(self.ACTION_FORWARD)
 
     def turn_direction(self):
@@ -203,3 +203,7 @@ class MegaPiController:
 
     def start (self):
         return self.button_value == 1
+    
+
+if __name__ == "__main__":
+    pass
