@@ -37,10 +37,12 @@ def get_color_signal():
     
     max_red = picam2.max_contour(red_ctn, roi)
     max_green = picam2.max_contour(green_ctn, roi)
+
     
     # Evaluar Bloque Rojo
     if max_red[3] is not None and (max_green[3] is None or max_red[0] > max_green[0]):
         # Solo responde si está en el rango ideal (ni muy lejos ni excesivamente cerca)
+        print(f"Área roja detectada: {max_red[0]}")
         if 1700 < max_red[0] < MAX_AREA_ROJO:
             picam2.draw_contours(red_ctn, roi, (0, 0, 255))
             return "ROJO"
@@ -48,6 +50,7 @@ def get_color_signal():
     # Evaluar Bloque Verde
     elif max_green[3] is not None:
         # Solo responde si está en el rango ideal 
+        print(f"Área verde detectada: {max_green[0]}")
         if 200 < max_green[0] < MAX_AREA_VERDE:
             picam2.draw_contours(green_ctn, roi, (0, 255, 0))
             return "VERDE"
