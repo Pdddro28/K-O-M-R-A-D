@@ -35,7 +35,7 @@ MegaPi Case
 
 - ```Engineering Purpose:``` Functions as a rigid mechanical cradle for the low-level power electronics. By elevating the PCB via the 3mm integrated standoffs, it prevents electrical short-circuits with the chassis while dampening vibrations. The completely open perimeter guarantees immediate access to the motor screw terminals, power rails, and sensor ports for field maintenance.
 
-
+<img width="698" height="515" alt="MegaPiBase" src="https://github.com/user-attachments/assets/1998a856-5af4-434d-878d-18f04e4c0457" />
 
 RaspberryPi Base
 ===
@@ -43,3 +43,5 @@ RaspberryPi Base
 - ```Design & Geometry:``` A flat, mid-level modular platform featuring four integrated corner standoffs to mount the Raspberry Pi 4 safely. The front section of the base integrates a dual-ear hinge mount equipped with internal locking teeth that mate directly with the Camera Case hinge.
 
 - ```Engineering Purpose:``` Serves as a dual-purpose structural bridge. It provides a stable, elevated mount for the high-level on-board computer, ensuring optimal heat dissipation via natural convection to prevent CPU thermal throttling. Concurrently, its integrated geared mount firmly locks the camera assembly at the front, eliminating the need for extra components and saving valuable chassis space.
+
+<img width="698" height="515" alt="MegaPiBase" src="https://github.com/user-attachments/assets/74d4b89d-c859-4a69-b3b7-ce7326d4601a" />
