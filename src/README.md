@@ -52,6 +52,39 @@ Where:
 
 - `vision_controller.py`: The core image processing module responsible for capturing the video feed, applying color masks, and analyzing the defined ROIs to detect path elements and targets.
 
+Note: To run any file of the project, you have to follow these steps:
+
+Clone the repository:
+```git clone https://github.com/JD277/K-O-M-R-A-D.git```
+
+Move to the project folder:
+```cd K-O-M-R-A-D```
+
+Install the dependencies:
+```pip install opencv-python numpy pandas picamera pyserial customtkinter```
+
+Execute the file you want using this structure:
+(Remember to upload arduino_controller.ino or StandardFirmata to your board first!)
+```python3 -m src.open_challenge```
+
+Note on execution: This specific way to execute the files (python3 -m) is required so Python can read the directories as structural modules. The __init__.py files inside the directories allow Python to correctly resolve and handle the imported files as packages.
+
+Core Libraries Used
+====
+```OpenCV (opencv-python):``` Used for real-time computer vision, image processing, and color segmentation.
+
+```NumPy:``` Handles heavy matrix operations and mathematical calculations for vision coordinates and masks.
+
+```Pandas:``` Utilized for data handling, logging, or managing calibration datasets.
+
+```PiCamera:``` Direct interface to capture high-frame-rate video feeds from the Raspberry Pi camera module.
+
+```PySerial (Serial):``` Establishes serial communication between the master controller (Raspberry Pi) and the Arduino micro-controller.
+
+```CustomTkinter:``` Used to develop a modern graphical user interface (GUI) for calibration and manual testing tools.
+
+```Dataclasses:``` (Built-in) Used to create structured data models for clean coordinate and ROI handling.
+
 Table of contents
 ====
 
