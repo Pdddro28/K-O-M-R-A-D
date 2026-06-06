@@ -55,17 +55,25 @@ Where:
 Note: To run any file of the project, you have to follow these steps:
 
 Clone the repository:
-```git clone https://github.com/JD277/K-O-M-R-A-D.git```
+```bash
+git clone https://github.com/JD277/K-O-M-R-A-D.git
+```
 
 Move to the project folder:
-```cd K-O-M-R-A-D```
+```bash
+cd K-O-M-R-A-D
+```
 
 Install the dependencies:
-```pip install opencv-python numpy pandas picamera pyserial customtkinter```
+```bash
+pip install opencv-python numpy pandas picamera pyserial customtkinter
+```
 
 Execute the file you want using this structure:
 (Remember to upload arduino_controller.ino or StandardFirmata to your board first!)
-```python3 -m src.open_challenge```
+```bash
+python3 -m src.open_challenge
+```
 
 Note on execution: This specific way to execute the files (python3 -m) is required so Python can read the directories as structural modules. The __init__.py files inside the directories allow Python to correctly resolve and handle the imported files as packages.
 
