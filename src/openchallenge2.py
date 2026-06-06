@@ -19,9 +19,6 @@ time_lap = time.time()
 n = 0
 
 # --- NUEVOS PARÁMETROS PID PARA CONTROL VISUAL ---
-# Las áreas manejan valores en píxeles mucho más altos que los centímetros de los sensores.
-# Por lo tanto, empezamos con un Kp pequeño (ej. 0.01 o 0.02) para evitar volantazos violentos.
-# Ve ajustando este Kp según responda el coche en pista.
 Kp_vision = 0.015    
 Ki_vision = 0.0
 Kd_vision = 0.005   
@@ -35,6 +32,14 @@ conteo = False
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
 DIST_MIN_CHOQUE = 20.0  
 steering_angle = 80     
+
+# --- VARIABLES DE TOLERANCIA (EVITAR ZIGZAGUEO) ---
+UMBRAL_PIXELES_MUERTO = 150  # Ignora errores de área menores a este valor
+TOLERANCIA_ANGULO = 3       # Si el ángulo está entre 77 y 83 (80 +/- 3), va recto
+
+# --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
+end_game_triggered = False
+end_game_timer = 0.0
 
 # --- CONFIGURACIÓN DE ROIS LATERALES ---
 roi2 = ROI(0, 100, 320, 150)  # ROI Izquierda
@@ -100,7 +105,7 @@ while running:
             time.sleep(0.1)
             continue
 
-        # Si el frente está despejado, avanzamos con la velocidad normal del Open Challenge
+        # Avanzamos con la velocidad normal del Open Challenge
         LNM.move_forward(speed=60) 
 
         # 1. TRACK TYPE DETECTION
@@ -138,12 +143,16 @@ while running:
             correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
             prev_error = error
             
-            # Geometría directa: error (+) implica que está muy a la izquierda -> suma para ir a la derecha.
+            # Cálculo del ángulo base
             steering_angle = int(80 + correction)
             steering_angle = max(40, min(120, steering_angle))
             
-            # Actuación suave del servo
-            if abs(error) < 150: # Umbral de píxeles muerto para evitar pequeños temblores
+            # --- FILTROS DE TOLERANCIA SUAVE (Evita movimientos constantes en rectas) ---
+            if abs(error) < UMBRAL_PIXELES_MUERTO: 
+                LNM.turn_center()
+                steering_angle = 80
+            elif abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
+                # Si la corrección es mínima (ej: 81 u 78), forzamos dirección recta
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
@@ -152,7 +161,7 @@ while running:
                 LNM.turn_left(angle=steering_angle, speed=50)
 
         # =========================================================================
-        # 3. LOGIC AND LAP COUNTER (Líneas de meta)
+        # 3. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
         # =========================================================================
         current_time = time.time()
 
@@ -176,10 +185,17 @@ while running:
 
         print("Loop count:", loops)
 
-        if loops == 12:
-            LNM.turn_direction()
-            time.sleep(3)
-            break
+        # Control asíncrono para el fin de carrera (3 segundos extra manteniendo lógica)
+        if loops >= 12 and not end_game_triggered:
+            print("🏁 ¡Vuelta 12 alcanzada! Iniciando cronómetro de 3 segundos de gracia...")
+            end_game_timer = current_time
+            end_game_triggered = True
+
+        if end_game_triggered:
+            # Comprobamos dinámicamente si ya transcurrieron los 3 segundos
+            if current_time - end_game_timer >= 3.0:
+                print("⏱️ Tiempo de gracia completado. Deteniendo robot.")
+                break
         
     except Exception as e:
         print("Exception:", e)
