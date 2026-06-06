@@ -13,7 +13,7 @@ print("Camera started. Press 'q' to quit.")
 
 # --- PID SEPARADOS POR LADO ---
 # Como al verde (lado izquierdo) le cuesta más, aumentamos su Kp a 3.5 (ajusta según pruebes)
-pid_dist_izq = PIDController(kp=3.5, ki=0.0, kd=1.2) 
+pid_dist_izq = PIDController(kp=3, ki=0.0, kd=1.0) 
 # Al rojo (lado derecho) lo dejamos con tus valores base que ya funcionaban bien
 pid_dist_der = PIDController(kp=2.9, ki=0.0, kd=1.0) 
 
@@ -37,7 +37,7 @@ def get_color_signal():
             picam2.draw_contours(red_ctn, roi, (0, 0, 255))
             return "ROJO"
     elif max_green[3] is not None:
-        if max_green[0] > 100:
+        if max_green[0] > 200:
             picam2.draw_contours(green_ctn, roi, (0, 255, 0))
             return "VERDE"
             
