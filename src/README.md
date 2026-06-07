@@ -107,6 +107,9 @@ Table of contents
 Code description
 ====
 
+This document provides a detailed and comprehensive description of all class attributes and methods, including the specifications of their respective arguments. We strongly recommend reviewing this section before exploring the rest of the documentation.
+
+If you plan to clone this repository, we suggest using this section as a reference map or navigation guide. It will help you understand the project’s structure, speed up your workflow, and help you quickly locate key components within the source code.
 
 Calibration
 ====
