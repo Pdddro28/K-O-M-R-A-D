@@ -1,7 +1,7 @@
 Intro
 ====
 
-This is the official Github repository proporty of The LNM, before known as Ars Machina, conformed by David Wang Wu and Pedro Catamo. This repository contains all the code, documentation and resources for our lil carrito. This is our fourth year participating in WRO.
+This is the official Github repository proporty of The LNM, before known as Ars Machina, conformed by David Wang Wu and Pedro Catamo. This repository contains all the code, documentation and resources for our project. This is our fourth year participating in WRO.
 
 Team Members
 ====
