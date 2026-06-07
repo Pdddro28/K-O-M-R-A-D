@@ -142,15 +142,38 @@ Open challenge
 
 ### Strategy
 
+Our navigation strategy is based on a hybrid approach that combines visual lane detection with telemetry to optimize speed on straight sections and ensure stability when cornering:
+
+*   **Vision-Based Lane Segmentation:** The front camera captures the surroundings and applies a perspective filter (bird's-eye view). Using HSV color spaces, we isolate the lane boundary lines. The algorithm calculates the midpoint of the drivable lane.
+*   **Steering Control (PID):** The difference between the vehicle’s center and the calculated center of the lane is fed as the error signal into a Proportional-Integral-Derivative (PID) controller that continuously adjusts the steering servo’s angle.
+*   **Dynamic Speed Management:** The system analyzes the road curvature. On long straightaways, the PWM of the drive motors is increased to maximum asynchronously; when approaching a sharp turn detected by the vision system or the front distance sensor, the system applies predictive engine braking to prevent understeer.
+*   **Turn Counting and Inertia:** The IMU gyroscope tracks accumulated turns of 90° and 360°. Upon registering the third complete rotation cycle coordinated with the run time, the robot executes the controlled stop routine.
+
 ### Flowchart
 
+
+
 ### Recommendations
+
+*   **Light Immunity:** Do not rely on fixed color threshold values. Use pre-calibration to generate a dynamic parameter file or implement histogram normalization (CLAHE) in image processing to prevent failures caused by shadows on the track.
+*   **Drift Effect:** The IMU accumulates error over time. Use distance sensors on straights to verify that the IMU’s angular readings have not become misaligned due to chassis vibrations.
 
 Obstacle challenge
 ====
 
 ### Strategy
 
+*   **Object Detection and Classification:** The system simultaneously segments three color masks in OpenCV: Black/White (lane), Red (mandatory obstacle on the right), and Green (mandatory obstacle on the left). The pixel size of the detected outline determines the estimated distance to the object (Bounding Box).
+*   **Evasion Routine (Swerve Maneuver):** When a block enters the critical “collision zone” (validated by the front ToF sensor for millimeter-level precision):
+    *   **Red Block:** The PID controller introduces an artificial *offset* to the right of the lane, forcing the servo to change course, and maintains lateral visual tracking to return to the center once the block leaves the field of view.
+    *   **Green Block:** The controller introduces an *offset* to the left, executing the internal swerve maneuver.
+*   **Lane Recovery (Re-entry):** After clearing the obstacle (confirmed by the side proximity sensors), the robot exits the evasion subroutine and restores the line-following PID setpoints to avoid colliding with the outer wall.
+
 ### Flowchart
 
+
+
 ### Recommendations
+
+*   **Visual False Positives:** Sometimes, track lines or reflections from the environment can be mistaken for blocks in the distance. Implement a minimum contour size filter (`cv2.contourArea`) so that the robot ignores distant visual noise and reacts only to actual blocks.
+*   **Actuator Synchronization:** When dodging, the drive motor speed must be reduced proportionally to the steering angle. If you maintain maximum PWM while turning sharply to avoid a block, the car’s inertia will cause it to skid, lose its IMU reference, and collide with the obstacle.
