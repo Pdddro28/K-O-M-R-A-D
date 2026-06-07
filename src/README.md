@@ -100,26 +100,17 @@ Table of contents
 
 * [Calibration](#calibration)
 
-- [Open challenge](#open-challenge)
-  - [Strategy](#open-challenge-strategy)
-  - [Flowchart](#open-challenge-flowchart)
-  - [Explanation](#open-challenge-explanation)
-  - [Recommendations](#open-challenge-recommendations)
-- [Obstacle challenge](#obstacle-challenge)
-  - [Strategy](#obstacle-challenge-strategy)
-  - [Flowchart](#obstacle-challenge-flowchart)
-  - [Explanation](#obstacle-challenge-explanation)
-  - [Recommendations](#obstacle-challenge-recommendations)
+* [Open challenge](#open-challenge)
+ 
+* [Obstacle challenge](#obstacle-challenge)
 
 Code description
 ====
 
-ped ped ped ped ped ped
 
 Calibration
 ====
 
-ped ped ped ped ped ped
 
 Open challenge
 ====
@@ -128,7 +119,7 @@ Open challenge
 
 ### Flowchart
 
-### Recomendations
+### Recommendations
 
 Obstacle challenge
 ====
@@ -137,4 +128,4 @@ Obstacle challenge
 
 ### Flowchart
 
-### Recomendations
+### Recommendations
