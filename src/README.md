@@ -114,6 +114,28 @@ If you plan to clone this repository, we suggest using this section as a referen
 Calibration
 ====
 
+Computer Vision Calibration (camera_calibration.py): Since lighting conditions at the event can vary drastically due to artificial lighting or nearby windows, the OpenCV-based vision system implements dynamic calibration.
+
+* **Perspective Matrix (Bird’s Eye View):** Geometric camera correction to transform the perspective view into an aerial plan view. This allows for the precise measurement of actual distances to the track lines and blocks.
+
+* **HSV Color Thresholds (Color Thresholding):** Adjustment of the color mask ranges for accurate detection of lines (Black/White) and traffic elements (Red and Green Blocks).
+
+* **Code Operation:** The script uses runtime sliders (cv2.createTrackbar) to find the optimal values for H (Hue), S (Saturation), and V (Value), which are automatically exported to a .json or .yaml configuration file that the main script reads upon startup.
+
+
+Mechanical Steering Calibration (`steering_calibration.py`)
+The mechanical components of the steering system (servo links and Ackermann geometry) are rarely perfectly symmetrical by design. 
+
+* **Neutral Point Adjustment (Trim):** Defines the exact pulse width (in microseconds or degrees) that forces the vehicle to move in a perfect straight line.
+* **Maximum Limit Mapping (Endpoints):** Configuration of the maximum left and right turning angles. This prevents the servo motor from being overloaded, avoiding mechanical jams or excessive current draw that could reset the electronics.
+    * *Operation in the code:* When this module is executed, the servo oscillates between its critical points, allowing the operator to visually verify the alignment of the front wheels before setting the parameters in the software constants.
+
+
+Calibration of Kinematic and Distance Sensors (`sensor_calibration.py`)
+Module responsible for stabilizing the proximity and telemetry sensors before allowing the chassis to move.
+
+* **Gyroscope/IMU Calibration (Offset Reset):** When the robot is powered on, it must remain stationary for approximately 2 to 3 seconds. The script calculates the average white noise of the sensor (magnetic/gyroscopic drift) on the X, Y, and Z axes to establish the relative zero degree of orientation.
+* **Distance Sensor Filtering:** Initialization and calculation of the error threshold for ultrasonic sensors or time-of-flight (ToF/LiDAR) sensors, ensuring accurate detection of the track’s side walls.
 
 Open challenge
 ====
