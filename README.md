@@ -14,7 +14,7 @@ Studying: 3rd year at U.E.C.Eduardo Blanco
 
 Misc: I speak English,Spanish,Mandarin and Taiwanese
 
-Aspirations: Computer Science at the UGMA
+Aspirations: Computer Science at the UGMA Universidad Gran Mariscal de Ayacucho
 
 Gmail: davidwangwu104@gmail.com
 
