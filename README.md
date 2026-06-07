@@ -60,7 +60,10 @@ Where:
 Mobility
 ====
 
-Our vehicle utilizes an Ackermann steering geometry to optimize cornering stability and eliminate tire scrubbing. By dynamically adjustments the front wheels, this configuration ensures the inner wheel turns at a sharper angle than the outer wheel to match their respective turning radii. Propulsion is managed via an electronic differential setup, which is broken down in full detail below.
+* **Automotive Kinematics (Ackermann Steering):** Rejecting tank-style differential spin turns, the vehicle utilizes true automotive physics based on the Ackermann principle. When cornering, the inner front wheel pivots more sharply than the outer wheel, preventing tire scrubbing and slipping to ensure optimal grip and predictable handling at high speeds. The steering is driven by a high-torque MG996R digital servo stabilized at a rigidly calibrated 90° center via 50Hz hardware PWM pulses.
+* **Propulsion and Speed:** Power is delivered by four RS380 DC geared motors operating at 11.1V and delivering approximately 450 RPM. With a wheel diameter of 6.5 cm, the robot reaches a theoretical maximum velocity of 1.53 m/s, resulting in an actual average track operating speed of approximately 1.2 m/s due to friction and weight.
+* **Electronic Differential (Software-Managed Cornering):** To avoid a heavy mechanical central differential, wheel speed coordination during turns is handled entirely via software. By altering the duty cycles through H-bridge drivers, the algorithm reduces power to the inner wheels during a turn so they do not fight each other.
+* **Mobility Limitations:** Aggressive dynamic braking generates counter-electromotive force (reverse currents) that can overheat the motor drivers if not properly dissipated. Additionally, the lack of a physical differential limits raw traction if a wheel completely loses contact with the track surface.
 
 Software for our WRO autonomous vehicle
 ====
