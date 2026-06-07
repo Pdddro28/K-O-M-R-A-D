@@ -62,7 +62,11 @@ Mobility
 
 Our vehicle utilizes an Ackermann steering geometry to optimize cornering stability and eliminate tire scrubbing. By dynamically adjustments the front wheels, this configuration ensures the inner wheel turns at a sharper angle than the outer wheel to match their respective turning radii. Propulsion is managed via an electronic differential setup, which is broken down in full detail below.
 
-Software
+Software for our WRO autonomous vehicle
 ====
 
-El Pedro.
+* **Architecture:** Python 3 code that bridges the Raspberry Pi and the motors via `MegaPiController` in a non-blocking asynchronous loop[cite: 1].
+* **Vision (OpenCV):** Optimizes FPS by processing specific Regions of Interest (ROIs)—lateral zones for walls and a central zone for traffic—instead of the full frame.
+* **Round 1 (Open Challenge):** Hybrid lane centering controlled by a visual PID based on the area difference between the walls[cite: 1]. If the track widens and a wall leaves the camera's view, physical ToF distance sensors automatically kick in as a backup[cite: 1].
+* **Round 2 (Obstacle Challenge):** A behavioral state machine bypasses traffic based on color: **Red** blocks force the car to hug the right wall, while **Green** blocks force it to the left (both maintaining a tight 12.0 cm distance)[cite: 1].
+* **Race Management:** Counts 12 laps by detecting color markers, using a 4-second cooldown to prevent false positives[cite: 1]. Upon completion, it executes a 3-second grace period to cross the finish line safely under full autonomous control before shutting down the motors[cite: 1].
