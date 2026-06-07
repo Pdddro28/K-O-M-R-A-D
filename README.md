@@ -3,34 +3,12 @@ Intro
 
 This is the official Github repository proporty of The LNM, before known as Ars Machina, conformed by David Wang Wu and Pedro Catamo. This repository contains all the code, documentation and resources for our project. This is our fourth year participating in WRO.
 
-Team Members
-====
+¡De una! Aquí tienes la información de los miembros de tu equipo organizada en una tabla limpia y estructurada en Markdown:
 
-I am David Wang:
-
-Birth date: 01/04/2011(15y/o)
-
-Studying: 3rd year at U.E.C.Eduardo Blanco
-
-Misc: I speak English,Spanish,Mandarin and Taiwanese
-
-Aspirations: Computer Science at the UGMA Universidad Gran Mariscal de Ayacucho
-
-Gmail: davidwangwu104@gmail.com
-
-
-
-I am Pedro Catamo:
-
-Birth date: 01/28/2009(17y/o)
-
-Studying: 5th year at U.E.C.Eduardo Blanco
-
-Misc: I speak English and Spanish
-
-Aspirations: Biomaterials Engineering at the UNC Humberto Fernandez Moran
-
-Gmail: pedrocatamo.2009@gmail.com
+| Member | Birth Date & Age | Studying | Languages / Misc | Aspirations | Gmail |
+| --- | --- | --- | --- | --- | --- |
+| **David Wang** | 01/04/2011 (15 y/o) | 3rd year at U.E.C. Eduardo Blanco | English, Spanish, Mandarin, Taiwanese | Computer Science at UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
+| **Pedro Catamo** | 01/28/2009 (17 y/o) | 5th year at U.E.C. Eduardo Blanco | English, Spanish | Biomaterials Engineering at UNC Humberto Fernandez Moran | pedrocatamo.2009@gmail.com |
 
 Folders Structure
 ====
