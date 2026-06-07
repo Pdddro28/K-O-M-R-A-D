@@ -3,8 +3,6 @@ Intro
 
 This is the official Github repository proporty of The LNM, before known as Ars Machina, conformed by David Wang Wu and Pedro Catamo. This repository contains all the code, documentation and resources for our project. This is our fourth year participating in WRO.
 
-¡De una! Aquí tienes la información de los miembros de tu equipo organizada en una tabla limpia y estructurada en Markdown:
-
 | Member | Birth Date & Age | Studying | Languages / Misc | Aspirations | Gmail |
 | --- | --- | --- | --- | --- | --- |
 | **David Wang** | 01/04/2011 (15 y/o) | 3rd year at U.E.C. Eduardo Blanco | English, Spanish, Mandarin, Taiwanese | Computer Science at UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
