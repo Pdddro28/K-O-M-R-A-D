@@ -96,7 +96,20 @@ Core Libraries Used
 Table of contents
 ====
 
-ped ped ped ped ped ped
+* [Code description](#code-description)
+
+* [Calibration](#calibration)
+
+- [Open challenge](#open-challenge)
+  - [Strategy](#open-challenge-strategy)
+  - [Flowchart](#open-challenge-flowchart)
+  - [Explanation](#open-challenge-explanation)
+  - [Recommendations](#open-challenge-recommendations)
+- [Obstacle challenge](#obstacle-challenge)
+  - [Strategy](#obstacle-challenge-strategy)
+  - [Flowchart](#obstacle-challenge-flowchart)
+  - [Explanation](#obstacle-challenge-explanation)
+  - [Recommendations](#obstacle-challenge-recommendations)
 
 Code description
 ====
@@ -111,14 +124,17 @@ ped ped ped ped ped ped
 Open challenge
 ====
 
-ped ped ped ped ped ped
+### Strategy
+
+### Flowchart
+
+### Recomendations
 
 Obstacle challenge
 ====
 
-ped ped ped ped ped ped
+### Strategy
 
-Recomendations
-====
+### Flowchart
 
-ped ped ped ped ped ped
+### Recomendations
