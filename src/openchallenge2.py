@@ -74,11 +74,11 @@ while running:
         LNM.obtenerarea_frontal()
         
         black_areas = obtener_areas()
-        draw_rois()
+        #draw_rois()
 
-        cv2.imshow('Vision HD - Posicion Corregida', LNM.vision.frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        #cv2.imshow('Vision HD - Posicion Corregida', LNM.vision.frame)
+        #if cv2.waitKey(1) & 0xFF == ord('q'):
+        #    break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
 
@@ -96,7 +96,7 @@ while running:
             if angulo_escape_opuesto == 80:
                 angulo_escape_opuesto = 60
                 
-            LNM.move_backward(angle=angulo_escape_opuesto, speed=55)
+            LNM.move_backward(angle=angulo_escape_opuesto, speed=85)
             time.sleep(0.75)
             
             LNM.turn_center(log=False)
@@ -106,7 +106,7 @@ while running:
             continue
 
         # Avanzamos con la velocidad normal del Open Challenge
-        LNM.move_forward(speed=60) 
+        LNM.move_forward(speed=130) 
 
         # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
@@ -122,7 +122,7 @@ while running:
             prev_error = 0.0
             integral = 0.0
               
-        if LNM.black_area < 8000 and girando and front_dist > 100:
+        if LNM.black_area < 8000 and girando and front_dist > 80:
            LNM.turn_center()
            girando = False
            conteo = False
@@ -175,11 +175,11 @@ while running:
             n = 1
             loops += 1
 
-        if current_time - orange_timer > 4 and LNM.turning_direction == 2: 
+        if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
             n = 0
             print("Timer reset, ready for next orange line detection.")
 
-        if current_time - blue_timer > 4 and LNM.turning_direction == 1:
+        if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
             n = 0
             print("Timer reset, ready for next blue line detection.")
 
@@ -193,7 +193,7 @@ while running:
 
         if end_game_triggered:
             # Comprobamos dinámicamente si ya transcurrieron los 3 segundos
-            if current_time - end_game_timer >= 7.5:
+            if current_time - end_game_timer >= 1.5:
                 print("⏱️ Tiempo de gracia completado. Deteniendo robot.")
                 break
         
