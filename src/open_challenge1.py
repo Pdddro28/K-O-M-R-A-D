@@ -144,4 +144,36 @@ while running:
                 tiempo_primer_loop = current_time
                 print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD Asimétrico (Izquierda).")
 
-        if LNM.blue_area > 500 and n == 0 and L
+        if LNM.blue_area > 500 and n == 0 and LNM.turning_direction == 1: 
+            blue_timer = current_time
+            n = 1
+            loops += 1
+            if loops == 1 and tiempo_primer_loop is None:
+                tiempo_primer_loop = current_time
+                print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD Asimétrico (Derecha).")
+
+        if current_time - orange_timer > 3.7 and LNM.turning_direction == 2: 
+            n = 0
+
+        if current_time - blue_timer > 3.7 and LNM.turning_direction == 1:
+            n = 0
+
+        print("Loop count:", loops)
+
+        if loops >= 12 and not end_game_triggered:
+            print("🏁 ¡Vuelta 12 alcanzada! Activando tiempo de gracia...")
+            end_game_timer = current_time
+            end_game_triggered = True
+
+        if end_game_triggered:
+            if current_time - end_game_timer >= 1.0:
+                print("⏱️ Tiempo de gracia completado. Deteniendo robot de forma segura.")
+                break
+        
+    except Exception as e:
+        print("Exception:", e)
+        LNM.stop()
+        break
+
+# --- SAFETY SHUTDOWN ---
+LNM.stop()
