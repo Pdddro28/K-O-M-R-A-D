@@ -23,10 +23,16 @@ Kd_hybrid = 0.005
 prev_error = 0.0
 steering_angle = 80     
 
-# --- CONFIGURACIÓN DE APAGADO / ASIMETRÍA DE PAREDES (WALL HUGGING) ---
-# Incrementa estos valores si quieres que se pegue MÁS a la pared exterior
-OFFSET_VISION = 600      # Desviación objetivo en píxeles para la cámara
-OFFSET_TOF = 12          # Desviación objetivo en centímetros para los ultrasonidos
+# --- CONFIGURACIÓN DE OFFSETS PARA PARED EXTERIOR (WALL-HUGGING) ---
+# Incrementa estos valores si quieres que se pegue aún más a las paredes exteriores
+VISION_OFFSET = 450          # Desplazamiento objetivo en píxeles de cámara
+TOF_OFFSET = 7               # Desplazamiento objetivo en centímetros (Ultrasonidos)
+
+current_offset_vision = 0
+current_offset_tof = 0
+
+# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
+DIST_MIN_CHOQUE = 25.0  
 
 # --- VARIABLES DE TOLERANCIA Y FILTRADO ---
 UMBRAL_PIXELES_MUERTO = 150  # Ignora variaciones de área insignificantes
@@ -70,44 +76,77 @@ while running:
         black_areas = obtener_areas()
         front_dist, left_dist, right_dist = LNM.get_distances()
 
+        # Detección del sentido inicial de la pista y configuración de tracking exterior
+        if LNM.turning_direction == 0: 
+            if LNM.orange_area > 1200:
+                LNM.turning_direction = 2
+            elif LNM.blue_area > 1200:
+                LNM.turning_direction = 1
+
+        # Asignación dinámica del Offset según las reglas solicitadas
+        if LNM.turning_direction == 2:    # Naranja primero -> Pegarse a la IZQUIERDA
+            current_offset_vision = VISION_OFFSET
+            current_offset_tof = TOF_OFFSET
+        elif LNM.turning_direction == 1:  # Azul primero -> Pegarse a la DERECHA
+            current_offset_vision = -VISION_OFFSET
+            current_offset_tof = -TOF_OFFSET
+
+        # =========================================================================
+        # FRENO DE MANO Y RETROCESO CONTROLADO EN ÁNGULO CON OFFSET
+        # =========================================================================
+        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
+            print(f"🚨 ¡OBSTÁCULO! Retroceso asistido por PD con sesgo de pared.")
+            LNM.stop(log=False)
+            time.sleep(0.05)
+            
+            start_reverse = time.time()
+            while (time.time() - start_reverse) < 0.75:
+                LNM.vision.receive_image()
+                black_areas = obtener_areas()
+                _, left_dist, right_dist = LNM.get_distances()
+                
+                area_izq_rev = black_areas[1]
+                area_der_rev = black_areas[0]
+                
+                # Cálculo de error en reversa alterado por el offset dinámico
+                if area_izq_rev > MIN_PARED_VALIDA and area_der_rev > MIN_PARED_VALIDA:
+                    error_rev = (area_izq_rev - area_der_rev) - current_offset_vision
+                else:
+                    error_rev = ((right_dist - left_dist) - current_offset_tof) * 350
+                
+                derivative_rev = error_rev - prev_error
+                correction_rev = (Kp_hybrid * error_rev) + (Kd_hybrid * derivative_rev)
+                prev_error = error_rev
+                
+                # Dirección inversa cinemática conservando la preferencia de carril
+                steering_angle_rev = int(80 - correction_rev)
+                steering_angle_rev = max(40, min(120, steering_angle_rev))
+                
+                LNM.move_backward(angle=steering_angle_rev, speed=85)
+                time.sleep(0.02)
+            
+            LNM.turn_center(log=False)
+            prev_error = 0.0
+            time.sleep(0.1)
+            continue
+
         # Avance continuo con la potencia establecida para el Open Challenge
         LNM.move_forward(speed=130) 
 
-        # Detección del sentido inicial de la pista
-        if LNM.turning_direction == 0: 
-            if LNM.orange_area > 1200:
-                 LNM.turning_direction = 2
-            elif LNM.blue_area > 1200:
-                 LNM.turning_direction = 1
-
         # =========================================================================
-        # SISTEMA DE NAVEGACIÓN PD HÍBRIDO ASIMÉTRICO (Apego a Pared Exterior)
+        # SISTEMA DE NAVEGACIÓN PD HÍBRIDO (Con tracking de pared exterior)
         # =========================================================================
         if tiempo_primer_loop is not None and (current_time - tiempo_primer_loop) > 0.5:
             area_izq = black_areas[1]
             area_der = black_areas[0]
 
-            # Inicializamos desfases (por defecto 0 si no se ha detectado sentido)
-            target_offset_vision = 0
-            target_offset_tof = 0
-
-            # Asignación de offsets según el sentido de la pista
-            if LNM.turning_direction == 2:    # Naranja primero -> Pegarse a la IZQUIERDA
-                target_offset_vision = OFFSET_VISION
-                target_offset_tof = OFFSET_TOF
-            elif LNM.turning_direction == 1:  # Azul primero -> Pegarse a la DERECHA
-                target_offset_vision = -OFFSET_VISION
-                target_offset_tof = -OFFSET_TOF
-
-            # Cálculo del Error aplicando la desviación del objetivo (Offset)
+            # Si restamos el offset a la izquierda, obligamos al PD a buscar el equilibrio matemático
+            # manteniendo el carro físicamente desplazado hacia el extremo exterior seleccionado.
             if area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA:
-                # El PD se estabiliza cuando la diferencia de píxeles iguala al offset
-                error = (area_izq - area_der) - target_offset_vision
+                error = (area_izq - area_der) - current_offset_vision
             else:
-                # El PD se estabiliza cuando la diferencia de distancia en cm iguala al offset
-                error = ((right_dist - left_dist) - target_offset_tof) * 350
+                error = ((right_dist - left_dist) - current_offset_tof) * 350
 
-            # Algoritmo de control Proporcional-Derivativo
             derivative = error - prev_error
             correction = (Kp_hybrid * error) + (Kd_hybrid * derivative)
             prev_error = error
@@ -116,8 +155,7 @@ while running:
             steering_angle = max(40, min(120, steering_angle))
             
             # --- FILTROS DINÁMICOS DE ESTABILIZACIÓN ---
-            # Solo aplicamos el centrado total si no hay un sentido de pista bloqueado (dirección = 0)
-            if LNM.turning_direction == 0 and abs(error) < UMBRAL_PIXELES_MUERTO:
+            if abs(error) < UMBRAL_PIXELES_MUERTO and area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA: 
                 LNM.turn_center()
                 steering_angle = 80
             elif abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
@@ -128,7 +166,7 @@ while running:
             elif steering_angle < 80:
                 LNM.turn_left(angle=steering_angle, speed=75)
         else:
-            # Modo salida pasiva: Forzamos dirección recta durante la primera recta de largada
+            # Modo salida pasiva (Primera recta limpia antes de activar el PD descentrado)
             LNM.turn_center()
             steering_angle = 80
             prev_error = 0.0
@@ -142,7 +180,7 @@ while running:
             loops += 1
             if loops == 1 and tiempo_primer_loop is None:
                 tiempo_primer_loop = current_time
-                print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD Asimétrico (Izquierda).")
+                print("⏱️ ¡Primer loop contado! Configurando tracking hacia la pared IZQUIERDA.")
 
         if LNM.blue_area > 500 and n == 0 and LNM.turning_direction == 1: 
             blue_timer = current_time
@@ -150,7 +188,7 @@ while running:
             loops += 1
             if loops == 1 and tiempo_primer_loop is None:
                 tiempo_primer_loop = current_time
-                print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD Asimétrico (Derecha).")
+                print("⏱️ ¡Primer loop contado! Configurando tracking hacia la pared DERECHA.")
 
         if current_time - orange_timer > 3.7 and LNM.turning_direction == 2: 
             n = 0
