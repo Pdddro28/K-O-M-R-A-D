@@ -47,4 +47,5 @@ RaspberryPi Base
 
 - ```Engineering Purpose:``` Serves as a dual-purpose structural bridge. It provides a stable, elevated mount for the high-level on-board computer, ensuring optimal heat dissipation via natural convection to prevent CPU thermal throttling. Concurrently, its integrated geared mount firmly locks the camera assembly at the front, eliminating the need for extra components and saving valuable chassis space.
 
-<img width="698" height="515" alt="MegaPiBase" src="https://github.com/user-attachments/assets/74d4b89d-c859-4a69-b3b7-ce7326d4601a" />
+<img width="814" height="451" alt="RaspberryPiBase" src="https://github.com/user-attachments/assets/71554a4c-e6c1-4e03-bede-13d4502ac880" />
+
