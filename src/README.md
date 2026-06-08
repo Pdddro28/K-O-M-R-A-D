@@ -132,11 +132,11 @@ Built on a responsive design using dark panels (`ctk.set_appearance_mode("Dark")
 
 -   **Horizontal Multi-tab Display Panel:** To provide accurate feedback during calibration, the script uses the `np.hstack()` method to combine three separate image matrices into a single real-time video strip:
     
-    1.  **Original Frame:** The captured raw stream, geometrically corrected in reverse to correspond to the physical position of the camera.
+    **Original Frame:** The captured raw stream, geometrically corrected in reverse to correspond to the physical position of the camera.
         
-    2.  **Binary Mask:** A black-and-white image that shows exactly which pixels are passing through the filter based on the current slider settings.
+    **Binary Mask:** A black-and-white image that shows exactly which pixels are passing through the filter based on the current slider settings.
         
-    3.  **Segmented Result:** The matrix operation (`cv.bitwise_and`) that isolates the filtered objects whilst retaining their actual colours, allowing you to see immediately whether ground noise is being captured.
+    **Segmented Result:** The matrix operation (`cv.bitwise_and`) that isolates the filtered objects whilst retaining their actual colours, allowing you to see immediately whether ground noise is being captured.
 
 
        ### 2. Mask Processing and Morphological Filtering (`find_mask`)
@@ -149,7 +149,7 @@ mask = cv.dilate(mask, kernel, iterations=1)
 
 ```
 
-## Structure of the JSON Configuration File
+### Structure of the JSON Configuration File
 
 When the operator clicks **"SAVE JSON"**, the application opens a native file browser and saves a structured object that the main navigation script reads when the vehicle starts up. This means you don’t have to touch a single line of source code before running a race.
 
@@ -176,7 +176,7 @@ Example of the automatically generated output format:
 
 ```
 
-## Technical Procedure for the Competition
+### Technical Procedure for the Competition
 
 This is the procedure our team follows at the test bench before each official attempt:
 
@@ -201,12 +201,37 @@ Open challenge
 
 ### Strategy
 
-Our navigation strategy is based on a hybrid approach that combines visual lane detection with telemetry to optimize speed on straight sections and ensure stability when cornering:
+To navigate without relying on continuous lines, the robot measures the free space on either side using two lateral Regions of Interest (`roi` and `roi2`).
 
-*   **Vision-Based Lane Segmentation:** The front camera captures the surroundings and applies a perspective filter (bird's-eye view). Using HSV color spaces, we isolate the lane boundary lines. The algorithm calculates the midpoint of the drivable lane.
-*   **Steering Control (PID):** The difference between the vehicle’s center and the calculated center of the lane is fed as the error signal into a Proportional-Integral-Derivative (PID) controller that continuously adjusts the steering servo’s angle.
-*   **Dynamic Speed Management:** The system analyzes the road curvature. On long straightaways, the PWM of the drive motors is increased to maximum asynchronously; when approaching a sharp turn detected by the vision system or the front distance sensor, the system applies predictive engine braking to prevent understeer.
-*   **Turn Counting and Inertia:** The IMU gyroscope tracks accumulated turns of 90° and 360°. Upon registering the third complete rotation cycle coordinated with the run time, the robot executes the controlled stop routine.
+-   **Error Calculation:** $Error = \text{Left Area} - \text{Right Area}$
+    
+-   **PD Controller:** Controls an Ackermann servo using parameters $K_p = 0.015$ and $K_d = 0.005$ (centre at $80^\circ$).
+    
+-   **Stability Filters (Anti-Zigzag):**
+
+    -   `DEAD_PIXEL_THRESHOLD = 150`: Ignores insignificant variations in area.
+        
+    -   `ANGLE_TOLERANCE = 3`: If the correction is minimal (between $77^\circ$ and $83^\circ$), forces the heading to $80^\circ$ (straight ahead) to avoid oscillations and save energy.
+
+The vehicle makes decisions by combining computer vision and forward ultrasonic distance sensing.
+
+A. Track Identification (Track Type)
+On start-up, the robot detects the colour of the first finish line (area > 1200) to determine the turning direction:
+
+Orange line: Locks in a counter-clockwise direction (turning_direction = 2).
+
+Blue Line: Locks clockwise direction (turning_direction = 1).
+
+B. Corner Turning AlgorithmEntry Trigger: If the distance to the front is $< 55\text{ cm}$ and the black area of the walls is $> 11000$, the robot calls LNM.turn_direction() and locks into turning mode (turning = True). Exit Trigger: When the track is clear in front ($> 80\text{ cm}$) and the wall area falls below $8000$, the robot returns to PID centring.
+
+Emergency Braking and Active EvasionIf the proximity sensor detects a frontal obstacle within DIST_MIN_CHOQUE (20.0 cm), an immediate hardware response is triggered:Braking: Complete shutdown of the rear motor (LNM.stop()). Inverse Calculation: Calculates an evasion angle symmetrically opposite to the previous turn ($160 - \text{steering\_angle}$). Manoeuvre: Reverses at high power (speed = 85) for 0.75 seconds to clear the obstruction, clears the PID history and resumes driving.
+
+Lap Counter and Technical Finish
+The rules require the car to stop exactly after completing 3 laps (12 control lines/corners).
+
+Debounce Filter: When a line is crossed, the reading is held for 1.7s (orange/blue_timer). This prevents the same line from being counted multiple times as the chassis passes over it.
+
+Non-Blocking Finish: Upon reaching lap 12, a 1s grace period timer is activated. The robot continues to navigate in a controlled manner to cross the finish line completely before shutting down definitively with LNM.stop().
 
 ### Flowchart
 
@@ -214,19 +239,49 @@ Our navigation strategy is based on a hybrid approach that combines visual lane 
 
 ### Recommendations
 
-*   **Light Immunity:** Do not rely on fixed color threshold values. Use pre-calibration to generate a dynamic parameter file or implement histogram normalization (CLAHE) in image processing to prevent failures caused by shadows on the track.
-*   **Drift Effect:** The IMU accumulates error over time. Use distance sensors on straights to verify that the IMU’s angular readings have not become misaligned due to chassis vibrations.
+- Reducing Video Latency: In the main loop, comment out or remove the lines for `cv2.imshow` and `cv2.waitKey` entirely during official rounds. Rendering video on screen consumes critical CPU resources and reduces the FPS of the control loop.
+
+- Quick On-Site Calibration: Bring at least three pre-configured JSON files from home (“High Light”, “Medium Light”, “Low Light”). If the practice time at the event is very short, simply load the one that most closely matches the environment rather than calibrating from scratch.
+
+- Protection against visual false positives: Strictly limit the size of the lateral ROIs (roi and roi2) so that they face only the floor and do not detect the walls of the category or other robots in the background.
 
 Obstacle challenge
 ====
 
 ### Strategy
 
-*   **Object Detection and Classification:** The system simultaneously segments three color masks in OpenCV: Black/White (lane), Red (mandatory obstacle on the right), and Green (mandatory obstacle on the left). The pixel size of the detected outline determines the estimated distance to the object (Bounding Box).
-*   **Evasion Routine (Swerve Maneuver):** When a block enters the critical “collision zone” (validated by the front ToF sensor for millimeter-level precision):
-    *   **Red Block:** The PID controller introduces an artificial *offset* to the right of the lane, forcing the servo to change course, and maintains lateral visual tracking to return to the center once the block leaves the field of view.
-    *   **Green Block:** The controller introduces an *offset* to the left, executing the internal swerve maneuver.
-*   **Lane Recovery (Re-entry):** After clearing the obstacle (confirmed by the side proximity sensors), the robot exits the evasion subroutine and restores the line-following PID setpoints to avoid colliding with the outer wall.
+When the robot is travelling along straight sections or open bends, it evaluates three logical scenarios in sequence to determine its direction using independent PID controllers:
+
+- #### CASE A: Active Obstacle Avoidance (Priority 1)
+If the camera detects a coloured block within its front ROI, the system ignores visual centring and uses the side ToF sensors to manoeuvre around it:
+
+- Bloque ROJO (Evitación por la Izquierda): El robot activa el pid_dist_der, cambia su distancia objetivo a DIST_PEGADO (12.0 cm) con respecto a la pared derecha y se aleja del obstáculo.
+
+- Bloque VERDE (Evitación por la Derecha): Se activa el pid_dist_izq, buscando pegarse a 12.0 cm de la pared izquierda.
+
+- #### CASE B: Backing Up Due to Wall Loss (Priority 2)
+If one of the two black walls on the track moves out of the field of view of the side ROIs (area < MIN_VALID_WALL), the robot uses the physical ToF sensors to avoid collision, guiding itself according to the direction of the circuit:
+
+- Orange Direction: Follows the left wall as a reference using the left ToF.
+
+- Blue Direction: Follows the right wall as a reference using the right ToF.
+
+CASE C: Pure Comfort Centring (Priority 3)If the track is clear and both walls are visible, pid_vision is activated. The system seeks symmetrical balance by calculating:$$Error = \text{Left Area} - \text{Right Area}$$The loop calculates the direction required to maintain an error of $0$.
+
+2. Steering Stability Filters
+To prevent the servo from overheating or experiencing unnecessary vibrations, the outputs of the three PIDs pass through a hysteresis filter: Deadband (ANGLE_TOLERANCE = 3): If the calculated angle is between $77^\circ$ and $83^\circ$, the car forces the servo to $80^\circ$ (straight). This maintains linear inertia on clear stretches and saves battery power.
+
+3. Emergency Evasive Manoeuvre
+To mitigate collisions caused by blind spots or loss of traction during tight manoeuvres, the system features an autonomous safety response:
+
+```
+if (Front Distance < 20 cm) and (No coloured block detected)
+      ACTION: Stop motors + Reverse with Inverse Angle for 0.75 seconds
+This mechanism dynamically calculates an escape angle opposite to the last recorded turn ($160 - \text{steering\_angle}$), freeing the chassis from the jam before restarting the main control loop.
+
+```
+
+
 
 ### Flowchart
 
@@ -234,5 +289,10 @@ Obstacle challenge
 
 ### Recommendations
 
-*   **Visual False Positives:** Sometimes, track lines or reflections from the environment can be mistaken for blocks in the distance. Implement a minimum contour size filter (`cv2.contourArea`) so that the robot ignores distant visual noise and reacts only to actual blocks.
-*   **Actuator Synchronization:** When dodging, the drive motor speed must be reduced proportionally to the steering angle. If you maintain maximum PWM while turning sharply to avoid a block, the car’s inertia will cause it to skid, lose its IMU reference, and collide with the obstacle.
+-   **Data Synchronisation (Vision vs. ToF):** Please disable `cv2.imshow` and `cv2.waitKey` completely during official rounds. Rendering video on screen consumes critical CPU resources and causes delays (latency) between camera readings and ToF sensor readings.
+
+-   **Hysteresis and False Positives:** Implement a voting filter for colour (detect the block over 2 or 3 consecutive frames before taking action). Reduce the front ROI vertically to ignore floor reflections or ceiling lights that mimic real blocks.
+
+-   Smooth PID Transitions: Reset the controllers’ numerical history (previous error = 0 and integral = 0) every time the code switches between vision-based centring and ToF-based avoidance. This prevents sudden jerks and skidding.
+
+-   Dynamic Speed: Don’t keep the power set at 65. Reduce your speed during sharp turns (when dodging blocks) to maintain grip, and automatically increase it on straight, clear stretches to improve your lap times.
