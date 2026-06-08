@@ -203,7 +203,7 @@ Open challenge
 
 To navigate without relying on continuous lines, the robot measures the free space on either side using two lateral Regions of Interest (`roi` and `roi2`).
 
--   **Error Calculation:** $Error = Left Area - Right Area
+-   **Error Calculation:** Error = Left Area - Right Area
     
 -   **PD Controller:** Controls an Ackermann servo using parameters K_p = 0.015 and K_d = 0.005 (centre at 80°)
     
@@ -211,29 +211,28 @@ To navigate without relying on continuous lines, the robot measures the free spa
 
     -   `DEAD_PIXEL_THRESHOLD = 150`: Ignores insignificant variations in area.
         
-    -   `ANGLE_TOLERANCE = 3`: If the correction is minimal 77° and $83°, forces the heading to $80^\circ$ (straight ahead) to avoid oscillations and save energy.
+    -   `ANGLE_TOLERANCE = 3`: If the correction is minimal 77° and 83°, forces the heading to 80° (straight ahead) to avoid oscillations and save energy.
 
 The vehicle makes decisions by combining computer vision and forward ultrasonic distance sensing.
 
 A. Track Identification (Track Type)
 On start-up, the robot detects the colour of the first finish line (area > 1200) to determine the turning direction:
 
-Orange line: Locks in a counter-clockwise direction (turning_direction = 2).
+- Orange line: Locks in a counter-clockwise direction (turning_direction = 2).
 
-Blue Line: Locks clockwise direction (turning_direction = 1).
+- Blue Line: Locks clockwise direction (turning_direction = 1).
 
-B. Corner Turning AlgorithmEntry Trigger: If the distance to the front is < 55cm and the black area of the walls is $> 11000, the robot calls LNM.turn_direction() and locks into turning mode (turning = True). Exit Trigger: When the track is clear in front ($> 80\text{ cm}$) and the wall area falls below 8000, the robot returns to PID centring.
+B. Corner Turning AlgorithmEntry Trigger: If the distance to the front is < 55cm and the black area of the walls is > 11000, the robot calls LNM.turn_direction() and locks into turning mode (turning = True). Exit Trigger: When the track is clear in front > 80cm and the wall area falls below 8000, the robot returns to PID centring.
 
-Emergency Braking and Active EvasionIf the proximity sensor detects a frontal obstacle within DIST_MIN_CHOQUE (20.0 cm), an immediate hardware response is triggered: Braking: Complete shutdown of the rear motor (LNM.stop()).
+- Emergency Braking and Active EvasionIf the proximity sensor detects a frontal obstacle within DIST_MIN_CHOQUE (20.0 cm), an immediate hardware response is triggered: Braking: Complete shutdown of the rear motor (LNM.stop()).
 
 - Inverse Calculation: Calculates an evasion angle symmetrically opposite to the previous turn 160°. Manoeuvre: Reverses at high power (speed = 85) for 0.75 seconds to clear the obstruction, clears the PID history and resumes driving.
 
-Lap Counter and Technical Finish
-The rules require the car to stop exactly after completing 3 laps (12 control lines/corners).
+- Lap Counter and Technical Finish: The rules require the car to stop exactly after completing 3 laps (12 control lines/corners).
 
-Debounce Filter: When a line is crossed, the reading is held for 1.7s (orange/blue_timer). This prevents the same line from being counted multiple times as the chassis passes over it.
+- Debounce Filter: When a line is crossed, the reading is held for 1.7s (orange/blue_timer). This prevents the same line from being counted multiple times as the chassis passes over it.
 
-Non-Blocking Finish: Upon reaching lap 12, a 1s grace period timer is activated. The robot continues to navigate in a controlled manner to cross the finish line completely before shutting down definitively with LNM.stop().
+- Non-Blocking Finish: Upon reaching lap 12, a 1s grace period timer is activated. The robot continues to navigate in a controlled manner to cross the finish line completely before shutting down definitively with LNM.stop().
 
 ### Flowchart
 
