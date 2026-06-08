@@ -203,15 +203,15 @@ Open challenge
 
 To navigate without relying on continuous lines, the robot measures the free space on either side using two lateral Regions of Interest (`roi` and `roi2`).
 
--   **Error Calculation:** $Error = \text{Left Area} - \text{Right Area}$
+-   **Error Calculation:** $Error = Left Area - Right Area
     
--   **PD Controller:** Controls an Ackermann servo using parameters $K_p = 0.015$ and $K_d = 0.005$ (centre at $80^\circ$).
+-   **PD Controller:** Controls an Ackermann servo using parameters K_p = 0.015 and K_d = 0.005 (centre at 80°)
     
 -   **Stability Filters (Anti-Zigzag):**
 
     -   `DEAD_PIXEL_THRESHOLD = 150`: Ignores insignificant variations in area.
         
-    -   `ANGLE_TOLERANCE = 3`: If the correction is minimal (between $77^\circ$ and $83^\circ$), forces the heading to $80^\circ$ (straight ahead) to avoid oscillations and save energy.
+    -   `ANGLE_TOLERANCE = 3`: If the correction is minimal 77° and $83°, forces the heading to $80^\circ$ (straight ahead) to avoid oscillations and save energy.
 
 The vehicle makes decisions by combining computer vision and forward ultrasonic distance sensing.
 
@@ -222,9 +222,11 @@ Orange line: Locks in a counter-clockwise direction (turning_direction = 2).
 
 Blue Line: Locks clockwise direction (turning_direction = 1).
 
-B. Corner Turning AlgorithmEntry Trigger: If the distance to the front is $< 55\text{ cm}$ and the black area of the walls is $> 11000$, the robot calls LNM.turn_direction() and locks into turning mode (turning = True). Exit Trigger: When the track is clear in front ($> 80\text{ cm}$) and the wall area falls below $8000$, the robot returns to PID centring.
+B. Corner Turning AlgorithmEntry Trigger: If the distance to the front is < 55cm and the black area of the walls is $> 11000, the robot calls LNM.turn_direction() and locks into turning mode (turning = True). Exit Trigger: When the track is clear in front ($> 80\text{ cm}$) and the wall area falls below 8000, the robot returns to PID centring.
 
-Emergency Braking and Active EvasionIf the proximity sensor detects a frontal obstacle within DIST_MIN_CHOQUE (20.0 cm), an immediate hardware response is triggered:Braking: Complete shutdown of the rear motor (LNM.stop()). Inverse Calculation: Calculates an evasion angle symmetrically opposite to the previous turn ($160 - \text{steering\_angle}$). Manoeuvre: Reverses at high power (speed = 85) for 0.75 seconds to clear the obstruction, clears the PID history and resumes driving.
+Emergency Braking and Active EvasionIf the proximity sensor detects a frontal obstacle within DIST_MIN_CHOQUE (20.0 cm), an immediate hardware response is triggered: Braking: Complete shutdown of the rear motor (LNM.stop()).
+
+- Inverse Calculation: Calculates an evasion angle symmetrically opposite to the previous turn 160°. Manoeuvre: Reverses at high power (speed = 85) for 0.75 seconds to clear the obstruction, clears the PID history and resumes driving.
 
 Lap Counter and Technical Finish
 The rules require the car to stop exactly after completing 3 laps (12 control lines/corners).
@@ -266,7 +268,9 @@ If one of the two black walls on the track moves out of the field of view of the
 
 - Blue Direction: Follows the right wall as a reference using the right ToF.
 
-CASE C: Pure Comfort Centring (Priority 3)If the track is clear and both walls are visible, pid_vision is activated. The system seeks symmetrical balance by calculating:$$Error = \text{Left Area} - \text{Right Area}$$The loop calculates the direction required to maintain an error of $0$.
+- #### CASE C: Pure Comfort Centring (Priority 3)
+
+If the track is clear and both walls are visible, pid_vision is activated. The system seeks symmetrical balance by calculating:Error = Left Area - \Right AreaThe loop calculates the direction required to maintain an error of 0.
 
 2. Steering Stability Filters
 To prevent the servo from overheating or experiencing unnecessary vibrations, the outputs of the three PIDs pass through a hysteresis filter: Deadband (ANGLE_TOLERANCE = 3): If the calculated angle is between $77^\circ$ and $83^\circ$, the car forces the servo to $80^\circ$ (straight). This maintains linear inertia on clear stretches and saves battery power.
@@ -280,8 +284,6 @@ if (Front Distance < 20 cm) and (No coloured block detected)
 This mechanism dynamically calculates an escape angle opposite to the last recorded turn ($160 - \text{steering\_angle}$), freeing the chassis from the jam before restarting the main control loop.
 
 ```
-
-
 
 ### Flowchart
 
