@@ -306,9 +306,9 @@ The vehicle makes decisions by combining computer vision and forward ultrasonic 
 
 On start-up, the robot detects the colour of the first finish line (area > 1200) to determine the turning direction:
 
-- Orange line: Locks in a counter-clockwise direction (turning_direction = 2).
+- Orange line: Locks in a counter-clockwise direction.
 
-- Blue Line: Locks clockwise direction (turning_direction = 1).
+- Blue Line: Locks clockwise direction.
 
 ### B. Corner Turning Algorithm Entry Trigger:
 
