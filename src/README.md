@@ -114,28 +114,87 @@ If you plan to clone this repository, we suggest using this section as a referen
 Calibration
 ====
 
-Computer Vision Calibration (camera_calibration.py): Since lighting conditions at the event can vary drastically due to artificial lighting or nearby windows, the OpenCV-based vision system implements dynamic calibration.
+To ensure that our autonomous vehicle maintains optimal tracking accuracy under any changes in ambient track lighting, we designed and implemented an interactive calibration application with a **Graphical User Interface (GUI)** using the `customtkinter` library.
 
-* **Perspective Matrix (Bird’s Eye View):** Geometric camera correction to transform the perspective view into an aerial plan view. This allows for the precise measurement of actual distances to the track lines and blocks.
+This tool allows the team to tune threshold ranges in the **CIELAB** colour space in real time and export the results directly to standardised configuration files in **JSON** format.
 
-* **HSV Color Thresholds (Color Thresholding):** Adjustment of the color mask ranges for accurate detection of lines (Black/White) and traffic elements (Red and Green Blocks).
+The application implements an event-driven architecture by combining real-time processing from **OpenCV** and **Picamera2** with the main rendering loop (`mainloop`) of the graphical interface.
 
-* **Code Operation:** The script uses runtime sliders (cv2.createTrackbar) to find the optimal values for H (Hue), S (Saturation), and V (Value), which are automatically exported to a .json or .yaml configuration file that the main script reads upon startup.
+<img width="212" height="692" alt="untitled@1 25x" src="https://github.com/user-attachments/assets/477382e0-c876-448b-9bd1-81d4c36f85eb" />
+
+### Key Software Components
+
+### 1. High-Performance Graphical Interface (`VisionApp`)
+
+Built on a responsive design using dark panels (`ctk.set_appearance_mode("Dark")`), the interface is divided into two main sections:
+
+-   **Side Control Panel:** Contains a drop-down menu with presets (`COLOR_PRESETS`) to quickly start searching for specific colours (Red, Green, Blue, Purple, Orange and Black). It features 6 high-precision linear sliders (`CTkSlider`) that dynamically control the minimum and maximum limits of the **L**, **A** and **B** channels.
+
+-   **Horizontal Multi-tab Display Panel:** To provide accurate feedback during calibration, the script uses the `np.hstack()` method to combine three separate image matrices into a single real-time video strip:
+    
+    1.  **Original Frame:** The captured raw stream, geometrically corrected in reverse to correspond to the physical position of the camera.
+        
+    2.  **Binary Mask:** A black-and-white image that shows exactly which pixels are passing through the filter based on the current slider settings.
+        
+    3.  **Segmented Result:** The matrix operation (`cv.bitwise_and`) that isolates the filtered objects whilst retaining their actual colours, allowing you to see immediately whether ground noise is being captured.
 
 
-Mechanical Steering Calibration (`steering_calibration.py`)
-The mechanical components of the steering system (servo links and Ackermann geometry) are rarely perfectly symmetrical by design. 
+       ### 2. Mask Processing and Morphological Filtering (`find_mask`)
 
-* **Neutral Point Adjustment (Trim):** Defines the exact pulse width (in microseconds or degrees) that forces the vehicle to move in a perfect straight line.
-* **Maximum Limit Mapping (Endpoints):** Configuration of the maximum left and right turning angles. This prevents the servo motor from being overloaded, avoiding mechanical jams or excessive current draw that could reset the electronics.
-    * *Operation in the code:* When this module is executed, the servo oscillates between its critical points, allowing the operator to visually verify the alignment of the front wheels before setting the parameters in the software constants.
+When the sliders are moved, the `VisionController` class evaluates the Region of Interest (ROI) and calculates the binary segmentation using `cv.inRange`. To clean the signal of external factors or track imperfections, a morphological filtering loop for spatial cleaning is applied:
 
+```
+mask = cv.erode(mask, kernel, iterations=1)
+mask = cv.dilate(mask, kernel, iterations=1)
 
-Calibration of Kinematic and Distance Sensors (`sensor_calibration.py`)
-Module responsible for stabilizing the proximity and telemetry sensors before allowing the chassis to move.
+```
 
-* **Gyroscope/IMU Calibration (Offset Reset):** When the robot is powered on, it must remain stationary for approximately 2 to 3 seconds. The script calculates the average white noise of the sensor (magnetic/gyroscopic drift) on the X, Y, and Z axes to establish the relative zero degree of orientation.
-* **Distance Sensor Filtering:** Initialization and calculation of the error threshold for ultrasonic sensors or time-of-flight (ToF/LiDAR) sensors, ensuring accurate detection of the track’s side walls.
+## Structure of the JSON Configuration File
+
+When the operator clicks **"SAVE JSON"**, the application opens a native file browser and saves a structured object that the main navigation script reads when the vehicle starts up. This means you don’t have to touch a single line of source code before running a race.
+
+Example of the automatically generated output format:
+
+```
+{
+    "color": "BLUE",
+    "timestamp": "2026-06-02T10:13:21.286307",
+    "bounds": {
+        "lower": [
+            30,
+            110,
+            0
+        ],
+        "upper": [
+            255,
+            184,
+            95
+        ]
+    },
+    "space": "LAB"
+}
+
+```
+
+## Technical Procedure for the Competition
+
+This is the procedure our team follows at the test bench before each official attempt:
+
+**1. Select the Target:**
+
+Launch the software and select the item to be calibrated from the drop-down menu (for example, `GREEN` for the avoidance blocks or `BLACK` for the boundary lines).
+
+**2. Adjust the Colour Thresholds:**
+
+Move the **A** (green-red axis) and **B** (blue-yellow axis) sliders. Because the LAB colour space decouples brightness, colour can be isolated very intuitively. Adjust the **L** (Luminance) slider to include or exclude the intensity of the ceiling lights.
+
+**3. Check the Video Strip:**
+
+Look at the third image on the screen (Segmented Result). The target should be clearly defined and the background of the track should be completely dark (pure black).
+
+**4. Save the settings:**
+
+Press the green **SAVE JSON** button. The system permanently saves the calibration with a timestamp for version control.
 
 Open challenge
 ====
