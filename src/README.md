@@ -184,13 +184,16 @@ This is the procedure our team follows at the test bench before each official at
 
 Launch the software and select the item to be calibrated from the drop-down menu (for example, `GREEN` for the avoidance blocks or `BLACK` for the boundary lines).
 
+
 **2. Adjust the Colour Thresholds:**
 
 Move the **A** (green-red axis) and **B** (blue-yellow axis) sliders. Because the LAB colour space decouples brightness, colour can be isolated very intuitively. Adjust the **L** (Luminance) slider to include or exclude the intensity of the ceiling lights.
 
+
 **3. Check the Video Strip:**
 
 Look at the third image on the screen (Segmented Result). The target should be clearly defined and the background of the track should be completely dark (pure black).
+
 
 **4. Save the settings:**
 
