@@ -8,6 +8,8 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200)
 
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 
+states = {"straight": False, "girando": False}
+
 running = True
 loops = 0
 
@@ -16,23 +18,27 @@ blue_timer = time.time()
 time_lap = time.time()
 n = 0
 
-# --- PARÁMETROS DEL CONTROLADOR PD HÍBRIDO ---
-Kp_hybrid = 0.015    
-Kd_hybrid = 0.005   
+# --- NUEVOS PARÁMETROS PID PARA CONTROL VISUAL ---
+Kp_vision = 0.015    
+Ki_vision = 0.0
+Kd_vision = 0.005   
 
 prev_error = 0.0
-steering_angle = 80     
+integral = 0.0
+MAX_INTEGRAL = 15.0 
+girando = False
+conteo = False
 
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 25.0  
+DIST_MIN_CHOQUE = 20.0  
+steering_angle = 80     
 
-# --- VARIABLES DE TOLERANCIA Y FILTRADO ---
-UMBRAL_PIXELES_MUERTO = 150  # Ignora variaciones de área insignificantes
-TOLERANCIA_ANGULO = 3        # Banda muerta del servo para tramos rectos
-MIN_PARED_VALIDA = 350       # Límite por debajo del cual se considera pared perdida en cámara
+# --- VARIABLES DE TOLERANCIA (EVITAR ZIGZAGUEO) ---
+UMBRAL_PIXELES_MUERTO = 150  # Ignora errores de área menores a este valor
+TOLERANCIA_ANGULO = 3        # Si el ángulo está entre 77 y 83 (80 +/- 3), va recto
 
-# --- CONTROL DE ACTIVACIÓN RETARDADA DEL PD ---
-tiempo_primer_loop = None    # Almacenará el timestamp exacto del primer cruce
+# --- CONTROL DE APAGADO TEMPORAL DEL PD (NO BLOQUEANTE) ---
+pd_disable_until = 0.0       # Guarda el timestamp hasta el cual el PD estará apagado
 
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
 end_game_triggered = False
@@ -55,10 +61,16 @@ def obtener_areas():
     black_area_left = LNM.vision.max_contour(blackcnt_left, roi2)[0]
     return [black_area_right, black_area_left]
 
+def draw_rois():
+    LNM.vision.draw_roi(roi)
+    LNM.vision.draw_roi(roi2)
+    LNM.vision.draw_contours(blackcnt_left, roi2, (0, 255, 255))
+    LNM.vision.draw_contours(blackcnt_right, roi, (0, 255, 255))
+
 # --- MAIN CONTROL LOOP ---
 while running:
     try:
-        # Adquisición de datos de sensores, vídeo y tiempo actual del ciclo
+        # Sensors and data acquisition
         current_time = time.time()
         LNM.vision.receive_image()
         LNM.obtener_linea_azul()
@@ -66,53 +78,42 @@ while running:
         LNM.obtenerarea_frontal()
         
         black_areas = obtener_areas()
+        draw_rois()
+
+        cv2.imshow('Vision HD - Posicion Corregida', LNM.vision.frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # FRENO DE MANO Y RETROCESO CONTROLADO EN ÁNGULO POR PD (Centrado)
+        # FRENO DE MANO DE EMERGENCIA (Basado en proximidad física frontal)
         # =========================================================================
         if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
-            print(f"🚨 ¡OBSTÁCULO! Retroceso por tiempo fijo (0.75s) con dirección asistida por PD.")
+            print(f"🚨 ¡FRENO DE MANO! Frente obstruido a {front_dist:.2f} cm.")
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            start_reverse = time.time()
-            # El bucle se ejecuta estrictamente durante 0.75 segundos a velocidad fija de 85
-            while (time.time() - start_reverse) < 0.75:
-                LNM.vision.receive_image()
-                black_areas = obtener_areas()
-                _, left_dist, right_dist = LNM.get_distances()
+            angulo_escape_opuesto = 160 - steering_angle
+            angulo_escape_opuesto = max(40, min(120, angulo_escape_opuesto))
+            
+            if angulo_escape_opuesto == 80:
+                angulo_escape_opuesto = 60
                 
-                area_izq_rev = black_areas[1]
-                area_der_rev = black_areas[0]
-                
-                # Cálculo de error híbrido estándar (busca el centro)
-                if area_izq_rev > MIN_PARED_VALIDA and area_der_rev > MIN_PARED_VALIDA:
-                    error_rev = area_izq_rev - area_der_rev
-                else:
-                    error_rev = (right_dist - left_dist) * 350
-                
-                # Ejecución del algoritmo PD para ajustar el ángulo de las ruedas en reversa
-                derivative_rev = error_rev - prev_error
-                correction_rev = (Kp_hybrid * error_rev) + (Kd_hybrid * derivative_rev)
-                prev_error = error_rev
-                
-                # [INVERSIÓN CINEMÁTICA]: Dirección invertida para corregir hacia el centro marchando atrás
-                steering_angle_rev = int(80 - correction_rev)
-                steering_angle_rev = max(40, min(120, steering_angle_rev))
-                
-                LNM.move_backward(angle=steering_angle_rev, speed=85)
-                time.sleep(0.02)
+            LNM.move_backward(angle=angulo_escape_opuesto, speed=85)
+            time.sleep(0.75)
             
             LNM.turn_center(log=False)
             prev_error = 0.0
+            integral = 0.0
+            pd_disable_until = 0.0
             time.sleep(0.1)
-            continue  # Volver al inicio del bucle principal
+            continue
 
-        # Avance continuo con la potencia establecida para el Open Challenge
-        LNM.move_forward(speed=130) 
+        # Avanzamos con la velocidad normal del Open Challenge
+        LNM.move_forward(speed=120) 
 
-        # Detección del sentido inicial de la pista
+        # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
                  LNM.turning_direction = 2
@@ -120,76 +121,94 @@ while running:
                  LNM.turning_direction = 1
 
         # =========================================================================
-        # SISTEMA DE NAVEGACIÓN PD HÍBRIDO (Activación retardada tras primer loop)
+        # INDUCCIÓN DE SILENCIO AL PD ANTES DEL GIRO (Tu nueva condición)
         # =========================================================================
-        if tiempo_primer_loop is not None and (current_time - tiempo_primer_loop) > 0.5:
-            area_izq = black_areas[1]
-            area_der = black_areas[0]
+        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
+            if pd_disable_until == 0.0:  # Evita re-calcular el tiempo si ya está activo
+                print("⏸️ ¡Esquina detectada! Desactivando el PD por 0.8 segundos.")
+                pd_disable_until = current_time + 0.8
 
-            if area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA:
-                error = area_izq - area_der
-            else:
-                error = (right_dist - left_dist) * 350
+        # 2. CORNER DETECTION (Detección de Esquinas para Cruzar)
+        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
+            LNM.turn_direction()
+            girando = True
+            prev_error = 0.0
+            integral = 0.0
+              
+        if LNM.black_area < 8000 and girando and front_dist > 80:
+           LNM.turn_center()
+           girando = False
+           conteo = False
+           steering_angle = 80
+           pd_disable_until = 0.0  # Reseteamos el seguro al salir de la curva
 
+        # =========================================================================
+        # ESTRATEGIA DE CENTRADO MEDIANTE DIFERENCIA DE ÁREAS (PID VISUAL)
+        # =========================================================================
+        # Se añade la condición: Solo calcula si el tiempo actual superó el bache de 0.8s
+        if not girando and LNM.turning_direction != 0 and current_time > pd_disable_until:
+            # Error = Izquierda - Derecha
+            error = black_areas[1] - black_areas[0]
+            
+            # Control integral con filtro anti-windup
+            integral += error
+            integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
+            
             derivative = error - prev_error
-            correction = (Kp_hybrid * error) + (Kd_hybrid * derivative)
+            correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
             prev_error = error
             
+            # Cálculo del ángulo base
             steering_angle = int(80 + correction)
             steering_angle = max(40, min(120, steering_angle))
+            print(f"Error: {error}, Integral: {integral:.2f}, Derivative: {derivative}, Steering Angle: {steering_angle}")
             
-            # --- FILTROS DINÁMICOS DE ESTABILIZACIÓN (Anti-Zigzag) ---
-            if abs(error) < UMBRAL_PIXELES_MUERTO and area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA: 
+            # --- FILTROS DE TOLERANCIA SUAVE (Evita movimientos constantes en rectas) ---
+            if abs(error) < UMBRAL_PIXELES_MUERTO: 
                 LNM.turn_center()
                 steering_angle = 80
             elif abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=75)
+                LNM.turn_right(angle=steering_angle, speed=50)
             elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=75)
-        else:
-            # Modo salida pasiva: Forzamos dirección recta y reseteamos históricos
-            LNM.turn_center()
-            steering_angle = 80
-            prev_error = 0.0
+                LNM.turn_left(angle=steering_angle, speed=50)
+        elif pd_disable_until > current_time:
+            # Mientras el PD está apagado por la esquina, forzamos tranquilidad en las ruedas
+            # para que el comando manual 'LNM.turn_direction()' trabaje libremente.
+            pass
 
         # =========================================================================
-        # CONTEO DE VUELTAS Y FIN DE CARRERA ASÍNCRONO
+        # 3. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
         # =========================================================================
         if LNM.orange_area > 500 and n == 0 and LNM.turning_direction == 2: 
             orange_timer = current_time
             n = 1
             loops += 1
-            if loops == 1 and tiempo_primer_loop is None:
-                tiempo_primer_loop = current_time
-                print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD.")
 
         if LNM.blue_area > 500 and n == 0 and LNM.turning_direction == 1: 
             blue_timer = current_time
             n = 1
             loops += 1
-            if loops == 1 and tiempo_primer_loop is None:
-                tiempo_primer_loop = current_time
-                print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD.")
 
-        if current_time - orange_timer > 3.7 and LNM.turning_direction == 2: 
+        if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
             n = 0
+            print("Timer reset, ready for next orange line detection.")
 
-        if current_time - blue_timer > 3.7 and LNM.turning_direction == 1:
+        if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
             n = 0
+            print("Timer reset, ready for next blue line detection.")
 
-        print("Loop count:", loops)
-
+        # Control asíncrono para el fin de carrera (3 segundos extra manteniendo lógica)
         if loops >= 12 and not end_game_triggered:
-            print("🏁 ¡Vuelta 12 alcanzada! Activando tiempo de gracia...")
+            print("🏁 ¡Vuelta 12 alcanzada! Iniciando cronómetro de 3 segundos de gracia...")
             end_game_timer = current_time
             end_game_triggered = True
 
         if end_game_triggered:
-            if current_time - end_game_timer >= 1.0:
-                print("⏱️ Tiempo de gracia completado. Deteniendo robot de forma segura.")
+            if current_time - end_game_timer >= 1:
+                print("⏱️ Tiempo de gracia completado. Deteniendo robot.")
                 break
         
     except Exception as e:
