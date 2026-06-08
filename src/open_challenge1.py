@@ -28,15 +28,19 @@ MAX_AREA_ROJO = 14000
 MAX_AREA_VERDE = 12000 
 MIN_PARED_VALIDA = 350   # Si el área baja de esto, consideramos que la pared se "perdió"
 
+# --- CONFIGURACIÓN DE VELOCIDAD DINÁMICA ---
+VEL_MIN = 50
+VEL_MAX = 155
+# Referencias físicas de pista dadas por el usuario (suma de ambos lados)
+DIST_SUM_MIN = 40.0   # 20cm + 20cm (Caso más cerrado)
+DIST_SUM_MAX = 84.0   # 42cm + 42cm (Caso más amplio)
+# Referencias estimadas para el área combinada de las ROIs laterales (320x150 cada una)
+AREA_SUM_MIN = 800    
+AREA_SUM_MAX = 24000  
+
 # --- CONFIGURACIÓN DE EMERGENCIA Y TOLERANCIAS ---
 DIST_MIN_CHOQUE = 20.0  
 TOLERANCIA_ANGULO = 3    # Banda muerta para evitar que el servo tiemble en rectas
-
-# --- CONFIGURACIÓN DE VELOCIDAD DINÁMICA ---
-MIN_SPEED = 50           # Velocidad mínima en zonas muy críticas o cerradas
-MAX_SPEED = 155          # Velocidad máxima en rectas perfectas
-CORNER_SPEED = 55        # Velocidad fija segura mientras se ejecuta el giro de esquina
-OBSTACLE_SPEED_CAP = 75  # Límite de velocidad máxima permitida al esquivar tráfico
 
 # --- CONFIGURACIÓN DE ROIS LATERALES PARA EL CENTRADO ---
 roi_izq = ROI(0, 100, 320, 150)
@@ -85,6 +89,41 @@ def get_color_signal():
             
     return "NINGUNO"
 
+def calcular_velocidad_dinamica(area_i, area_d, ToF_i, ToF_d, ToF_f, en_curva):
+    """ Calcula la velocidad óptima entre 50 y 155 basándose en el ancho de la pista """
+    # Si estamos ejecutando un giro de esquina forzado, reducimos al mínimo para no derrapar
+    if en_curva:
+        return VEL_MIN
+
+    # 1. Factor basado en distancia física (ToF)
+    # Acotamos los sensores a rangos reales para evitar lecturas infinitas de ruido
+    dist_izq_clamped = max(10.0, min(45.0, ToF_i))
+    dist_der_clamped = max(10.0, min(45.0, ToF_d))
+    suma_dist = dist_izq_clamped + dist_der_clamped
+    
+    # Normalización del factor ToF (0.0 cerrado, 1.0 completamente abierto)
+    factor_tof = (suma_dist - DIST_SUM_MIN) / (DIST_SUM_MAX - DIST_SUM_MIN)
+    factor_tof = max(0.0, min(1.0, factor_tof))
+    
+    # 2. Factor basado en Visión (Área Negra Lateral)
+    suma_areas = area_i + area_d
+    factor_vision = (suma_areas - AREA_SUM_MIN) / (AREA_SUM_MAX - AREA_SUM_MIN)
+    factor_vision = max(0.0, min(1.0, factor_vision))
+    
+    # Fusionamos ambos factores (60% peso a los sensores de distancia, 40% a la visión)
+    factor_pista = (factor_tof * 0.6) + (factor_vision * 0.4)
+    
+    # Calcular velocidad base interpolada
+    velocidad = int(VEL_MIN + (VEL_MAX - VEL_MIN) * factor_pista)
+    
+    # 3. Atenuación por proximidad frontal (Filtro de seguridad proactivo)
+    # Si nos acercamos a una pared de frente (entre 55cm y 120cm), reducimos linealmente la velocidad
+    if 55.0 < ToF_f < 120.0:
+        factor_freno = (ToF_f - 55.0) / (120.0 - 55.0)
+        velocidad = int(VEL_MIN + (velocidad - VEL_MIN) * factor_freno)
+        
+    return max(VEL_MIN, min(VEL_MAX, velocidad))
+
 # --- MAIN CONTROL LOOP ---
 try:
     while True:
@@ -123,37 +162,12 @@ try:
             continue  
 
         # =========================================================================
-        # CÁLCULO DE VELOCIDAD DINÁMICA ASÍNCRONA
+        # CÁLCULO Y APLICACIÓN DE VELOCIDAD DINÁMICA
         # =========================================================================
-        if girando:
-            # Si está ejecutando un giro de esquina cerrada, mantiene velocidad controlada
-            velocidad_dinamica = CORNER_SPEED
-        else:
-            # A. Factor Frontal (ToF): Espacio libre adelante. 
-            # Si front_dist >= 160cm es 1.0 (máximo). Si baja a 40cm se acerca a 0.0.
-            factor_frontal = (front_dist - 40.0) / (160.0 - 40.0)
-            factor_frontal = max(0.0, min(1.0, factor_frontal))
-            
-            # B. Factor Lateral (Visual): Densidad de las paredes.
-            # Sumatoria del área negra. Si están muy pegadas, el área sube (ej: 9000 pixeles).
-            # Si la ronda es abierta o despejada, el área baja (ej: menos de 1000 pixeles).
-            total_area_lateral = area_izq + area_der
-            factor_lateral = 1.0 - ((total_area_lateral - 800.0) / (9000.0 - 800.0))
-            factor_lateral = max(0.0, min(1.0, factor_lateral))
-            
-            # C. Combinación de factores (75% peso al frente por seguridad, 25% apertura de paredes)
-            indice_apertura = (0.75 * factor_frontal) + (0.25 * factor_lateral)
-            
-            # Escalar linealmente entre tu rango de velocidades [50 - 155]
-            velocidad_dinamica = int(MIN_SPEED + (MAX_SPEED - MIN_SPEED) * indice_apertura)
-            
-            # D. Cap de seguridad por Tráfico: Si hay un obstáculo cerca, limitamos la velocidad
-            # para evitar que el coche embista el bloque por exceso de inercia al cambiar de carril.
-            if color_detectado in ["ROJO", "VERDE"]:
-                velocidad_dinamica = min(velocidad_dinamica, OBSTACLE_SPEED_CAP)
-
-        # Enviar la velocidad calculada dinámicamente al motor
-        LNM.move_forward(velocidad_dinamica)
+        velocidad_calculada = calcular_velocidad_dinamica(
+            area_izq, area_der, left_dist, right_dist, front_dist, girando
+        )
+        LNM.move_forward(velocidad_calculada)
 
         # 2. DETECCIÓN DEL SENTIDO INICIAL DE LA PISTA
         if LNM.turning_direction == 0: 
@@ -215,7 +229,7 @@ try:
             # --- CORRECCIÓN FINAL Y FILTRADO DE DIRECCIÓN ---
             steering_angle = max(40, min(120, steering_angle))
             
-            # Filtro de histéresis
+            # Filtro de histéresis: si el quiebre es mínimo, mantén recto para no perder inercia
             if abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
                 LNM.turn_center()
                 steering_angle = 80  
