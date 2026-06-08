@@ -31,6 +31,9 @@ UMBRAL_PIXELES_MUERTO = 150  # Ignora variaciones de área insignificantes
 TOLERANCIA_ANGULO = 3        # Banda muerta del servo para tramos rectos
 MIN_PARED_VALIDA = 350       # Límite por debajo del cual se considera pared perdida en cámara
 
+# --- CONTROL DE ACTIVACIÓN RETARDADA DEL PD ---
+tiempo_primer_loop = None    # Almacenará el timestamp exacto del primer cruce
+
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
 end_game_triggered = False
 end_game_timer = 0.0
@@ -55,7 +58,8 @@ def obtener_areas():
 # --- MAIN CONTROL LOOP ---
 while running:
     try:
-        # Adquisición de datos de sensores y vídeo
+        # Adquisición de datos de sensores, vídeo y tiempo actual del ciclo
+        current_time = time.time()
         LNM.vision.receive_image()
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
@@ -65,21 +69,41 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # FRENO DE MANO DE EMERGENCIA (Seguridad física proactiva)
+        # FRENO DE MANO Y RETROCESO DINÁMICO ASISTIDO POR PD
         # =========================================================================
         if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
-            print(f"🚨 ¡FRENO DE MANO! Frente obstruido a {front_dist:.2f} cm.")
+            print(f"🚨 ¡OBSTÁCULO! Iniciando retroceso controlado por PD. Frente: {front_dist:.2f} cm.")
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            angulo_escape_opuesto = 160 - steering_angle
-            angulo_escape_opuesto = max(40, min(120, angulo_escape_opuesto))
-            
-            if angulo_escape_opuesto == 80:
-                angulo_escape_opuesto = 60
+            start_reverse = time.time()
+            while (time.time() - start_reverse) < 1.2:
+                LNM.vision.receive_image()
+                LNM.obtenerarea_frontal()
+                black_areas = obtener_areas()
+                front_dist, left_dist, right_dist = LNM.get_distances()
                 
-            LNM.move_backward(angle=angulo_escape_opuesto, speed=85)
-            time.sleep(0.75)
+                if front_dist >= 45.0:
+                    print("✅ Frente despejado con éxito.")
+                    break
+                
+                area_izq_rev = black_areas[1]
+                area_der_rev = black_areas[0]
+                
+                if area_izq_rev > MIN_PARED_VALIDA and area_der_rev > MIN_PARED_VALIDA:
+                    error_rev = area_izq_rev - area_der_rev
+                else:
+                    error_rev = (right_dist - left_dist) * 350
+                
+                derivative_rev = error_rev - prev_error
+                correction_rev = (Kp_hybrid * error_rev) + (Kd_hybrid * derivative_rev)
+                prev_error = error_rev
+                
+                steering_angle = int(80 - correction_rev)
+                steering_angle = max(40, min(120, steering_angle))
+                
+                LNM.move_backward(angle=steering_angle, speed=80)
+                time.sleep(0.02)
             
             LNM.turn_center(log=False)
             prev_error = 0.0
@@ -97,54 +121,60 @@ while running:
                  LNM.turning_direction = 1
 
         # =========================================================================
-        # SISTEMA DE NAVEGACIÓN PD HÍBRIDO (Visión + Ultrasonidos Integrados)
+        # SISTEMA DE NAVEGACIÓN PD HÍBRIDO (Con activación retardada)
         # =========================================================================
-        area_izq = black_areas[1]
-        area_der = black_areas[0]
+        # El PD solo toma el control si ya se registró el 1er loop Y pasaron más de 0.5 segundos
+        if tiempo_primer_loop is not None and (current_time - tiempo_primer_loop) > 0.5:
+            area_izq = black_areas[1]
+            area_der = black_areas[0]
 
-        if area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA:
-            # CASO OPTIMAL: Ambas paredes detectadas en cámara -> Error por visión espacial
-            error = area_izq - area_der
+            if area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA:
+                error = area_izq - area_der
+            else:
+                error = (right_dist - left_dist) * 350
+
+            derivative = error - prev_error
+            correction = (Kp_hybrid * error) + (Kd_hybrid * derivative)
+            prev_error = error
+            
+            steering_angle = int(80 + correction)
+            steering_angle = max(40, min(120, steering_angle))
+            
+            # --- FILTROS DINÁMICOS DE ESTABILIZACIÓN (Anti-Zigzag) ---
+            if abs(error) < UMBRAL_PIXELES_MUERTO and area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA: 
+                LNM.turn_center()
+                steering_angle = 80
+            elif abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
+                LNM.turn_center()
+                steering_angle = 80
+            elif steering_angle > 80:
+                LNM.turn_right(angle=steering_angle, speed=75)
+            elif steering_angle < 80:
+                LNM.turn_left(angle=steering_angle, speed=75)
         else:
-            # CASO DE RESPALDO / CURVA ABIERTA: Una pared sale de foco -> Control por ToF directo
-            # Escalamos la diferencia de distancias (cm) al rango analógico del PD visual
-            error = (right_dist - left_dist) * 350
-
-        # Algoritmo de control Proporcional-Derivativo (PD) continuo
-        derivative = error - prev_error
-        correction = (Kp_hybrid * error) + (Kd_hybrid * derivative)
-        prev_error = error
-        
-        # Mapeo directo sobre el servo de dirección
-        steering_angle = int(80 + correction)
-        steering_angle = max(40, min(120, steering_angle))
-        
-        # --- FILTROS DINÁMICOS DE ESTABILIZACIÓN (Anti-Zigzag) ---
-        if abs(error) < UMBRAL_PIXELES_MUERTO and area_izq > MIN_PARED_VALIDA and area_der > MIN_PARED_VALIDA: 
+            # Modo salida pasiva: Forzamos dirección totalmente recta y reseteamos el histórico del error
             LNM.turn_center()
             steering_angle = 80
-        elif abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
-            LNM.turn_center()
-            steering_angle = 80
-        elif steering_angle > 80:
-            LNM.turn_right(angle=steering_angle, speed=75)
-        elif steering_angle < 80:
-            LNM.turn_left(angle=steering_angle, speed=75)
+            prev_error = 0.0
 
         # =========================================================================
         # CONTEO DE VUELTAS Y FIN DE CARRERA ASÍNCRONO
         # =========================================================================
-        current_time = time.time()
-
         if LNM.orange_area > 500 and n == 0 and LNM.turning_direction == 2: 
             orange_timer = current_time
             n = 1
             loops += 1
+            if loops == 1 and tiempo_primer_loop is None:
+                tiempo_primer_loop = current_time
+                print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD.")
 
         if LNM.blue_area > 500 and n == 0 and LNM.turning_direction == 1: 
             blue_timer = current_time
             n = 1
             loops += 1
+            if loops == 1 and tiempo_primer_loop is None:
+                tiempo_primer_loop = current_time
+                print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD.")
 
         if current_time - orange_timer > 3.7 and LNM.turning_direction == 2: 
             n = 0
