@@ -203,6 +203,7 @@ Open challenge
 ====
 
 ### Strategy
+---
 
 To navigate without relying on continuous lines, the robot measures the free space on either side using two lateral Regions of Interest (`roi` and `roi2`).
 
@@ -218,14 +219,17 @@ To navigate without relying on continuous lines, the robot measures the free spa
 
 The vehicle makes decisions by combining computer vision and forward ultrasonic distance sensing.
 
-A. Track Identification (Track Type)
+### A. Track Identification (Track Type)
+
 On start-up, the robot detects the colour of the first finish line (area > 1200) to determine the turning direction:
 
 - Orange line: Locks in a counter-clockwise direction (turning_direction = 2).
 
 - Blue Line: Locks clockwise direction (turning_direction = 1).
 
-B. Corner Turning AlgorithmEntry Trigger: If the distance to the front is < 55cm and the black area of the walls is > 11000, the robot calls LNM.turn_direction() and locks into turning mode (turning = True). Exit Trigger: When the track is clear in front > 80cm and the wall area falls below 8000, the robot returns to PID centring.
+### B. Corner Turning Algorithm Entry Trigger:
+
+If the distance to the front is < 55cm and the black area of the walls is > 11000, the robot calls LNM.turn_direction() and locks into turning mode (turning = True). Exit Trigger: When the track is clear in front > 80cm and the wall area falls below 8000, the robot returns to PID centring.
 
 - Emergency Braking and Active EvasionIf the proximity sensor detects a frontal obstacle within DIST_MIN_CHOQUE (20.0 cm), an immediate hardware response is triggered: Braking: Complete shutdown of the rear motor (LNM.stop()).
 
@@ -238,10 +242,11 @@ B. Corner Turning AlgorithmEntry Trigger: If the distance to the front is < 55cm
 - Non-Blocking Finish: Upon reaching lap 12, a 1s grace period timer is activated. The robot continues to navigate in a controlled manner to cross the finish line completely before shutting down definitively with LNM.stop().
 
 ### Flowchart
-
+---
 
 
 ### Recommendations
+---
 
 - Reducing Video Latency: In the main loop, comment out or remove the lines for `cv2.imshow` and `cv2.waitKey` entirely during official rounds. Rendering video on screen consumes critical CPU resources and reduces the FPS of the control loop.
 
@@ -253,6 +258,7 @@ Obstacle challenge
 ====
 
 ### Strategy
+---
 
 When the robot is travelling along straight sections or open bends, it evaluates three logical scenarios in sequence to determine its direction using independent PID controllers:
 
@@ -275,10 +281,10 @@ If one of the two black walls on the track moves out of the field of view of the
 
 If the track is clear and both walls are visible, pid_vision is activated. The system seeks symmetrical balance by calculating:Error = Left Area - \Right AreaThe loop calculates the direction required to maintain an error of 0.
 
-2. Steering Stability Filters
+- Steering Stability Filters
 To prevent the servo from overheating or experiencing unnecessary vibrations, the outputs of the three PIDs pass through a hysteresis filter: Deadband (ANGLE_TOLERANCE = 3): If the calculated angle is between $77^\circ$ and $83^\circ$, the car forces the servo to $80^\circ$ (straight). This maintains linear inertia on clear stretches and saves battery power.
 
-3. Emergency Evasive Manoeuvre
+- Emergency Evasive Manoeuvre
 To mitigate collisions caused by blind spots or loss of traction during tight manoeuvres, the system features an autonomous safety response:
 
 ```
@@ -289,15 +295,16 @@ This mechanism dynamically calculates an escape angle opposite to the last recor
 ```
 
 ### Flowchart
-
+---
 
 
 ### Recommendations
+---
 
 -   **Data Synchronisation (Vision vs. ToF):** Please disable `cv2.imshow` and `cv2.waitKey` completely during official rounds. Rendering video on screen consumes critical CPU resources and causes delays (latency) between camera readings and ToF sensor readings.
 
 -   **Hysteresis and False Positives:** Implement a voting filter for colour (detect the block over 2 or 3 consecutive frames before taking action). Reduce the front ROI vertically to ignore floor reflections or ceiling lights that mimic real blocks.
 
--   Smooth PID Transitions: Reset the controllers’ numerical history (previous error = 0 and integral = 0) every time the code switches between vision-based centring and ToF-based avoidance. This prevents sudden jerks and skidding.
+-   **Smooth PID Transitions:** Reset the controllers’ numerical history (previous error = 0 and integral = 0) every time the code switches between vision-based centring and ToF-based avoidance. This prevents sudden jerks and skidding.
 
--   Dynamic Speed: Don’t keep the power set at 65. Reduce your speed during sharp turns (when dodging blocks) to maintain grip, and automatically increase it on straight, clear stretches to improve your lap times.
+-   **Dynamic Speed:** Don’t keep the power set at 65. Reduce your speed during sharp turns (when dodging blocks) to maintain grip, and automatically increase it on straight, clear stretches to improve your lap times.
