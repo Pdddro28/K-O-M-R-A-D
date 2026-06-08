@@ -23,8 +23,8 @@ Kd_hybrid = 0.005
 prev_error = 0.0
 steering_angle = 80     
 
-# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 20.0  
+# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMBENCIA ---
+DIST_MIN_CHOQUE = 25.0  
 
 # --- VARIABLES DE TOLERANCIA Y FILTRADO ---
 UMBRAL_PIXELES_MUERTO = 150  # Ignora variaciones de área insignificantes
@@ -69,57 +69,50 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # FRENO DE MANO Y RETROCESO DINÁMICO ASISTIDO POR PD
+        # FRENO DE MANO Y RETROCESO CONTROLADO EN ÁNGULO POR PD
         # =========================================================================
         if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
-            print(f"🚨 ¡OBSTÁCULO! Iniciando retroceso controlado por PD. Frente: {front_dist:.2f} cm.")
+            print(f"🚨 ¡OBSTÁCULO! Retroceso por tiempo fijo (0.75s) con dirección asistida por PD.")
             LNM.stop(log=False)
             time.sleep(0.05)
             
             start_reverse = time.time()
-            while (time.time() - start_reverse) < 1.2:
+            # El bucle se ejecuta estrictamente durante 0.75 segundos a velocidad fija de 85
+            while (time.time() - start_reverse) < 0.75:
                 LNM.vision.receive_image()
-                LNM.obtenerarea_frontal()
                 black_areas = obtener_areas()
-                front_dist, left_dist, right_dist = LNM.get_distances()
-                
-                if front_dist >= 45.0:
-                    print("✅ Frente despejado con éxito.")
-                    break
+                _, left_dist, right_dist = LNM.get_distances()
                 
                 area_izq_rev = black_areas[1]
                 area_der_rev = black_areas[0]
                 
+                # Mismo cálculo de error híbrido (Cámara o Ultrasonidos si falta visión)
                 if area_izq_rev > MIN_PARED_VALIDA and area_der_rev > MIN_PARED_VALIDA:
                     error_rev = area_izq_rev - area_der_rev
                 else:
                     error_rev = (right_dist - left_dist) * 350
                 
+                # Ejecución del algoritmo PD para ajustar el ángulo de las ruedas
                 derivative_rev = error_rev - prev_error
                 correction_rev = (Kp_hybrid * error_rev) + (Kd_hybrid * derivative_rev)
                 prev_error = error_rev
                 
-                steering_angle = int(80 - correction_rev)
-                steering_angle = max(40, min(120, steering_angle))
+                # [INVERSIÓN CINEMÁTICA]: Al ir marcha atrás, restamos la corrección para 
+                # que el giro del coche respecto a las paredes sea el correcto.
+                steering_angle_rev = int(80 - correction_rev)
+                steering_angle_rev = max(40, min(120, steering_angle_rev))
                 
-                LNM.move_backward(angle=steering_angle, speed=80)
+                # Ejecuta el movimiento hacia atrás actualizando el ángulo dinámicamente
+                LNM.move_backward(angle=steering_angle_rev, speed=85)
                 time.sleep(0.02)
-            angulo_escape_opuesto = 160 - steering_angle
-            angulo_escape_opuesto = max(40, min(120, angulo_escape_opuesto))
-            
-            if angulo_escape_opuesto == 60:
-                angulo_escape_opuesto = 80
-                
-            LNM.move_backward(angle=angulo_escape_opuesto, speed=80)
-            time.sleep(0.75)
             
             LNM.turn_center(log=False)
             prev_error = 0.0
             time.sleep(0.1)
-            continue
+            continue  # Volver al inicio del bucle principal (marcha adelante)
 
         # Avance continuo con la potencia establecida para el Open Challenge
-        LNM.move_forward(speed=70) 
+        LNM.move_forward(speed=130) 
 
         # Detección del sentido inicial de la pista
         if LNM.turning_direction == 0: 
@@ -131,7 +124,6 @@ while running:
         # =========================================================================
         # SISTEMA DE NAVEGACIÓN PD HÍBRIDO (Con activación retardada)
         # =========================================================================
-        # El PD solo toma el control si ya se registró el 1er loop Y pasaron más de 0.5 segundos
         if tiempo_primer_loop is not None and (current_time - tiempo_primer_loop) > 0.5:
             area_izq = black_areas[1]
             area_der = black_areas[0]
@@ -160,7 +152,7 @@ while running:
             elif steering_angle < 80:
                 LNM.turn_left(angle=steering_angle, speed=75)
         else:
-            # Modo salida pasiva: Forzamos dirección totalmente recta y reseteamos el histórico del error
+            # Modo salida pasiva: Forzamos dirección recta y reseteamos históricos
             LNM.turn_center()
             steering_angle = 80
             prev_error = 0.0
@@ -184,10 +176,10 @@ while running:
                 tiempo_primer_loop = current_time
                 print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD.")
 
-        if current_time - orange_timer > 5 and LNM.turning_direction == 2: 
+        if current_time - orange_timer > 3.7 and LNM.turning_direction == 2: 
             n = 0
 
-        if current_time - blue_timer > 5 and LNM.turning_direction == 1:
+        if current_time - blue_timer > 3.7 and LNM.turning_direction == 1:
             n = 0
 
         print("Loop count:", loops)
