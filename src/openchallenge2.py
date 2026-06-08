@@ -193,7 +193,7 @@ while running:
 
         if end_game_triggered:
             # Comprobamos dinámicamente si ya transcurrieron los 3 segundos
-            if current_time - end_game_timer >= 1.5:
+            if current_time - end_game_timer >= 1:
                 print("⏱️ Tiempo de gracia completado. Deteniendo robot.")
                 break
         
