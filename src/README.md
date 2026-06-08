@@ -120,7 +120,7 @@ This tool allows the team to tune threshold ranges in the **CIELAB** colour spac
 
 The application implements an event-driven architecture by combining real-time processing from **OpenCV** and **Picamera2** with the main rendering loop (`mainloop`) of the graphical interface.
 
-<img width="212" height="692" alt="untitled@1 25x" src="https://github.com/user-attachments/assets/477382e0-c876-448b-9bd1-81d4c36f85eb" />
+<img width="200" height="700" alt="untitled@1 25x" src="https://github.com/user-attachments/assets/477382e0-c876-448b-9bd1-81d4c36f85eb" />
 
 ### Key Software Components
 
