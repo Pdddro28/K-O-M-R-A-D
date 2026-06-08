@@ -74,11 +74,11 @@ while running:
         LNM.obtenerarea_frontal()
         
         black_areas = obtener_areas()
-        #draw_rois()
+        draw_rois()
 
-        #cv2.imshow('Vision HD - Posicion Corregida', LNM.vision.frame)
-        #if cv2.waitKey(1) & 0xFF == ord('q'):
-        #    break
+        cv2.imshow('Vision HD - Posicion Corregida', LNM.vision.frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
 
@@ -106,7 +106,7 @@ while running:
             continue
 
         # Avanzamos con la velocidad normal del Open Challenge
-        LNM.move_forward(speed=130) 
+        LNM.move_forward(speed=120) 
 
         # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
@@ -146,7 +146,7 @@ while running:
             # Cálculo del ángulo base
             steering_angle = int(80 + correction)
             steering_angle = max(40, min(120, steering_angle))
-            
+            print(f"Error: {error}, Integral: {integral:.2f}, Derivative: {derivative}, Steering Angle: {steering_angle}")
             # --- FILTROS DE TOLERANCIA SUAVE (Evita movimientos constantes en rectas) ---
             if abs(error) < UMBRAL_PIXELES_MUERTO: 
                 LNM.turn_center()
@@ -183,7 +183,7 @@ while running:
             n = 0
             print("Timer reset, ready for next blue line detection.")
 
-        print("Loop count:", loops)
+        #print("Loop count:", loops)
 
         # Control asíncrono para el fin de carrera (3 segundos extra manteniendo lógica)
         if loops >= 12 and not end_game_triggered:
