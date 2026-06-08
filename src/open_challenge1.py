@@ -24,7 +24,7 @@ prev_error = 0.0
 steering_angle = 80     
 
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 25.0  
+DIST_MIN_CHOQUE = 20.0  
 
 # --- VARIABLES DE TOLERANCIA Y FILTRADO ---
 UMBRAL_PIXELES_MUERTO = 150  # Ignora variaciones de área insignificantes
@@ -104,6 +104,14 @@ while running:
                 
                 LNM.move_backward(angle=steering_angle, speed=80)
                 time.sleep(0.02)
+            angulo_escape_opuesto = 160 - steering_angle
+            angulo_escape_opuesto = max(40, min(120, angulo_escape_opuesto))
+            
+            if angulo_escape_opuesto == 60:
+                angulo_escape_opuesto = 80
+                
+            LNM.move_backward(angle=angulo_escape_opuesto, speed=80)
+            time.sleep(0.75)
             
             LNM.turn_center(log=False)
             prev_error = 0.0
@@ -111,7 +119,7 @@ while running:
             continue
 
         # Avance continuo con la potencia establecida para el Open Challenge
-        LNM.move_forward(speed=130) 
+        LNM.move_forward(speed=70) 
 
         # Detección del sentido inicial de la pista
         if LNM.turning_direction == 0: 
@@ -176,10 +184,10 @@ while running:
                 tiempo_primer_loop = current_time
                 print("⏱️ ¡Primer loop contado! Activando cuenta regresiva de 0.5s para el PD.")
 
-        if current_time - orange_timer > 3.7 and LNM.turning_direction == 2: 
+        if current_time - orange_timer > 5 and LNM.turning_direction == 2: 
             n = 0
 
-        if current_time - blue_timer > 3.7 and LNM.turning_direction == 1:
+        if current_time - blue_timer > 5 and LNM.turning_direction == 1:
             n = 0
 
         print("Loop count:", loops)
