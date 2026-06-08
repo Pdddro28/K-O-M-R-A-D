@@ -253,21 +253,22 @@ Obstacle challenge
 
 When the robot is travelling along straight sections or open bends, it evaluates three logical scenarios in sequence to determine its direction using independent PID controllers:
 
-- #### CASE A: Active Obstacle Avoidance (Priority 1)
+#### CASE A: Active Obstacle Avoidance (Priority 1)
 If the camera detects a coloured block within its front ROI, the system ignores visual centring and uses the side ToF sensors to manoeuvre around it:
 
-- Bloque ROJO (Evitación por la Izquierda): El robot activa el pid_dist_der, cambia su distancia objetivo a DIST_PEGADO (12.0 cm) con respecto a la pared derecha y se aleja del obstáculo.
+- RED block (Avoidance to the Left): The robot activates pid_dist_der, sets its target distance to DIST_PEGADO (12.0 cm) relative to the right wall, and moves away from the obstacle.
 
-- Bloque VERDE (Evitación por la Derecha): Se activa el pid_dist_izq, buscando pegarse a 12.0 cm de la pared izquierda.
+- GREEN block (Avoidance to the Right): pid_dist_izq is activated, aiming to stay 12.0 cm from the left wall.
 
-- #### CASE B: Backing Up Due to Wall Loss (Priority 2)
+
+#### CASE B: Backing Up Due to Wall Loss (Priority 2)
 If one of the two black walls on the track moves out of the field of view of the side ROIs (area < MIN_VALID_WALL), the robot uses the physical ToF sensors to avoid collision, guiding itself according to the direction of the circuit:
 
 - Orange Direction: Follows the left wall as a reference using the left ToF.
 
 - Blue Direction: Follows the right wall as a reference using the right ToF.
 
-- #### CASE C: Pure Comfort Centring (Priority 3)
+#### CASE C: Pure Comfort Centring (Priority 3)
 
 If the track is clear and both walls are visible, pid_vision is activated. The system seeks symmetrical balance by calculating:Error = Left Area - \Right AreaThe loop calculates the direction required to maintain an error of 0.
 
