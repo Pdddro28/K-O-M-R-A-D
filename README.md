@@ -8,6 +8,11 @@ This is the official Github repository proporty of The LNM, before known as Ars 
 | **David Wang** | 01/04/2011 (15 y/o) | 3rd year at U.E.C. Eduardo Blanco | English, Spanish, Mandarin, Taiwanese | Computer Science at UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
 | **Pedro Catamo** | 01/28/2009 (17 y/o) | 5th year at U.E.C. Eduardo Blanco | English, Spanish | Biomaterials Engineering at UNC Humberto Fernandez Moran | pedrocatamo.2009@gmail.com |
 
+Vehicle photo
+====
+
+<img width="3060" height="4080" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" />
+
 Folders Structure
 ====
 
