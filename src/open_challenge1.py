@@ -24,7 +24,7 @@ prev_error = 0.0
 steering_angle = 80     
 
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 20.0  
+DIST_MIN_CHOQUE = 25.0  
 
 # --- VARIABLES DE TOLERANCIA Y FILTRADO ---
 UMBRAL_PIXELES_MUERTO = 150  # Ignora variaciones de área insignificantes
@@ -127,9 +127,9 @@ while running:
             LNM.turn_center()
             steering_angle = 80
         elif steering_angle > 80:
-            LNM.turn_right(angle=steering_angle, speed=50)
+            LNM.turn_right(angle=steering_angle, speed=75)
         elif steering_angle < 80:
-            LNM.turn_left(angle=steering_angle, speed=50)
+            LNM.turn_left(angle=steering_angle, speed=75)
 
         # =========================================================================
         # CONTEO DE VUELTAS Y FIN DE CARRERA ASÍNCRONO
@@ -146,10 +146,10 @@ while running:
             n = 1
             loops += 1
 
-        if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
+        if current_time - orange_timer > 3.7 and LNM.turning_direction == 2: 
             n = 0
 
-        if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
+        if current_time - blue_timer > 3.7 and LNM.turning_direction == 1:
             n = 0
 
         print("Loop count:", loops)
