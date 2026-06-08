@@ -55,23 +55,23 @@ Where:
 Note: To run any file of the project, you have to follow these steps:
 
 Clone the repository:
-```bash
+```
 git clone https://github.com/JD277/K-O-M-R-A-D.git
 ```
 
 Move to the project folder:
-```bash
+```
 cd K-O-M-R-A-D
 ```
 
 Install the dependencies:
-```bash
+```
 pip install opencv-python numpy pandas picamera pyserial customtkinter
 ```
 
 Execute the file you want using this structure:
 (Remember to upload arduino_controller.ino or StandardFirmata to your board first!)
-```bash
+```
 python3 -m src.open_challenge
 ```
 
@@ -122,41 +122,21 @@ The application implements an event-driven architecture by combining real-time p
 
 <img width="200" height="700" alt="untitled@1 25x" src="https://github.com/user-attachments/assets/477382e0-c876-448b-9bd1-81d4c36f85eb" />
 
-### Key Software Components
-
-### 1. High-Performance Graphical Interface (`VisionApp`)
-
-Built on a responsive design using dark panels (`ctk.set_appearance_mode("Dark")`), the interface is divided into two main sections:
-
--   **Side Control Panel:** Contains a drop-down menu with presets (`COLOR_PRESETS`) to quickly start searching for specific colours (Red, Green, Blue, Purple, Orange and Black). It features 6 high-precision linear sliders (`CTkSlider`) that dynamically control the minimum and maximum limits of the **L**, **A** and **B** channels.
-
--   **Horizontal Multi-tab Display Panel:** To provide accurate feedback during calibration, the script uses the `np.hstack()` method to combine three separate image matrices into a single real-time video strip:
-    
-    **Original Frame:** The captured raw stream, geometrically corrected in reverse to correspond to the physical position of the camera.
-        
-    **Binary Mask:** A black-and-white image that shows exactly which pixels are passing through the filter based on the current slider settings.
-        
-    **Segmented Result:** The matrix operation (`cv.bitwise_and`) that isolates the filtered objects whilst retaining their actual colours, allowing you to see immediately whether ground noise is being captured.
-
-
-       ### 2. Mask Processing and Morphological Filtering (`find_mask`)
-
-When the sliders are moved, the `VisionController` class evaluates the Region of Interest (ROI) and calculates the binary segmentation using `cv.inRange`. To clean the signal of external factors or track imperfections, a morphological filtering loop for spatial cleaning is applied:
-
-```
-mask = cv.erode(mask, kernel, iterations=1)
+Key Software Components1. High-Performance Graphical Interface (VisionApp)Built on a responsive design using dark panels (ctk.set_appearance_mode("Dark")), the interface is divided into two main sections:Side Control Panel: Contains a drop-down menu with presets (COLOR_PRESETS) to quickly start searching for specific colours (Red, Green, Blue, Purple, Orange and Black). It features 6 high-precision linear sliders (CTkSlider) that dynamically control the minimum and maximum limits of the L, A and B channels.Horizontal Multi-tab Display Panel: To provide accurate feedback during calibration, the script uses the np.hstack() method to combine three separate image matrices into a single real-time video strip:Original Frame: The captured raw stream, geometrically corrected in reverse to correspond to the physical position of the camera.Binary Mask: A black-and-white image that shows exactly which pixels are passing through the filter based on the current slider settings.Segmented Result: The matrix operation (cv.bitwise_and) that isolates the filtered objects whilst retaining their actual colours, allowing you to see immediately whether ground noise is being captured.2. Mask Processing and Morphological Filtering (find_mask)When the sliders are moved, the VisionController class evaluates the Region of Interest (ROI) and calculates the binary segmentation using cv.inRange. To clean the signal of external factors or track imperfections, a morphological filtering loop for spatial cleaning is applied:Pythonmask = cv.erode(mask, kernel, iterations=1)
 mask = cv.dilate(mask, kernel, iterations=1)
+3. Dynamic Region of Interest Selector (ROI-Detector)To accurately limit the camera's field of view to specific zones of the track and optimize processing resources, we implemented a lightweight geometric calibration utility called ROI-Detector.py.This script uses standard native libraries (tkinter and dataclasses) alongside OpenCV to allow developers to interactively draw, label, and export bounding boxes directly from a live video feed.Pythonimport cv2
+from dataclasses import dataclass
+import tkinter as tk
+from tkinter import filedialog
 
-```
-
-### Structure of the JSON Configuration File
-
-When the operator clicks **"SAVE JSON"**, the application opens a native file browser and saves a structured object that the main navigation script reads when the vehicle starts up. This means you don’t have to touch a single line of source code before running a race.
-
-Example of the automatically generated output format:
-
-```
-{
+# --- DATA STRUCTURES ---
+@dataclass
+class ROI:
+    x1: int; y1: int
+    x2: int; y2: int
+Event-Driven Interaction: The application hooks into the mouse pipeline via cv2.setMouseCallback(). When the operator clicks and drags on the interface, the script updates a temporary visual guide (EVENT_MOUSEMOVE) and permanently appends the coordinate pairs to a global configuration array upon release (EVENT_LBUTTONUP).Proportional Pillarboxing: To guarantee that coordinate selection remains accurate across different camera hardware, the display loop applies a letterbox/pillarbox transformation using cv2.copyMakeBorder. This keeps the original aspect ratio perfectly centered inside a fixed $800 \times 600$ viewport.On-Screen Feedback: Every selected region is drawn dynamically onto the frame using cv2.rectangle(), accompanied by a telemetry label showing the bounding box index and its precise resolution in pixels:Pythonlabel = f"ROI {i+1}: {width}x{height}"
+cv2.putText(display, label, (x1_, y1_ - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+Structure of the Exported Configuration FilesA. JSON Color Calibration FormatWhen the operator clicks "SAVE JSON" in the main interface, the application opens a native file browser and saves a structured object that the main navigation script reads when the vehicle starts up. This means you don’t have to touch a single line of source code before running a race.Example of the automatically generated output format:JSON{
     "color": "BLUE",
     "timestamp": "2026-06-02T10:13:21.286307",
     "bounds": {
@@ -173,31 +153,19 @@ Example of the automatically generated output format:
     },
     "space": "LAB"
 }
+B. Python ROI Blueprint FormatWhen the execution of ROI-Detector.py is finished, the application automatically invokes a native file explorer via filedialog.asksaveasfilename. Instead of using an external data parsing format, it exports a directly importable, native Python script containing an array of serialized ROI objects.Example of the automatically generated output format:Pythonfrom dataclasses import dataclass
 
-```
-
-### Technical Procedure for the Competition
-
-This is the procedure our team follows at the test bench before each official attempt:
-
-**1. Select the Target:**
-
-Launch the software and select the item to be calibrated from the drop-down menu (for example, `GREEN` for the avoidance blocks or `BLACK` for the boundary lines).
+@dataclass
+class ROI:
+    x1: int; y1: int
+    x2: int; y2: int
 
 
-**2. Adjust the Colour Thresholds:**
-
-Move the **A** (green-red axis) and **B** (blue-yellow axis) sliders. Because the LAB colour space decouples brightness, colour can be isolated very intuitively. Adjust the **L** (Luminance) slider to include or exclude the intensity of the ceiling lights.
-
-
-**3. Check the Video Strip:**
-
-Look at the third image on the screen (Segmented Result). The target should be clearly defined and the background of the track should be completely dark (pure black).
-
-
-**4. Save the settings:**
-
-Press the green **SAVE JSON** button. The system permanently saves the calibration with a timestamp for version control.
+rois = [
+    ROI(120, 200, 340, 450),
+    ROI(450, 200, 680, 450),
+]
+Technical Procedures for the CompetitionThis is the procedure our team follows at the test bench before each official attempt:Phase 1: Tracking Area Isolation (ROI-Detector)1. Initialize the Window:Launch the script. The system will open a standardized $800 \times 600$ window displaying the live feed from the camera, automatically padded with black borders if needed to maintain aspect ratio.2. Draw the Regions:Click and drag the left mouse button (LBUTTONDOWN) across the target zones. A yellow tracking box will show the real-time bounds. Releasing the button locks the green box and updates the pixel layout label.3. Clear or Reset (Optional):If a tracking area is misplaced during the session, press the 'c' key on the keyboard to wipe the array clean and start drawing the coordinates fresh.4. Export the Python Blueprint:Press the 'ESC' key or close the application window. A file manager window will pop up prompting you to name and save your compiled .py coordinate script, which will be loaded directly by the vehicle’s high-level navigation code.Phase 2: Color Space Thresholding (VisionApp)1. Select the Target:Launch the software and select the item to be calibrated from the drop-down menu (for example, GREEN for the avoidance blocks or BLACK for the boundary lines).2. Adjust the Colour Thresholds:Move the A (green-red axis) and B (blue-yellow axis) sliders. Because the LAB colour space decouples brightness, colour can be isolated very intuitively. Adjust the L (Luminance) slider to include or exclude the intensity of the ceiling lights.3. Check the Video Strip:Look at the third image on the screen (Segmented Result). The target should be clearly defined and the background of the track should be completely dark (pure black).4. Save the settings:Press the green SAVE JSON button. The system permanently saves the calibration with a timestamp for version control.
 
 Open challenge
 ====
