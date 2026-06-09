@@ -86,7 +86,7 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # Avanzamos a velocidad de competencia
-        LNM.move_forward(speed=120) 
+        LNM.move_forward(speed=130) 
 
         # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 

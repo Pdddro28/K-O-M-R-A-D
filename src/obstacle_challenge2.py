@@ -119,7 +119,7 @@ try:
             continue  
 
         # MANTENER POTENCIA CONSTANTE: Evita caídas de velocidad en el bucle principal
-        LNM.move_forward(65)
+        LNM.move_forward(80)
 
         # 2. DETECCIÓN DEL SENTIDO INICIAL DE LA PISTA
         if LNM.turning_direction == 0: 
