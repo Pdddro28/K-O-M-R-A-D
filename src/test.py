@@ -18,7 +18,7 @@ time_lap = time.time()
 n = 0
 
 # --- PARÁMETROS PID PARA CONTROL VISUAL DE PAREDES ---
-Kp_vision = 0.015    
+Kp_vision = 0.020    
 Ki_vision = 0.0
 Kd_vision = 0.005   
 prev_error = 0.0
@@ -34,8 +34,8 @@ LIMIT_DER = 105     # Máximo giro permitido a la derecha (Disminuir si se traba
 TOLERANCIA_ANGULO = 3       
 
 # --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
-Kp_obstaculo = 0.08  # Bajado un poco para que la transición sea más suave
-MIN_ANCHO_DETECCION = 20   
+Kp_obstaculo = 0.5  # Bajado un poco para que la transición sea más suave
+MIN_ANCHO_DETECCION = 10   
 
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMBENCIA ---
 DIST_MIN_CHOQUE = 20.0  
@@ -124,7 +124,7 @@ while running:
             continue
 
         # Tracción constante establecida a tu velocidad ideal de control (75)
-        LNM.move_forward(speed=75) 
+        LNM.move_forward(speed=105) 
 
         # 1. DETECCIÓN DEL SENTIDO DE LA PISTA
         if LNM.turning_direction == 0: 
