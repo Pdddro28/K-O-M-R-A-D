@@ -29,16 +29,16 @@ MAX_INTEGRAL = 15.0
 girando = False
 conteo = False
 
-# --- CONFIGURACIÓN DE PERFILADO DINÁMICO (TU NUEVA ESTRATEGIA) ---
-# Ajusta este valor (en píxeles). Más alto = más se pegará al lado opuesto.
-# Prueba entre 300 y 800 según veas el comportamiento en pista.
-BIAS_PERFILADO = 500  
+# --- CONFIGURACIÓN DE BIAS DINÁMICO POR ULTRASONIDO ---
+DIST_DESEADA_PARED_OPUESTA = 15.0  # El coche intentará mantener estos cm con la pared externa
+Kp_pared = 1.2                     # Qué tan fuerte va a corregir para alejarse de la pared incorrecta
+DIST_MIN_PARA_PERMITIR_GIRO = 16.0 # Candado: Si está más cerca de esto de la pared interior, NO gira
 
 steering_angle = 80     
 
 # --- VARIABLES DE TOLERANCIA (EVITAR ZIGZAGUEO) ---
-UMBRAL_PIXELES_MUERTO = 150  # Ignora errores de área menores a este valor
-TOLERANCIA_ANGULO = 3        # Si el ángulo está entre 77 y 83 (80 +/- 3), va recto
+UMBRAL_PIXELES_MUERTO = 150  
+TOLERANCIA_ANGULO = 3        
 
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
 end_game_triggered = False
@@ -85,7 +85,7 @@ while running:
 
         front_dist, left_dist, right_dist = LNM.get_distances()
 
-        # Avanzamos fluidamente a la velocidad de competencia
+        # Avanzamos a velocidad de competencia
         LNM.move_forward(speed=120) 
 
         # 1. TRACK TYPE DETECTION
@@ -96,11 +96,22 @@ while running:
                  LNM.turning_direction = 1
 
         # 2. CORNER DETECTION (Detección de Esquinas para Cruzar)
-        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
+        # Se añade el CANDADO DE SEGURIDAD LATERAL para evitar que gire si está ahogado contra la pared
+        puede_girar = True
+        if LNM.turning_direction == 1 and left_dist < DIST_MIN_PARA_PERMITIR_GIRO:  # Vuelta Izquierda
+            puede_girar = False
+        print(f"LNM.turning_direction: {LNM.turning_direction}")
+        if LNM.turning_direction == 2 and right_dist < DIST_MIN_PARA_PERMITIR_GIRO: # Vuelta Derecha
+            print("Pone puede_girar en False")
+            puede_girar = False
+
+        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0 and puede_girar:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
             integral = 0.0
+        elif front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0 and not puede_girar:
+            print("⚠️ Intento de giro bloqueado: Demasiado cerca de la pared interna. Corrigiendo posición...")
               
         if LNM.black_area < 8000 and girando and front_dist > 80:
            LNM.turn_center()
@@ -109,36 +120,41 @@ while running:
            steering_angle = 80
 
         # =========================================================================
-        # ESTRATEGIA DE CENTRADO PERFILADO MEDIANTE ADICIÓN DE BIAS (PID VISUAL)
+        # ESTRATEGIA DE CENTRADO CON RECHAZO DINÁMICO DE PAREDES (HUGGING OPUESTO)
         # =========================================================================
         if not girando and LNM.turning_direction != 0:
-            # Error Base = Izquierda - Derecha
+            # Error puro de la cámara
             error = black_areas[1] - black_areas[0]
             
-            # --- INYECCIÓN DE BIAS PARA PEGARSE AL LADO OPUESTO ---
-            if LNM.turning_direction == 1:    # Sentido Izquierdo -> Nos pegamos a la DERECHA
-                error += BIAS_PERFILADO       # Forzamos un error positivo artificial para que gire a la derecha
-            elif LNM.turning_direction == 2:  # Sentido Derecho -> Nos pegamos a la IZQUIERDA
-                error -= BIAS_PERFILADO       # Forzamos un error negativo artificial para que gire a la izquierda
-            
-            # Control integral con filtro anti-windup
+            # Control PID Visual base
             integral += error
             integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
-            
             derivative = error - prev_error
             correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
             prev_error = error
             
-            # Cálculo del ángulo base
+            # Ángulo base dictado por la cámara
             steering_angle = int(80 + correction)
-            steering_angle = max(40, min(120, steering_angle))
-            print(f"Error con Bias: {error}, Steering Angle: {steering_angle}, Sentido: {LNM.turning_direction}")
             
-            # --- FILTROS DE TOLERANCIA SUAVE ---
-            if abs(error) < UMBRAL_PIXELES_MUERTO: 
-                LNM.turn_center()
-                steering_angle = 80
-            elif abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
+            # --- INYECCIÓN DE BIAS PROPORCIONAL POR ULTRASONIDO ---
+            if LNM.turning_direction == 1:  # Sentido Izquierdo -> Pegarse a la DERECHA (Alejarse de la izquierda)
+                if left_dist < 35.0 and left_dist > 1.0:
+                    # Si se acerca a la pared izquierda, sumamos un empuje hacia la derecha
+                    empuje_derecha = (35.0 - left_dist) * Kp_pared
+                    steering_angle += int(empuje_derecha)
+                    
+            elif LNM.turning_direction == 2:  # Sentido Derecho -> Pegarse a la IZQUIERDA (Alejarse de la derecha)
+                if right_dist < 35.0 and right_dist > 1.0:
+                    # Si se acerca a la pared derecha, restamos un empuje para ir a la izquierda
+                    empuje_izquierda = (35.0 - right_dist) * Kp_pared
+                    steering_angle -= int(empuje_izquierda)
+
+            # Acotamos los límites físicos del servo
+            steering_angle = max(40, min(120, steering_angle))
+            print(f"Distancias -> L: {left_dist:.1f}, R: {right_dist:.1f} | Ángulo Final: {steering_angle}")
+            
+            # --- FILTROS DE TOLERANCIA ---
+            if abs(error) < UMBRAL_PIXELES_MUERTO and (left_dist >= 30 and right_dist >= 30): 
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
@@ -147,7 +163,7 @@ while running:
                 LNM.turn_left(angle=steering_angle, speed=50)
 
         # =========================================================================
-        # 3. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
+        # 3. LOGIC AND LAP COUNTER
         # =========================================================================
         current_time = time.time()
 
@@ -163,21 +179,16 @@ while running:
 
         if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
             n = 0
-            print("Timer reset, ready for next orange line detection.")
 
         if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
             n = 0
-            print("Timer reset, ready for next blue line detection.")
 
-        # Control asíncrono para el fin de carrera
         if loops >= 12 and not end_game_triggered:
-            print("🏁 ¡Vuelta 12 alcanzada! Iniciando cronómetro de 3 segundos de gracia...")
             end_game_timer = current_time
             end_game_triggered = True
 
         if end_game_triggered:
             if current_time - end_game_timer >= 1:
-                print("⏱️ Tiempo de gracia completado. Deteniendo robot.")
                 break
         
     except Exception as e:
