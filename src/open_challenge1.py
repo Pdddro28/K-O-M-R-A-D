@@ -29,9 +29,11 @@ MAX_INTEGRAL = 15.0
 girando = False
 conteo = False
 
-# --- CONFIGURACIÓN DE FRENOS DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 20.0     # Umbral frontal
-DIST_MIN_LATERAL = 8.0    # Umbral lateral (si baja de esto, activa el freno lateral)
+# --- CONFIGURACIÓN DE PERFILADO DINÁMICO (TU NUEVA ESTRATEGIA) ---
+# Ajusta este valor (en píxeles). Más alto = más se pegará al lado opuesto.
+# Prueba entre 300 y 800 según veas el comportamiento en pista.
+BIAS_PERFILADO = 500  
+
 steering_angle = 80     
 
 # --- VARIABLES DE TOLERANCIA (EVITAR ZIGZAGUEO) ---
@@ -83,64 +85,17 @@ while running:
 
         front_dist, left_dist, right_dist = LNM.get_distances()
 
-        # =========================================================================
-        # 1. FRENO DE MANO FRONTAL (Basado en proximidad física frontal)
-        # =========================================================================
-        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
-            print(f"🚨 ¡FRENO DE MANO FRONTAL! Frente obstruido a {front_dist:.2f} cm.")
-            LNM.stop(log=False)
-            time.sleep(0.05)
-            
-            angulo_escape_opuesto = 160 - steering_angle
-            angulo_escape_opuesto = max(40, min(120, angulo_escape_opuesto))
-            
-            if angulo_escape_opuesto == 80:
-                angulo_escape_opuesto = 60
-                
-            LNM.move_backward(angle=angulo_escape_opuesto, speed=85)
-            time.sleep(0.75)
-            
-            LNM.turn_center(log=False)
-            prev_error = 0.0
-            integral = 0.0
-            time.sleep(0.1)
-            continue
-
-        # =========================================================================
-        # 2. FRENO DE MANO LATERAL (Tu nueva propuesta de evasión de paredes)
-        # =========================================================================
-        if (left_dist < DIST_MIN_LATERAL and left_dist > 1.0) or (right_dist < DIST_MIN_LATERAL and right_dist > 1.0):
-            print(f"🚨 ¡FRENO LATERAL! Pared muy cerca. L: {left_dist:.2f}cm, R: {right_dist:.2f}cm. Reacomodando...")
-            LNM.stop(log=False)
-            time.sleep(0.05)
-            
-            # Si el problema es a la izquierda, el ángulo en reversa debe ser cerrado a la izquierda
-            # para que la trompa apunte hacia la derecha y se despegue.
-            if left_dist < right_dist:
-                angulo_escape_lateral = 55  # Ruedas a la izquierda marcha atrás
-            else:
-                angulo_escape_lateral = 105 # Ruedas a la derecha marcha atrás
-                
-            LNM.move_backward(angle=angulo_escape_lateral, speed=90)
-            time.sleep(0.55)  # Retroceso rápido y conciso para no perder demasiado tiempo
-            
-            LNM.turn_center(log=False)
-            prev_error = 0.0
-            integral = 0.0
-            time.sleep(0.1)
-            continue  # Re-evaluar el entorno en el próximo ciclo del bucle principal
-
-        # Avanzamos con la velocidad normal del Open Challenge si el camino está despejado
+        # Avanzamos fluidamente a la velocidad de competencia
         LNM.move_forward(speed=120) 
 
-        # 3. TRACK TYPE DETECTION
+        # 1. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
                  LNM.turning_direction = 2
             elif LNM.blue_area > 1200:
                  LNM.turning_direction = 1
 
-        # 4. CORNER DETECTION (Detección de Esquinas para Cruzar)
+        # 2. CORNER DETECTION (Detección de Esquinas para Cruzar)
         if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
@@ -154,11 +109,17 @@ while running:
            steering_angle = 80
 
         # =========================================================================
-        # ESTRATEGIA DE CENTRADO MEDIANTE DIFERENCIA DE ÁREAS (PID VISUAL)
+        # ESTRATEGIA DE CENTRADO PERFILADO MEDIANTE ADICIÓN DE BIAS (PID VISUAL)
         # =========================================================================
         if not girando and LNM.turning_direction != 0:
-            # Error = Izquierda - Derecha
+            # Error Base = Izquierda - Derecha
             error = black_areas[1] - black_areas[0]
+            
+            # --- INYECCIÓN DE BIAS PARA PEGARSE AL LADO OPUESTO ---
+            if LNM.turning_direction == 1:    # Sentido Izquierdo -> Nos pegamos a la DERECHA
+                error += BIAS_PERFILADO       # Forzamos un error positivo artificial para que gire a la derecha
+            elif LNM.turning_direction == 2:  # Sentido Derecho -> Nos pegamos a la IZQUIERDA
+                error -= BIAS_PERFILADO       # Forzamos un error negativo artificial para que gire a la izquierda
             
             # Control integral con filtro anti-windup
             integral += error
@@ -171,9 +132,9 @@ while running:
             # Cálculo del ángulo base
             steering_angle = int(80 + correction)
             steering_angle = max(40, min(120, steering_angle))
-            print(f"Error: {error}, Integral: {integral:.2f}, Derivative: {derivative}, Steering Angle: {steering_angle}")
+            print(f"Error con Bias: {error}, Steering Angle: {steering_angle}, Sentido: {LNM.turning_direction}")
             
-            # --- FILTROS DE TOLERANCIA SUAVE (Evita movimientos constantes en rectas) ---
+            # --- FILTROS DE TOLERANCIA SUAVE ---
             if abs(error) < UMBRAL_PIXELES_MUERTO: 
                 LNM.turn_center()
                 steering_angle = 80
@@ -186,7 +147,7 @@ while running:
                 LNM.turn_left(angle=steering_angle, speed=50)
 
         # =========================================================================
-        # 5. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
+        # 3. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
         # =========================================================================
         current_time = time.time()
 
@@ -208,7 +169,7 @@ while running:
             n = 0
             print("Timer reset, ready for next blue line detection.")
 
-        # Control asíncrono para el fin de carrera (3 segundos extra manteniendo lógica)
+        # Control asíncrono para el fin de carrera
         if loops >= 12 and not end_game_triggered:
             print("🏁 ¡Vuelta 12 alcanzada! Iniciando cronómetro de 3 segundos de gracia...")
             end_game_timer = current_time
