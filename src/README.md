@@ -336,6 +336,7 @@ If the distance to the front is < 55cm and the black area of the walls is > 1100
  <img width="4212" height="5119" alt="untitled@1 25x (2)" src="https://github.com/user-attachments/assets/a883bf9f-e6aa-4d78-8e31-b39a46432649" />
 
 </div>
+
 ### Recommendations
 ---
 
