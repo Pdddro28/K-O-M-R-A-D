@@ -122,7 +122,7 @@ The application implements an event-driven architecture by combining real-time p
 
 <div align="center">
 
-<img width="200" height="700" alt="untitled@1 25x" src="https://github.com/user-attachments/assets/477382e0-c876-448b-9bd1-81d4c36f85eb" />
+<img width="242" height="692" alt="untitled@1 25x (1)" src="https://github.com/user-attachments/assets/9d747519-a0e4-48d1-b878-fad6fa3810e0" />
 
 </div>
 
@@ -266,7 +266,7 @@ If a tracking area is misplaced during the session, press the **'c'** key on the
 
 **4. Export the Python Blueprint:**
 
-Press the **'ESC'** key or close the application window. A file manager window will pop up prompting you to name and save your compiled `.py` coordinate script, which will be loaded directly by the vehicle’s high-level navigation code.
+Press the **'Q'** key or close the application window. A file manager window will pop up prompting you to name and save your compiled `.py` coordinate script, which will be loaded directly by the vehicle’s high-level navigation code.
 
 #### Phase 2: Color Space Thresholding (`VisionApp`)
 
