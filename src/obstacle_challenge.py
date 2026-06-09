@@ -54,9 +54,9 @@ end_game_triggered = False
 end_game_timer = 0.0
 
 # --- CONFIGURACIÓN DE ROIS LATERALES Y CÁMARA ---
-roi_izq = ROI(0, 100, 320, 150)  # ROI Izquierda Pared
-roi_der = ROI(320, 100, 640, 150) # ROI Derecha Pared
-roi_obstaculo = ROI(0, 50, 640, 380) # ROI Central Obstáculos
+roi_izq = ROI(0, 100, 320, 150)  
+roi_der = ROI(320, 100, 640, 150) 
+roi_obstaculo = ROI(0, 50, 640, 380) 
 
 black_area_right = 0
 black_area_left = 0
@@ -120,29 +120,38 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # FRENO DE MANO DE EMERGENCIA (Solo si no estamos esquivando un bloque)
+        # FRENO DE MANO DE EMERGENCIA CON ORIENTACIÓN ACTIVA (REVERSIÓN INTELIGENTE)
         # =========================================================================
         if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0 and color_detectado == "NINGUNO":
-            print(f"🚨 ¡FRENO DE MANO! Frente obstruido a {front_dist:.2f} cm.")
+            print(f"🚨 ¡FRENO DE MANO! Frente obstruido a {front_dist:.2f} cm. Corrigiendo orientación...")
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            angulo_escape_opuesto = 160 - steering_angle
-            angulo_escape_opuesto = max(40, min(120, angulo_escape_opuesto))
-            
-            if angulo_escape_opuesto == 80:
-                angulo_escape_opuesto = 60
+            # Comparamos distancias laterales reales para saber hacia dónde corregir la trompa
+            if left_dist < right_dist:
+                # Más pegado a la izquierda -> Forzamos ruedas a la izquierda (50) 
+                # para que la cola vaya a la izquierda y la trompa apunte a la DERECHA (vía libre)
+                angulo_retroceso = 50  
+                print("↩️ Corrigiendo hacia la Derecha en reversa.")
+            else:
+                # Más pegado a la derecha -> Forzamos ruedas a la derecha (110)
+                # para que la cola vaya a la derecha y la trompa apunte a la IZQUIERDA (vía libre)
+                angulo_retroceso = 110
+                print("↪️ Corrigiendo hacia la Izquierda en reversa.")
                 
-            LNM.move_backward(angle=angulo_escape_opuesto, speed=85)
-            time.sleep(0.75)
+            # Retroceso controlado a velocidad óptima de desatasco
+            LNM.move_backward(angle=angulo_retroceso, speed=75)
+            time.sleep(0.85) # Tiempo suficiente para salir del embudo por completo
             
+            # Limpieza total de residuos PID para que no arranque con un volantazo fantasma
             LNM.turn_center(log=False)
             prev_error = 0.0
             integral = 0.0
+            prev_error_tof = 0.0
             time.sleep(0.1)
             continue
 
-        # Avanzamos dinámicamente con la velocidad normal del Open Challenge
+        # Avanzamos con la nueva velocidad recomendada (más control y tracción)
         LNM.move_forward(speed=75) 
 
         # 1. TRACK TYPE DETECTION
@@ -173,36 +182,34 @@ while running:
             # CASO A: DETECCIÓN DE TRÁFICO (Esquivar bloques de colores mediante ToF)
             if color_detectado in ["ROJO", "VERDE"]:
                 if color_detectado == "ROJO":
-                    # Obstáculo Rojo -> Pegarse a la derecha usando sensor derecho
                     current_dist = min(right_dist, 60.0)
                     error_tof = DIST_PEGADO - current_dist
                     correction_tof = (Kp_tof * error_tof) + Kd_tof * (error_tof - prev_error_tof)
-                    steering_angle = int(80 - correction_tof) # Resta para ir a la derecha
+                    steering_angle = int(80 - correction_tof) 
                 else:
-                    # Obstáculo Verde -> Pegarse a la izquierda usando sensor izquierdo
                     current_dist = min(left_dist, 60.0)
                     error_tof = DIST_PEGADO - current_dist
                     correction_tof = (Kp_tof * error_tof) + Kd_tof * (error_tof - prev_error_tof)
-                    steering_angle = int(80 + correction_tof) # Suma para ir a la izquierda
+                    steering_angle = int(80 + correction_tof) 
                 
                 prev_error_tof = error_tof
                 print(f"🚧 ESQUIVANDO OBSTÁCULO {color_detectado} | Ángulo ToF: {steering_angle}")
 
-            # CASO B: RESPALDO ToF (Se perdió una de las paredes negras en la cámara)
+            # CASO B: RESPALDO ToF (Pared perdida en la cámara)
             elif black_areas[0] < MIN_PARED_VALIDA or black_areas[1] < MIN_PARED_VALIDA:
-                if LNM.turning_direction == 2:  # Sentido Naranja -> Seguir pared izquierda
+                if LNM.turning_direction == 2:  
                     current_dist = min(left_dist, 60.0)
                     error_tof = DIST_NORMAL - current_dist
                     correction_tof = (Kp_tof * error_tof) + Kd_tof * (error_tof - prev_error_tof)
                     steering_angle = int(80 + correction_tof)
-                else:                           # Sentido Azul -> Seguir pared derecha
+                else:                           
                     current_dist = min(right_dist, 60.0)
                     error_tof = DIST_NORMAL - current_dist
                     correction_tof = (Kp_tof * error_tof) + Kd_tof * (error_tof - prev_error_tof)
                     steering_angle = int(80 - correction_tof)
                 
                 prev_error_tof = error_tof
-                print(f"⚠️ PARED PERDIDA EN CÁMARA | Respaldo ToF -> Ángulo: {steering_angle}")
+                print(f"⚠️ RESPALDO ToF ACTIVADO | Ángulo: {steering_angle}")
 
             # CASO C: PISTA IDEAL (Centrado estándar por diferencia de áreas visuales)
             else:
@@ -216,7 +223,6 @@ while running:
                 prev_error = error
                 
                 steering_angle = int(80 + correction)
-                print(f"Visual Error: {error}, Steering Angle: {steering_angle}")
 
             # --- FILTROS DE TOLERANCIA Y EJECUCIÓN DE DIRECCIÓN ---
             steering_angle = max(40, min(120, steering_angle))
@@ -246,11 +252,9 @@ while running:
 
         if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
             n = 0
-            print("Timer reset, ready for next orange line detection.")
 
         if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
             n = 0
-            print("Timer reset, ready for next blue line detection.")
 
         if loops >= 12 and not end_game_triggered:
             print("🏁 ¡Vuelta 12 alcanzada! Iniciando cronómetro de gracia...")
