@@ -29,15 +29,14 @@ girando = False
 # =========================================================================
 # 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN (PREVIENE TRABAS MECÁNICAS)
 # =========================================================================
-LIMIT_IZQ = 55      # Máximo giro permitido a la izquierda (Aumentar si se traba, ej: 60)
-LIMIT_DER = 105     # Máximo giro permitido a la derecha (Disminuir si se traba, ej: 100)
+LIMIT_IZQ = 55      # Máximo giro permitido a la izquierda
+LIMIT_DER = 105     # Máximo giro permitido a la derecha
 TOLERANCIA_ANGULO = 3       
 
 # --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
-Kp_obstaculo = 0.5  # Bajado un poco para que la transición sea más suave
 MIN_ANCHO_DETECCION = 10   
 
-# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMBENCIA ---
+# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
 DIST_MIN_CHOQUE = 20.0  
 steering_angle = 80     
 
@@ -48,6 +47,7 @@ end_game_timer = 0.0
 # --- ROIS LATERALES Y DE OBSTÁCULOS ---
 roi_izq = ROI(0, 100, 320, 150)  
 roi_der = ROI(320, 100, 640, 150) 
+# Mantener el ROI alto (y_min=60) ayuda a que detecte el bloque a la distancia y empiece a esquivar antes
 roi_obstaculo = ROI(40, 60, 600, 360) 
 
 def obtener_areas_negras():
@@ -112,7 +112,6 @@ while running:
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            # Usamos los mismos límites seguros para la reversa
             angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
             LNM.move_backward(angle=angulo_retroceso, speed=75)
             time.sleep(0.85)
@@ -123,7 +122,7 @@ while running:
             time.sleep(0.1)
             continue
 
-        # Tracción constante establecida a tu velocidad ideal de control (75)
+        # Tracción constante establecida a tu nueva velocidad máxima de desarrollo (105)
         LNM.move_forward(speed=105) 
 
         # 1. DETECCIÓN DEL SENTIDO DE LA PISTA
@@ -152,23 +151,25 @@ while running:
             
             # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR
             if color_detectado in ["ROJO", "VERDE"]:
-                error_obstaculo = 320 - x_bloque
                 
                 if color_detectado == "VERDE":
-                    # Obstáculo Verde -> Pegarse a la IZQUIERDA
-                    base_izq = 20  # Reducido para evitar saltar el límite bruscamente
-                    raw_angle = int(80 - base_izq + (error_obstaculo * Kp_obstaculo))
-                    # Acotamos de inmediato antes de cualquier acción o print
+                    # Obstáculo Verde -> Pasar estrictamente por la IZQUIERDA (Ángulo < 80)
+                    # Subimos base_izq a 38 para provocar un salto de carril inmediato y sumamos margen por ancho
+                    base_izq = 38 
+                    factor_proximidad = int(ancho_bloque * 0.25)
+                    raw_angle = 80 - base_izq - factor_proximidad
+                    
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-                    print(f"🟢 EVADIENDO VERDE -> Carril Izquierdo. Ángulo Final: {steering_angle}")
+                    print(f"🟢 EVADIENDO VERDE -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
                 
                 elif color_detectado == "ROJO":
-                    # Obstáculo Rojo -> Pegarse a la DERECHA
-                    base_der = 20  
-                    raw_angle = int(80 + base_der + (error_obstaculo * Kp_obstaculo))
-                    # Acotamos de inmediato
+                    # Obstáculo Rojo -> Pasar estrictamente por la DERECHA (Ángulo > 80)
+                    base_der = 38
+                    factor_proximidad = int(ancho_bloque * 0.25)
+                    raw_angle = 80 + base_der + factor_proximidad
+                    
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-                    print(f"🔴 EVADIENDO ROJO -> Carril Derecho. Ángulo Final: {steering_angle}")
+                    print(f"🔴 EVADIENDO ROJO -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
 
             # CASO B: PISTA LIBRE (Centrado clásico por diferencia de áreas negras)
             else:
@@ -182,7 +183,7 @@ while running:
                 raw_angle = int(80 + correction)
                 steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
 
-            # --- EJECUCIÓN DE DIRECCIÓN (FILTRADA BAJO LÍMITES SEGUROS) ---
+            # --- EJECUCIÓN DE DIRECCIÓN ---
             if abs(steering_angle - 80) <= TOLERANCIA_ANGULO and color_detectado == "NINGUNO":
                 LNM.turn_center()
                 steering_angle = 80
