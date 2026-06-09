@@ -29,7 +29,7 @@ girando = False
 # =========================================================================
 # 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN (PREVIENE TRABAS MECÁNICAS)
 # =========================================================================
-LIMIT_IZQ = 55      # Máximo giro permitido a la izquierda
+LIMIT_IZQ = 40     # Máximo giro permitido a la izquierda
 LIMIT_DER = 105     # Máximo giro permitido a la derecha
 TOLERANCIA_ANGULO = 3       
 
