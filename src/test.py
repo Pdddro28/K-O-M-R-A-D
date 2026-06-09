@@ -26,18 +26,20 @@ integral = 0.0
 MAX_INTEGRAL = 15.0 
 girando = False
 
-# --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
-# Ganancia para el esquive: define qué tan agresivo se mueve al ver un bloque
-Kp_obstaculo = 0.15  
-MIN_ANCHO_DETECCION = 20   # Ignora ruidos visuales más pequeños que este ancho en píxeles
+# =========================================================================
+# 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN (PREVIENE TRABAS MECÁNICAS)
+# =========================================================================
+LIMIT_IZQ = 55      # Máximo giro permitido a la izquierda (Aumentar si se traba, ej: 60)
+LIMIT_DER = 105     # Máximo giro permitido a la derecha (Disminuir si se traba, ej: 100)
+TOLERANCIA_ANGULO = 3       
 
-# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
+# --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
+Kp_obstaculo = 0.08  # Bajado un poco para que la transición sea más suave
+MIN_ANCHO_DETECCION = 20   
+
+# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMBENCIA ---
 DIST_MIN_CHOQUE = 20.0  
 steering_angle = 80     
-
-# --- VARIABLES DE TOLERANCIA ---
-UMBRAL_PIXELES_MUERTO = 150  
-TOLERANCIA_ANGULO = 3       
 
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
 end_game_triggered = False
@@ -46,7 +48,7 @@ end_game_timer = 0.0
 # --- ROIS LATERALES Y DE OBSTÁCULOS ---
 roi_izq = ROI(0, 100, 320, 150)  
 roi_der = ROI(320, 100, 640, 150) 
-roi_obstaculo = ROI(40, 60, 600, 360) # ROI amplio para cazar bloques de frente
+roi_obstaculo = ROI(40, 60, 600, 360) 
 
 def obtener_areas_negras():
     cnt_left = LNM.vision.find_contours(LNM.mask_black, roi_izq)
@@ -56,33 +58,26 @@ def obtener_areas_negras():
     return [area_right, area_left]
 
 def procesar_obstaculos():
-    """ 
-    Analiza la ROI central buscando bloques.
-    Retorna: color ("ROJO", "VERDE", "NINGUNO"), x_centro_bloque, ancho_bloque
-    """
+    """ Analiza la ROI central buscando bloques. """
     red_ctn = LNM.vision.find_contours(LNM.mask_red, roi_obstaculo)
     green_ctn = LNM.vision.find_contours(LNM.mask_green, roi_obstaculo)
     
     max_red = LNM.vision.max_contour(red_ctn, roi_obstaculo)
     max_green = LNM.vision.max_contour(green_ctn, roi_obstaculo)
     
-    # Validar Bloque Rojo
     if max_red[3] is not None and (max_green[3] is None or max_red[0] > max_green[0]):
-        if max_red[0] > 1500: # Filtro de área mínima
+        if max_red[0] > 1500: 
             x, y, w, h = cv2.boundingRect(max_red[3])
             if w > MIN_ANCHO_DETECCION:
                 x_centro = x + (w // 2)
-                # Dibujar Bounding Box en Rojo
                 cv2.rectangle(LNM.vision.frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
                 return "ROJO", x_centro, w
                 
-    # Validar Bloque Verde
     elif max_green[3] is not None:
         if max_green[0] > 1500:
             x, y, w, h = cv2.boundingRect(max_green[3])
             if w > MIN_ANCHO_DETECCION:
                 x_centro = x + (w // 2)
-                # Dibujar Bounding Box en Verde
                 cv2.rectangle(LNM.vision.frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
                 return "VERDE", x_centro, w
                 
@@ -99,7 +94,6 @@ while running:
         color_detectado, x_bloque, ancho_bloque = procesar_obstaculos()
         black_areas = obtener_areas_negras()
 
-        # Dibujar ROIs de referencia en la pantalla
         LNM.vision.draw_roi(roi_izq)
         LNM.vision.draw_roi(roi_der)
         LNM.vision.draw_roi(roi_obstaculo)
@@ -111,15 +105,15 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # FRENO DE MANO INTELIGENTE CON CONTROL DE ORIENTACIÓN
+        # FRENO DE MANO INTELIGENTE CON CONTROL DE ORIENTACIÓN LIMITADO
         # =========================================================================
         if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0 and color_detectado == "NINGUNO":
             print(f"🚨 ¡OBSTRUCCIÓN! Frente a {front_dist:.2f} cm. Calculando escape...")
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            # Escape dinámico basado en proximidad lateral real
-            angulo_retroceso = 50 if left_dist < right_dist else 110
+            # Usamos los mismos límites seguros para la reversa
+            angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
             LNM.move_backward(angle=angulo_retroceso, speed=75)
             time.sleep(0.85)
             
@@ -129,7 +123,7 @@ while running:
             time.sleep(0.1)
             continue
 
-        # Tracción constante establecida a tu velocidad ideal de control
+        # Tracción constante establecida a tu velocidad ideal de control (75)
         LNM.move_forward(speed=75) 
 
         # 1. DETECCIÓN DEL SENTIDO DE LA PISTA
@@ -158,22 +152,23 @@ while running:
             
             # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR
             if color_detectado in ["ROJO", "VERDE"]:
-                # Medimos qué tan lejos del centro horizontal (320) está el bloque
                 error_obstaculo = 320 - x_bloque
                 
                 if color_detectado == "VERDE":
-                    # Obstáculo Verde -> Tu regla manda ir al carril IZQUIERDO.
-                    # Forzamos un bias base hacia la izquierda y le sumamos la evasión proporcional
-                    base_izq = 30  # Fuerza de salida del carril
-                    steering_angle = int(80 - base_izq + (error_obstaculo * Kp_obstaculo))
-                    print(f"🟢 EVADIENDO VERDE -> Carril Izquierdo. Ángulo: {steering_angle}")
+                    # Obstáculo Verde -> Pegarse a la IZQUIERDA
+                    base_izq = 20  # Reducido para evitar saltar el límite bruscamente
+                    raw_angle = int(80 - base_izq + (error_obstaculo * Kp_obstaculo))
+                    # Acotamos de inmediato antes de cualquier acción o print
+                    steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
+                    print(f"🟢 EVADIENDO VERDE -> Carril Izquierdo. Ángulo Final: {steering_angle}")
                 
                 elif color_detectado == "ROJO":
-                    # Obstáculo Rojo -> Tu regla manda ir al carril DERECHO.
-                    # Forzamos un bias base hacia la derecha y le restamos la evasión proporcional
-                    base_der = 30
-                    steering_angle = int(80 + base_der + (error_obstaculo * Kp_obstaculo))
-                    print(f"🔴 EVADIENDO ROJO -> Carril Derecho. Ángulo: {steering_angle}")
+                    # Obstáculo Rojo -> Pegarse a la DERECHA
+                    base_der = 20  
+                    raw_angle = int(80 + base_der + (error_obstaculo * Kp_obstaculo))
+                    # Acotamos de inmediato
+                    steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
+                    print(f"🔴 EVADIENDO ROJO -> Carril Derecho. Ángulo Final: {steering_angle}")
 
             # CASO B: PISTA LIBRE (Centrado clásico por diferencia de áreas negras)
             else:
@@ -184,11 +179,10 @@ while running:
                 correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
                 prev_error = error
                 
-                steering_angle = int(80 + correction)
+                raw_angle = int(80 + correction)
+                steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
 
-            # --- ACOTAMIENTO FÍSICO Y FILTROS DE HISTÉRESIS ---
-            steering_angle = max(40, min(120, steering_angle))
-            
+            # --- EJECUCIÓN DE DIRECCIÓN (FILTRADA BAJO LÍMITES SEGUROS) ---
             if abs(steering_angle - 80) <= TOLERANCIA_ANGULO and color_detectado == "NINGUNO":
                 LNM.turn_center()
                 steering_angle = 80
