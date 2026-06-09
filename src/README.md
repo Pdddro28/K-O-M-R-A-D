@@ -122,7 +122,7 @@ The application implements an event-driven architecture by combining real-time p
 
 <div align="center">
 
-    <img width="200" height="700" alt="untitled@1 25x" src="https://github.com/user-attachments/assets/477382e0-c876-448b-9bd1-81d4c36f85eb" />
+<img width="200" height="700" alt="untitled@1 25x" src="https://github.com/user-attachments/assets/477382e0-c876-448b-9bd1-81d4c36f85eb" />
 
 </div>
 
