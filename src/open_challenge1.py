@@ -29,16 +29,14 @@ MAX_INTEGRAL = 15.0
 girando = False
 conteo = False
 
-# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 20.0  
+# --- CONFIGURACIÓN DE FRENOS DE MANO DE EMERGENCIA ---
+DIST_MIN_CHOQUE = 20.0     # Umbral frontal
+DIST_MIN_LATERAL = 8.0    # Umbral lateral (si baja de esto, activa el freno lateral)
 steering_angle = 80     
 
 # --- VARIABLES DE TOLERANCIA (EVITAR ZIGZAGUEO) ---
 UMBRAL_PIXELES_MUERTO = 150  # Ignora errores de área menores a este valor
 TOLERANCIA_ANGULO = 3        # Si el ángulo está entre 77 y 83 (80 +/- 3), va recto
-
-# --- CONTROL DE APAGADO TEMPORAL DEL PD (NO BLOQUEANTE) ---
-pd_disable_until = 0.0       # Guarda el timestamp hasta el cual el PD estará apagado
 
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
 end_game_triggered = False
@@ -71,7 +69,6 @@ def draw_rois():
 while running:
     try:
         # Sensors and data acquisition
-        current_time = time.time()
         LNM.vision.receive_image()
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
@@ -87,10 +84,10 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # FRENO DE MANO DE EMERGENCIA (Basado en proximidad física frontal)
+        # 1. FRENO DE MANO FRONTAL (Basado en proximidad física frontal)
         # =========================================================================
         if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
-            print(f"🚨 ¡FRENO DE MANO! Frente obstruido a {front_dist:.2f} cm.")
+            print(f"🚨 ¡FRENO DE MANO FRONTAL! Frente obstruido a {front_dist:.2f} cm.")
             LNM.stop(log=False)
             time.sleep(0.05)
             
@@ -106,29 +103,44 @@ while running:
             LNM.turn_center(log=False)
             prev_error = 0.0
             integral = 0.0
-            pd_disable_until = 0.0
             time.sleep(0.1)
             continue
 
-        # Avanzamos con la velocidad normal del Open Challenge
+        # =========================================================================
+        # 2. FRENO DE MANO LATERAL (Tu nueva propuesta de evasión de paredes)
+        # =========================================================================
+        if (left_dist < DIST_MIN_LATERAL and left_dist > 1.0) or (right_dist < DIST_MIN_LATERAL and right_dist > 1.0):
+            print(f"🚨 ¡FRENO LATERAL! Pared muy cerca. L: {left_dist:.2f}cm, R: {right_dist:.2f}cm. Reacomodando...")
+            LNM.stop(log=False)
+            time.sleep(0.05)
+            
+            # Si el problema es a la izquierda, el ángulo en reversa debe ser cerrado a la izquierda
+            # para que la trompa apunte hacia la derecha y se despegue.
+            if left_dist < right_dist:
+                angulo_escape_lateral = 55  # Ruedas a la izquierda marcha atrás
+            else:
+                angulo_escape_lateral = 105 # Ruedas a la derecha marcha atrás
+                
+            LNM.move_backward(angle=angulo_escape_lateral, speed=90)
+            time.sleep(0.55)  # Retroceso rápido y conciso para no perder demasiado tiempo
+            
+            LNM.turn_center(log=False)
+            prev_error = 0.0
+            integral = 0.0
+            time.sleep(0.1)
+            continue  # Re-evaluar el entorno en el próximo ciclo del bucle principal
+
+        # Avanzamos con la velocidad normal del Open Challenge si el camino está despejado
         LNM.move_forward(speed=120) 
 
-        # 1. TRACK TYPE DETECTION
+        # 3. TRACK TYPE DETECTION
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 1200:
                  LNM.turning_direction = 2
             elif LNM.blue_area > 1200:
                  LNM.turning_direction = 1
 
-        # =========================================================================
-        # INDUCCIÓN DE SILENCIO AL PD ANTES DEL GIRO (Tu nueva condición)
-        # =========================================================================
-        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
-            if pd_disable_until == 0.0:  # Evita re-calcular el tiempo si ya está activo
-                print("⏸️ ¡Esquina detectada! Desactivando el PD por 0.8 segundos.")
-                pd_disable_until = current_time + 0.8
-
-        # 2. CORNER DETECTION (Detección de Esquinas para Cruzar)
+        # 4. CORNER DETECTION (Detección de Esquinas para Cruzar)
         if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
@@ -140,13 +152,11 @@ while running:
            girando = False
            conteo = False
            steering_angle = 80
-           pd_disable_until = 0.0  # Reseteamos el seguro al salir de la curva
 
         # =========================================================================
         # ESTRATEGIA DE CENTRADO MEDIANTE DIFERENCIA DE ÁREAS (PID VISUAL)
         # =========================================================================
-        # Se añade la condición: Solo calcula si el tiempo actual superó el bache de 0.8s
-        if not girando and LNM.turning_direction != 0 and current_time > pd_disable_until:
+        if not girando and LNM.turning_direction != 0:
             # Error = Izquierda - Derecha
             error = black_areas[1] - black_areas[0]
             
@@ -174,14 +184,12 @@ while running:
                 LNM.turn_right(angle=steering_angle, speed=50)
             elif steering_angle < 80:
                 LNM.turn_left(angle=steering_angle, speed=50)
-        elif pd_disable_until > current_time:
-            # Mientras el PD está apagado por la esquina, forzamos tranquilidad en las ruedas
-            # para que el comando manual 'LNM.turn_direction()' trabaje libremente.
-            pass
 
         # =========================================================================
-        # 3. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
+        # 5. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
         # =========================================================================
+        current_time = time.time()
+
         if LNM.orange_area > 500 and n == 0 and LNM.turning_direction == 2: 
             orange_timer = current_time
             n = 1
