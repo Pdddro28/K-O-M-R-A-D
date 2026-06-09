@@ -131,12 +131,12 @@ while running:
             if left_dist < right_dist:
                 # Más pegado a la izquierda -> Forzamos ruedas a la izquierda (50) 
                 # para que la cola vaya a la izquierda y la trompa apunte a la DERECHA (vía libre)
-                angulo_retroceso = 50  
+                angulo_retroceso = 130  
                 print("↩️ Corrigiendo hacia la Derecha en reversa.")
             else:
                 # Más pegado a la derecha -> Forzamos ruedas a la derecha (110)
                 # para que la cola vaya a la derecha y la trompa apunte a la IZQUIERDA (vía libre)
-                angulo_retroceso = 110
+                angulo_retroceso = 130
                 print("↪️ Corrigiendo hacia la Izquierda en reversa.")
                 
             # Retroceso controlado a velocidad óptima de desatasco
