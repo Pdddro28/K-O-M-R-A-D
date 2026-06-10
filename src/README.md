@@ -146,7 +146,6 @@ Built on a responsive design using dark panels (`ctk.set_appearance_mode("Dark")
 
 When the sliders are moved, the `VisionController` class evaluates the Region of Interest (ROI) and calculates the binary segmentation using `cv.inRange`. To clean the signal of external factors or track imperfections, a morphological filtering loop for spatial cleaning is applied:
 
-Python
 
 ```
 mask = cv.erode(mask, kernel, iterations=1)
@@ -159,8 +158,6 @@ mask = cv.dilate(mask, kernel, iterations=1)
 To accurately limit the camera's field of view to specific zones of the track and optimize processing resources, we implemented a lightweight geometric calibration utility called `ROI-Detector.py`.
 
 This script uses standard native libraries (`tkinter` and `dataclasses`) alongside **OpenCV** to allow developers to interactively draw, label, and export bounding boxes directly from a live video feed.
-
-Python
 
 ```
 import cv2
@@ -183,8 +180,6 @@ class ROI:
 -   **On-Screen Feedback:** Every selected region is drawn dynamically onto the frame using `cv2.rectangle()`, accompanied by a telemetry label showing the bounding box index and its precise resolution in pixels:
     
 
-Python
-
 ```
 label = f"ROI {i+1}: {width}x{height}"
 cv2.putText(display, label, (x1_, y1_ - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
@@ -198,8 +193,6 @@ cv2.putText(display, label, (x1_, y1_ - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 
 When the operator clicks **"SAVE JSON"** in the main interface, the application opens a native file browser and saves a structured object that the main navigation script reads when the vehicle starts up. This means you don’t have to touch a single line of source code before running a race.
 
 Example of the automatically generated output format:
-
-JSON
 
 ```
 {
@@ -227,8 +220,6 @@ JSON
 When the execution of `ROI-Detector.py` is finished, the application automatically invokes a native file explorer via `filedialog.asksaveasfilename`. Instead of using an external data parsing format, it exports a directly importable, native Python script containing an array of serialized `ROI` objects.
 
 Example of the automatically generated output format:
-
-Python
 
 ```
 from dataclasses import dataclass
