@@ -34,11 +34,11 @@ LIMIT_DER = 105             # Máximo giro permitido a la derecha
 TOLERANCIA_ANGULO = 3       
 
 # --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
-MIN_ANCHO_DETECCION = 10   
+MIN_ANCHO_DETECCION = 20   
 primer_color_obstaculo = None  # 📌 REQUISITO 4: Registro del primer color del reto
 
 # --- CONFIGURACIÓN DE ULTRASONIDOS Y AJUSTES DE GIRO ---
-DIST_MIN_CHOQUE = 20.0          # Freno de mano de emergencia frontal
+DIST_MIN_CHOQUE = 15.0          # Freno de mano de emergencia frontal
 DIST_CRITICA_CURVA = 11.0       # 📌 REQUISITO 1: Menor distancia = gira más cerca de la pared (antes era 15)
 DIST_MIN_PARED_FALLBACK = 12.0  # 📌 REQUISITO 2: Distancia lateral límite para activar el guardarraíl
 steering_angle = 80     
@@ -120,16 +120,8 @@ while running:
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            # Ajuste de dirección en reversa según cinemática Ackermann para esquivar el bloque
-            if color_detectado == "VERDE":
-                # Si es verde evadimos por la izquierda adelante -> Reversa hacia la derecha (LIMIT_DER) apunta la nariz a la izq.
-                angulo_retroceso = LIMIT_DER
-            elif color_detectado == "ROJO":
-                # Si es rojo evadimos por la derecha adelante -> Reversa hacia la izquierda (LIMIT_IZQ) apunta la nariz a la der.
-                angulo_retroceso = LIMIT_IZQ
-            else:
                 # Fallback clásico si se activa por aproximación a paredes puras
-                angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
+            angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
             
             LNM.move_backward(angle=angulo_retroceso, speed=75)
             time.sleep(0.85)
