@@ -49,9 +49,9 @@ end_game_triggered = False
 end_game_timer = 0.0
 
 # --- ROIS LATERALES Y DE OBSTÁCULOS ---
-roi_izq = ROI(0, 100, 320, 150)  
-roi_der = ROI(320, 100, 640, 150) 
-roi_obstaculo = ROI(40, 60, 600, 360) 
+roi_izq = ROI(0, 100,540, 150)  
+roi_der = ROI(540, 100, 1080, 150) 
+roi_obstaculo = ROI(00, 60, 1080, 360) 
 
 def obtener_areas_negras():
     cnt_left = LNM.vision.find_contours(LNM.mask_black, roi_izq)
@@ -200,9 +200,9 @@ while running:
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=65)
+                LNM.turn_right(angle=steering_angle, speed=75)
             elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=65)
+                LNM.turn_left(angle=steering_angle, speed=75)
 
         # =========================================================================
         # 3. CONTROL DE VUELTAS Y FIN DE CARRERA
