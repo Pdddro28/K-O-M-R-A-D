@@ -1,4 +1,5 @@
-Electromechanical System
+## Electromechanical System
+---
 
 Our autonomous vehicle splits its operational workload into two dedicated, coordinated subsystems: **The Mechanical Muscle** (chassis physics, Ackermann steering, and raw propulsion) and **The Electronic Brain** (distributed parallel processing and high-bandwidth sensor perception).
 
