@@ -55,7 +55,11 @@ $$V = \frac{450\text{ RPM}}{60} \times 0.2041\text{ m} \approx 1.53\text{ m/s}$$
 * **Reason for Selection:** By avoiding a heavy, bulky mechanical central differential, wheel speed coordination during turns is managed entirely in **software**. By applying varied Duty Cycles through the MegaPi's H-bridge drivers, the algorithm reduces power to the inner wheels during a turn so they do not fight each other.
 * **Disadvantages:** Aggressive dynamic braking generates reverse currents (counter-electromotive force) that heat up the motor drivers if not dissipated properly. Additionally, lacking a physical differential limits raw mechanical traction if one wheel loses total contact with the track surface.
 
+<div align="center">
+
 ![Yfrobot Steering Chassis](https://yfrobot.com/cdn/shop/products/800-800_faf268ef-ce45-4bb0-930f-424f8070b6ff.jpg?v=1609730313&width=1445)
+
+</div>
 
 ---
 
