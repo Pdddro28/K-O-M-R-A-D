@@ -17,7 +17,7 @@ blue_timer = time.time()
 time_lap = time.time()
 n = 0
 
-# --- PARÁMETROS PID PARA CONTROL VISUAL DE PAREDES ---
+# --- PARAMÉTROS PID PARA CONTROL VISUAL DE PAREDES ---
 Kp_vision = 0.020    
 Ki_vision = 0.0
 Kd_vision = 0.005   
@@ -27,17 +27,20 @@ MAX_INTEGRAL = 15.0
 girando = False
 
 # =========================================================================
-# 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN (PREVIENE TRABAS MECÁNICAS)
+# 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN & CALIBRACIÓN
 # =========================================================================
-LIMIT_IZQ = 40     # Máximo giro permitido a la izquierda
-LIMIT_DER = 105     # Máximo giro permitido a la derecha
+LIMIT_IZQ = 40              # Máximo giro permitido a la izquierda
+LIMIT_DER = 105             # Máximo giro permitido a la derecha
 TOLERANCIA_ANGULO = 3       
 
 # --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
 MIN_ANCHO_DETECCION = 10   
+primer_color_obstaculo = None  # 📌 REQUISITO 4: Registro del primer color del reto
 
-# --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 20.0  
+# --- CONFIGURACIÓN DE ULTRASONIDOS Y AJUSTES DE GIRO ---
+DIST_MIN_CHOQUE = 20.0          # Freno de mano de emergencia frontal
+DIST_CRITICA_CURVA = 11.0       # 📌 REQUISITO 1: Menor distancia = gira más cerca de la pared (antes era 15)
+DIST_MIN_PARED_FALLBACK = 12.0  # 📌 REQUISITO 2: Distancia lateral límite para activar el guardarraíl
 steering_angle = 80     
 
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
@@ -48,7 +51,6 @@ end_game_timer = 0.0
 # --- ROIS LATERALES Y DE OBSTÁCULOS ---
 roi_izq = ROI(0, 100, 320, 150)  
 roi_der = ROI(320, 100, 640, 150) 
-# Mantener el ROI alto (y_min=60) ayuda a que detecte el bloque a la distancia y empiece a esquivar antes
 roi_obstaculo = ROI(40, 60, 600, 360) 
 
 def obtener_areas_negras():
@@ -95,6 +97,11 @@ while running:
         color_detectado, x_bloque, ancho_bloque = procesar_obstaculos()
         black_areas = obtener_areas_negras()
 
+        # 📌 REQUISITO 4: Registrar de forma persistente el primer color detectado
+        if primer_color_obstaculo is None and color_detectado in ["ROJO", "VERDE"]:
+            primer_color_obstaculo = color_detectado
+            print(f"🎯 [CONFIG] Primer color de obstáculo registrado: {primer_color_obstaculo}")
+
         LNM.vision.draw_roi(roi_izq)
         LNM.vision.draw_roi(roi_der)
         LNM.vision.draw_roi(roi_obstaculo)
@@ -106,14 +113,24 @@ while running:
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # FRENO DE MANO INTELIGENTE CON CONTROL DE ORIENTACIÓN LIMITADO
+        # 📌 REQUISITO 3: FRENO DE MANO CON RETROCESO EN CURVA SEGÚN OBSTÁCULO
         # =========================================================================
-        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0 and color_detectado == "NINGUNO":
-            print(f"🚨 ¡OBSTRUCCIÓN! Frente a {front_dist:.2f} cm. Calculando escape...")
+        if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
+            print(f"🚨 ¡OBSTRUCCIÓN! Frente a {front_dist:.2f} cm. Estatus Bloque: {color_detectado}. Escapando...")
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
+            # Ajuste de dirección en reversa según cinemática Ackermann para esquivar el bloque
+            if color_detectado == "VERDE":
+                # Si es verde evadimos por la izquierda adelante -> Reversa hacia la derecha (LIMIT_DER) apunta la nariz a la izq.
+                angulo_retroceso = LIMIT_DER
+            elif color_detectado == "ROJO":
+                # Si es rojo evadimos por la derecha adelante -> Reversa hacia la izquierda (LIMIT_IZQ) apunta la nariz a la der.
+                angulo_retroceso = LIMIT_IZQ
+            else:
+                # Fallback clásico si se activa por aproximación a paredes puras
+                angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
+            
             LNM.move_backward(angle=angulo_retroceso, speed=75)
             time.sleep(0.85)
             
@@ -123,7 +140,7 @@ while running:
             time.sleep(0.1)
             continue
 
-        # Tracción constante establecida a tu nueva velocidad máxima de desarrollo (105)
+        # Tracción constante en pista libre
         LNM.move_forward(speed=65) 
 
         # 1. DETECCIÓN DEL SENTIDO DE LA PISTA
@@ -133,8 +150,8 @@ while running:
             elif LNM.blue_area > 1200:
                  LNM.turning_direction = 1
 
-        # 2. DETECCIÓN DE CURVAS CERRADAS
-        if front_dist < 15 and not girando and LNM.black_area > 12800 and LNM.turning_direction != 0:
+        # 2. DETECCIÓN DE CURVAS CERRADAS (📌 REQUISITO 1: Calibrado con DIST_CRITICA_CURVA)
+        if front_dist < DIST_CRITICA_CURVA and not girando and LNM.black_area > 12800 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
@@ -152,25 +169,17 @@ while running:
             
             # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR
             if color_detectado in ["ROJO", "VERDE"]:
-                
                 if color_detectado == "VERDE":
-                    # Obstáculo Verde -> Pasar estrictamente por la IZQUIERDA (Ángulo < 80)
-                    # Subimos base_izq a 38 para provocar un salto de carril inmediato y sumamos margen por ancho
                     base_izq = 38 
                     factor_proximidad = int(ancho_bloque * 0.30)
                     raw_angle = 80 - base_izq - factor_proximidad
-                    
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-                    #print(f"🟢 EVADIENDO VERDE -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
                 
                 elif color_detectado == "ROJO":
-                    # Obstáculo Rojo -> Pasar estrictamente por la DERECHA (Ángulo > 80)
                     base_der = 38
                     factor_proximidad = int(ancho_bloque * 0.30)
                     raw_angle = 80 + base_der + factor_proximidad
-                    
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-                    #print(f"🔴 EVADIENDO ROJO -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
 
             # CASO B: PISTA LIBRE (Centrado clásico por diferencia de áreas negras)
             else:
@@ -184,7 +193,17 @@ while running:
                 raw_angle = int(80 + correction)
                 steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
 
-            # --- EJECUCIÓN DE DIRECCIÓN ---
+            # =========================================================================
+            # 📌 REQUISITO 2: GUARDARRAÍL DE FALLBACK ELECTRÓNICO (ULTRASONIDOS LATERALES)
+            # =========================================================================
+            if left_dist < DIST_MIN_PARED_FALLBACK and left_dist > 1.0:
+                # Demasiado cerca de la izquierda: Forzar corrección inmediata a la derecha (suave/medio)
+                steering_angle = max(steering_angle, 92) 
+            elif right_dist < DIST_MIN_PARED_FALLBACK and right_dist > 1.0:
+                # Demasiado cerca de la derecha: Forzar corrección inmediata a la izquierda
+                steering_angle = min(steering_angle, 55)
+
+            # --- EJECUCIÓN FÍSICA DE LA DIRECCIÓN ACKERMANN ---
             if abs(steering_angle - 80) <= TOLERANCIA_ANGULO and color_detectado == "NINGUNO":
                 LNM.turn_center()
                 steering_angle = 80
@@ -209,7 +228,6 @@ while running:
             n = 1
             loops += 1
             print (f"🔵 VUELTA AZUL DETECTADA - Total Vueltas: {loops}")
-
 
         if current_time - orange_timer > lap_time and LNM.turning_direction == 2: 
             n = 0
