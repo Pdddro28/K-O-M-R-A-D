@@ -147,4 +147,90 @@ while running:
         # =========================================================================
         # CONTROL DE NAVEGACIÓN HÍBRIDO (PAREDES VS EVASIÓN POR BOUNDING BOX)
         # =========================================================================
-        if not girando and LNM.turning
+        if not girando and LNM.turning_direction != 0:
+            
+            # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR (Freno de mano deshabilitado aquí)
+            if color_detectado in ["ROJO", "VERDE"]:
+                
+                if color_detectado == "VERDE":
+                    # Obstáculo Verde -> Abrirse hacia la IZQUIERDA
+                    base_izq = 35 
+                    factor_proximidad = int(ancho_bloque * 0.35) 
+                    raw_angle = 80 - base_izq - factor_proximidad
+                    
+                    steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
+                    print(f"🟢 EVADIENDO VERDE -> Ángulo: {steering_angle} | Bloque Ancho: {ancho_bloque}")
+                    
+                    if steering_angle < 80:
+                        LNM.turn_left(angle=steering_angle, speed=VEL_EVASION)
+                
+                elif color_detectado == "ROJO":
+                    # Obstáculo Rojo -> Abrirse hacia la DERECHA
+                    base_der = 35
+                    factor_proximidad = int(ancho_bloque * 0.35)
+                    raw_angle = 80 + base_der + factor_proximidad
+                    
+                    steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
+                    print(f"🔴 EVADIENDO ROJO -> Ángulo: {steering_angle} | Bloque Ancho: {ancho_bloque}")
+                    
+                    if steering_angle > 80:
+                        LNM.turn_right(angle=steering_angle, speed=VEL_EVASION)
+
+            # CASO B: PISTA LIBRE (Centrado PID estándar por paredes de lona)
+            else:
+                error = black_areas[1] - black_areas[0]
+                integral += error
+                integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
+                derivative = error - prev_error
+                correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
+                prev_error = error
+                
+                raw_angle = int(80 + correction)
+                steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
+
+                # --- EJECUCIÓN DIRECTA EN PISTA LIBRE ---
+                if abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
+                    LNM.turn_center()
+                    LNM.move_forward(speed=VEL_RECTA)
+                    steering_angle = 80
+                elif steering_angle > 80:
+                    LNM.turn_right(angle=steering_angle, speed=VEL_RECTA)
+                elif steering_angle < 80:
+                    LNM.turn_left(angle=steering_angle, speed=VEL_RECTA)
+
+        # =========================================================================
+        # 3. CONTROL DE VUELTAS Y FIN DE CARRERA
+        # =========================================================================
+        current_time = time.time()
+
+        if LNM.orange_area > 500 and n == 0 and LNM.turning_direction == 2: 
+            orange_timer = current_time
+            n = 1
+            loops += 1
+
+        if LNM.blue_area > 500 and n == 0 and LNM.turning_direction == 1: 
+            blue_timer = current_time
+            n = 1
+            loops += 1
+
+        if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
+            n = 0
+
+        if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
+            n = 0
+
+        if loops >= 12 and not end_game_triggered:
+            end_game_timer = current_time
+            end_game_triggered = True
+
+        if end_game_triggered:
+            if current_time - end_game_timer >= 1:
+                break
+        
+    except Exception as e:
+        print("Exception:", e)
+        LNM.stop()
+        break
+
+# --- SAFETY SHUTDOWN ---
+LNM.stop()
