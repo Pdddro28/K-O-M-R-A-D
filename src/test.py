@@ -41,6 +41,7 @@ DIST_MIN_CHOQUE = 20.0
 steering_angle = 80     
 
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
+lap_time = 4.3
 end_game_triggered = False
 end_game_timer = 0.0
 
@@ -70,7 +71,7 @@ def procesar_obstaculos():
             x, y, w, h = cv2.boundingRect(max_red[3])
             if w > MIN_ANCHO_DETECCION:
                 x_centro = x + (w // 2)
-                cv2.rectangle(LNM.vision.frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
+                cv2.rectangle(LNM.vision.frame[roi_obstaculo.y1:roi_obstaculo.y2, roi_obstaculo.x1:roi_obstaculo.x2], (x, y), (x+w, y+h), (0, 0, 255), 3)
                 return "ROJO", x_centro, w
                 
     elif max_green[3] is not None:
@@ -78,7 +79,7 @@ def procesar_obstaculos():
             x, y, w, h = cv2.boundingRect(max_green[3])
             if w > MIN_ANCHO_DETECCION:
                 x_centro = x + (w // 2)
-                cv2.rectangle(LNM.vision.frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
+                cv2.rectangle(LNM.vision.frame[roi_obstaculo.y1:roi_obstaculo.y2, roi_obstaculo.x1:roi_obstaculo.x2], (x, y), (x+w, y+h), (0, 255, 0), 3)
                 return "VERDE", x_centro, w
                 
     return "NINGUNO", 320, 0
@@ -123,7 +124,7 @@ while running:
             continue
 
         # Tracción constante establecida a tu nueva velocidad máxima de desarrollo (105)
-        LNM.move_forward(speed=105) 
+        LNM.move_forward(speed=65) 
 
         # 1. DETECCIÓN DEL SENTIDO DE LA PISTA
         if LNM.turning_direction == 0: 
@@ -133,7 +134,7 @@ while running:
                  LNM.turning_direction = 1
 
         # 2. DETECCIÓN DE CURVAS CERRADAS
-        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
+        if front_dist < 15 and not girando and LNM.black_area > 12800 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
@@ -156,20 +157,20 @@ while running:
                     # Obstáculo Verde -> Pasar estrictamente por la IZQUIERDA (Ángulo < 80)
                     # Subimos base_izq a 38 para provocar un salto de carril inmediato y sumamos margen por ancho
                     base_izq = 38 
-                    factor_proximidad = int(ancho_bloque * 0.25)
+                    factor_proximidad = int(ancho_bloque * 0.30)
                     raw_angle = 80 - base_izq - factor_proximidad
                     
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-                    print(f"🟢 EVADIENDO VERDE -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
+                    #print(f"🟢 EVADIENDO VERDE -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
                 
                 elif color_detectado == "ROJO":
                     # Obstáculo Rojo -> Pasar estrictamente por la DERECHA (Ángulo > 80)
                     base_der = 38
-                    factor_proximidad = int(ancho_bloque * 0.25)
+                    factor_proximidad = int(ancho_bloque * 0.30)
                     raw_angle = 80 + base_der + factor_proximidad
                     
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-                    print(f"🔴 EVADIENDO ROJO -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
+                    #print(f"🔴 EVADIENDO ROJO -> Ángulo Seguro: {steering_angle} (Ancho: {ancho_bloque})")
 
             # CASO B: PISTA LIBRE (Centrado clásico por diferencia de áreas negras)
             else:
@@ -188,29 +189,32 @@ while running:
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=50)
+                LNM.turn_right(angle=steering_angle, speed=65)
             elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=50)
+                LNM.turn_left(angle=steering_angle, speed=65)
 
         # =========================================================================
         # 3. CONTROL DE VUELTAS Y FIN DE CARRERA
         # =========================================================================
-        current_time = time.time()
+        current_time = time.time() 
 
         if LNM.orange_area > 500 and n == 0 and LNM.turning_direction == 2: 
             orange_timer = current_time
             n = 1
             loops += 1
+            print (f"🔶 VUELTA NARANJA DETECTADA - Total Vueltas: {loops}")
 
         if LNM.blue_area > 500 and n == 0 and LNM.turning_direction == 1: 
             blue_timer = current_time
             n = 1
             loops += 1
+            print (f"🔵 VUELTA AZUL DETECTADA - Total Vueltas: {loops}")
 
-        if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
+
+        if current_time - orange_timer > lap_time and LNM.turning_direction == 2: 
             n = 0
 
-        if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
+        if current_time - blue_timer > lap_time and LNM.turning_direction == 1:
             n = 0
 
         if loops >= 12 and not end_game_triggered:
