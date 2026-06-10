@@ -42,7 +42,7 @@ $$V = \frac{450\text{ RPM}}{60} \times 0.2041\text{ m} \approx 1.53\text{ m/s}$$
 
 
 
-*The actual average speed on the track, accounting for friction losses and vehicle weight, is approximately **$1.2\text{ m/s}$**.*
+*The actual average speed on the track, accounting for friction losses and vehicle weight, is approximately **1.2m/s**.*
 
 ### Configuration Analysis (Pros & Cons)
 
