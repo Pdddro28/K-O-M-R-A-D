@@ -17,8 +17,11 @@ The vehicle utilizes the **Ackermann Steering Principle** to conquer sharp corne
 * **The Mechanical Execution:** An **MG996R** digital servo ($11 \text{ kg}\cdot\text{cm}$ torque) mounted onto an L-shaped aluminum bracket drives a system of mechanical linkages, steering arms, and asymmetrical tie rods. This geometry automatically forces the inner wheel to turn more sharply than the outer one.
 * **The Digital Control:** Driven by continuous, jitter-free $50\text{Hz}$ hardware PWM pulses from the MegaPi board, keeping the steering stable at a rigidly calibrated center of $90^\circ$.
 
+<div align="center">
+
 <img width="806" height="426" alt="ackermann_steering_system" src="https://github.com/user-attachments/assets/25611d01-fda5-4efb-8155-ce0bdbe7e73e" />
 
+</div>
 
 ### Electronic 2WD Propulsion (Differential-Free)
 
@@ -29,8 +32,11 @@ Propulsion is delivered via a configuration of four **RS380** DC geared motor.
 * No-load Current: $0.4\text{A}$ | Stall Current: $4.5\text{A}$
 * No-load Speed: $15000\text{ RPM}$ (Output speed after gearbox: approx. $450\text{ RPM}$)
 
+<div align="center">
+
 <img width="515" height="218" alt="Rear_wheel_drive" src="https://github.com/user-attachments/assets/da8175e6-313d-42d6-bd3b-b1318082536f" />
 
+</div>
 
 * **Average Vehicle Speed Calculation:**
 With a wheel diameter of $6.5\text{ cm}$ ($0.065\text{ m}$), we calculate the wheel circumference ($C$) and the theoretical maximum velocity ($V$):
@@ -61,7 +67,11 @@ The most common issue in competition robotics is unexpected micro-controller res
 
 To optimize performance and drastically reduce latency, high-level computer vision tasks and low-level real-time hardware execution run asynchronously:
 
+<div align="center">
+
 <img width="1726" height="1562" alt="untitled@1 5x" src="https://github.com/user-attachments/assets/4edd4e1d-c5a2-4dde-81da-3d31e9ca40ec" />
+
+</div>
 
 ### Power Supply System
 
@@ -92,7 +102,11 @@ $$\text{Runtime}_{\text{Power}} = \frac{2.2\text{Ah} \times 0.8}{6.5\text{A}} \a
 
 > **⚠️ The Golden Rule of Grounding:** Both batteries must share a unified **Common Ground (GND)** rail on the MegaPi board. Without this single 0V reference point, PWM control signals would float, creating devastating electromagnetic interference (EMI), corrupted ultrasonic readings, and erratic servo twitches.
 
+<div align="center">
+
 <img width="2960" height="1625" alt="L-N-M@1 25x" src="https://github.com/user-attachments/assets/13e15df3-6f13-4d22-9dfd-a9a075e6561c" />
+
+</div>
 
 ---
 
