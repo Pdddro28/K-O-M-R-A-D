@@ -27,18 +27,18 @@ MAX_INTEGRAL = 15.0
 girando = False
 
 # =========================================================================
-# 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN Y VELOCIDAD
+# 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN Y VELOCIDAD (1080 x 320)
 # =========================================================================
-LIMIT_IZQ = 40      # Máximo giro permitido a la izquierda
-LIMIT_DER = 105     # Máximo giro permitido a la derecha
+LIMIT_IZQ = 40      
+LIMIT_DER = 105     
 TOLERANCIA_ANGULO = 3       
 
-VEL_RECTA = 105     # Velocidad en tramos limpios
-VEL_EVASION = 95    # Velocidad estable de esquive rápido
+VEL_RECTA = 105     
+VEL_EVASION = 95    
 
 # --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
-MIN_ANCHO_DETECCION = 10   
-UMBRAL_AREA_DETECCION = 300  # Ojo: Bajo para detectar el bloque a gran distancia y anular el freno de mano a tiempo
+MIN_ANCHO_DETECCION = 18     # Los bloques ahora ocupan más píxeles a lo ancho
+UMBRAL_AREA_DETECCION = 600  # Calibrado para la nueva densidad de píxeles horizontales
 
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
 DIST_MIN_CHOQUE = 20.0  
@@ -48,10 +48,16 @@ steering_angle = 80
 end_game_triggered = False
 end_game_timer = 0.0
 
-# --- ROIS LATERALES Y DE OBSTÁCULOS ---
-roi_izq = ROI(0, 100, 320, 150)  
-roi_der = ROI(320, 100, 640, 150) 
-roi_obstaculo = ROI(40, 60, 600, 360) 
+# =========================================================================
+# 📐 ROIS OPTIMIZADAS PARA RESOLUCIÓN 1080 x 320
+# =========================================================================
+# Ajustamos el alto (Y) para que tengan una buena ventana de escaneo vertical
+roi_izq = ROI(0, 100, 540, 220)  
+roi_der = ROI(540, 100, 1080, 220) 
+
+# 🚨 CORREGIDO: y_max limitado a 320 (el límite físico de tu cámara)
+# Se conserva un margen en X (70 a 1010) para ignorar ruidos en las paredes laterales
+roi_obstaculo = ROI(70, 60, 1010, 320) 
 
 def obtener_areas_negras():
     cnt_left = LNM.vision.find_contours(LNM.mask_black, roi_izq)
@@ -61,7 +67,7 @@ def obtener_areas_negras():
     return [area_right, area_left]
 
 def procesar_obstaculos():
-    """ Analiza la ROI central buscando bloques con sensibilidad aumentada. """
+    """ Analiza la ROI central buscando bloques en formato panorámico. """
     red_ctn = LNM.vision.find_contours(LNM.mask_red, roi_obstaculo)
     green_ctn = LNM.vision.find_contours(LNM.mask_green, roi_obstaculo)
     
@@ -84,7 +90,7 @@ def procesar_obstaculos():
                 cv2.rectangle(LNM.vision.frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
                 return "VERDE", x_centro, w
                 
-    return "NINGUNO", 320, 0
+    return "NINGUNO", 540, 0  # Centro exacto de la nueva resolución horizontal
 
 # --- MAIN CONTROL LOOP ---
 while running:
@@ -127,19 +133,19 @@ while running:
 
         # 1. DETECCIÓN DEL SENTIDO DE LA PISTA
         if LNM.turning_direction == 0: 
-            if LNM.orange_area > 1200:
+            if LNM.orange_area > 1800: 
                  LNM.turning_direction = 2
-            elif LNM.blue_area > 1200:
+            elif LNM.blue_area > 1800:
                  LNM.turning_direction = 1
 
         # 2. DETECCIÓN DE CURVAS CERRADAS
-        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
+        if front_dist < 55 and not girando and LNM.black_area > 16000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
             integral = 0.0
               
-        if LNM.black_area < 8000 and girando and front_dist > 80:
+        if LNM.black_area < 11000 and girando and front_dist > 80:
            LNM.turn_center()
            girando = False
            steering_angle = 80
@@ -149,13 +155,12 @@ while running:
         # =========================================================================
         if not girando and LNM.turning_direction != 0:
             
-            # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR (Freno de mano deshabilitado aquí)
+            # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR
             if color_detectado in ["ROJO", "VERDE"]:
                 
                 if color_detectado == "VERDE":
-                    # Obstáculo Verde -> Abrirse hacia la IZQUIERDA
                     base_izq = 35 
-                    factor_proximidad = int(ancho_bloque * 0.35) 
+                    factor_proximidad = int(ancho_bloque * 0.20) 
                     raw_angle = 80 - base_izq - factor_proximidad
                     
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
@@ -165,9 +170,8 @@ while running:
                         LNM.turn_left(angle=steering_angle, speed=VEL_EVASION)
                 
                 elif color_detectado == "ROJO":
-                    # Obstáculo Rojo -> Abrirse hacia la DERECHA
                     base_der = 35
-                    factor_proximidad = int(ancho_bloque * 0.35)
+                    factor_proximidad = int(ancho_bloque * 0.20)
                     raw_angle = 80 + base_der + factor_proximidad
                     
                     steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
@@ -203,12 +207,12 @@ while running:
         # =========================================================================
         current_time = time.time()
 
-        if LNM.orange_area > 500 and n == 0 and LNM.turning_direction == 2: 
+        if LNM.orange_area > 700 and n == 0 and LNM.turning_direction == 2: 
             orange_timer = current_time
             n = 1
             loops += 1
 
-        if LNM.blue_area > 500 and n == 0 and LNM.turning_direction == 1: 
+        if LNM.blue_area > 700 and n == 0 and LNM.turning_direction == 1: 
             blue_timer = current_time
             n = 1
             loops += 1
