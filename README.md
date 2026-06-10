@@ -11,7 +11,11 @@ This is the official Github repository proporty of The LNM, before known as Ars 
 Vehicle photo
 ====
 
+<div align="center">
+
 <img width="3060" height="4080" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" />
+
+</div>
 
 Folders Structure
 ====
