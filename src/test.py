@@ -37,8 +37,8 @@ VEL_RECTA = 105
 VEL_EVASION = 95    
 
 # --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (CÁMARA) ---
-MIN_ANCHO_DETECCION = 18     # Los bloques ahora ocupan más píxeles a lo ancho
-UMBRAL_AREA_DETECCION = 600  # Calibrado para la nueva densidad de píxeles horizontales
+MIN_ANCHO_DETECCION = 18     
+UMBRAL_AREA_DETECCION = 600  
 
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
 DIST_MIN_CHOQUE = 20.0  
@@ -49,15 +49,11 @@ end_game_triggered = False
 end_game_timer = 0.0
 
 # =========================================================================
-# 📐 ROIS OPTIMIZADAS PARA RESOLUCIÓN 1080 x 320
+# 📐 ROIS OPTIMIZADAS PARA RESOLUCIÓN HORIZONTAL 1080 x 320
 # =========================================================================
-# Ajustamos el alto (Y) para que tengan una buena ventana de escaneo vertical
 roi_izq = ROI(0, 100, 540, 220)  
 roi_der = ROI(540, 100, 1080, 220) 
-
-# 🚨 CORREGIDO: y_max limitado a 320 (el límite físico de tu cámara)
-# Se conserva un margen en X (70 a 1010) para ignorar ruidos en las paredes laterales
-roi_obstaculo = ROI(70, 60, 1010, 320) 
+roi_obstaculo = ROI(70, 60, 1010, 320) # Límite Y físico corregido a 320
 
 def obtener_areas_negras():
     cnt_left = LNM.vision.find_contours(LNM.mask_black, roi_izq)
@@ -90,7 +86,7 @@ def procesar_obstaculos():
                 cv2.rectangle(LNM.vision.frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
                 return "VERDE", x_centro, w
                 
-    return "NINGUNO", 540, 0  # Centro exacto de la nueva resolución horizontal
+    return "NINGUNO", 540, 0  # Centro exacto horizontal recalculado
 
 # --- MAIN CONTROL LOOP ---
 while running:
@@ -151,9 +147,9 @@ while running:
            steering_angle = 80
 
         # =========================================================================
-        # CONTROL DE NAVEGACIÓN HÍBRIDO (PAREDES VS EVASIÓN POR BOUNDING BOX)
+        # CONTROL DE NAVEGACIÓN HÍBRIDO (¡DESBLOQUEADO PARA ARRANCAR DESDE CERO!)
         # =========================================================================
-        if not girando and LNM.turning_direction != 0:
+        if not girando: # 🚀 Corregido: Ya no exige turning_direction != 0 para moverse
             
             # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR
             if color_detectado in ["ROJO", "VERDE"]:
@@ -180,7 +176,7 @@ while running:
                     if steering_angle > 80:
                         LNM.turn_right(angle=steering_angle, speed=VEL_EVASION)
 
-            # CASO B: PISTA LIBRE (Centrado PID estándar por paredes de lona)
+            # CASO B: PISTA LIBRE / CENTRADO INICIAL PID
             else:
                 error = black_areas[1] - black_areas[0]
                 integral += error
@@ -192,7 +188,7 @@ while running:
                 raw_angle = int(80 + correction)
                 steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
 
-                # --- EJECUCIÓN DIRECTA EN PISTA LIBRE ---
+                # --- EJECUCIÓN EN PISTA LIMPIAS ---
                 if abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
                     LNM.turn_center()
                     LNM.move_forward(speed=VEL_RECTA)
