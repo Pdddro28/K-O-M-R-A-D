@@ -158,9 +158,9 @@ class MegaPiController:
 
     def turn_direction(self):
         if self.turning_direction == 1:
-            self.turn_left(angle=40, speed=105, log=True) 
+            self.turn_left(angle=40, speed=115, log=True) 
         elif self.turning_direction == 2:
-            self.turn_left(angle=120, speed=105, log=True) 
+            self.turn_left(angle=120, speed=115, log=True) 
 
     def turn_left(self, angle, speed, log=True):
         self._send_command(3, v1=angle, v2=speed)
@@ -203,7 +203,7 @@ class MegaPiController:
             print("System: Connection closed.")
 
     def start (self):
-        return self.button_value == 1
+        return self.button_value == 0
     
 
 if __name__ == "__main__":

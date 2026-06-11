@@ -92,7 +92,7 @@ try:
         area_izq, area_der = obtener_areas_negras()
         front_dist, left_dist, right_dist = LNM.get_distances()
 
-        # cv2.imshow('Picamera2 + OpenCV Stream', picam2.frame)
+        cv2.imshow('Picamera2 + OpenCV Stream', picam2.frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
              break

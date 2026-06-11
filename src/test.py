@@ -37,15 +37,16 @@ LIMIT_DER = 105             # Máximo giro permitido a la derecha
 TOLERANCIA_ANGULO = 3       
 
 # --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (ESCALA 1080p) ---
-MIN_ANCHO_DETECCION = 34    # Escalado lineal (20 * 1.68)
-MIN_AREA_ROJO = 4300        # Escalado base (1500 * 2.85) para ver de lejos
-MIN_AREA_VERDE = 9000       # 📌 REQUISITO: Mucho más grande para que reaccione solo cuando esté cerca
+MIN_ANCHO_DETECCION = 40    # Escalado lineal (20 * 1.68)
+MIN_AREA_ROJO = 10300        # Escalado base (1500 * 2.85) para ver de lejos
+MIN_AREA_VERDE = 13800       # 📌 REQUISITO: Mucho más grande para que reaccione solo cuando esté cerca
 primer_color_obstaculo = None  
 
+
 # --- CONFIGURACIÓN DE ULTRASONIDOS Y AJUSTES DE GIRO ---
-DIST_MIN_CHOQUE = 15.0          # Freno de mano de emergencia frontal
-DIST_CRITICA_CURVA = 11.0       # Menor distancia = gira más cerca de la pared
-DIST_MIN_PARED_FALLBACK = 12.0  # Distancia lateral límite para activar el guardarraíl
+DIST_MIN_CHOQUE = 10.0          # Freno de mano de emergencia frontal
+DIST_CRITICA_CURVA = 20.0       # Menor distancia = gira más cerca de la pared
+DIST_MIN_PARED_FALLBACK = 20.0  # Distancia lateral límite para activar el guardarraíl
 steering_angle = 80     
 
 # --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
@@ -130,13 +131,14 @@ while running:
             
             # Reversa inteligente calculada según el color del bloque al frente
             if color_detectado == "VERDE":
+                print()
                 angulo_retroceso = LIMIT_DER  # Reversa a la derecha orienta la nariz a la izquierda
             elif color_detectado == "ROJO":
                 angulo_retroceso = LIMIT_IZQ  # Reversa a la izquierda orienta la nariz a la derecha
             else:
                 angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
             
-            LNM.move_backward(angle=angulo_retroceso, speed=75)
+            LNM.move_backward(angle=angulo_retroceso, speed=65)
             time.sleep(0.85)
             
             LNM.turn_center(log=False)
@@ -146,17 +148,17 @@ while running:
             continue
 
         # Tracción constante en pista libre
-        LNM.move_forward(speed=65) 
+        LNM.move_forward(speed=90) 
 
         # 1. DETECCIÓN DEL SENTIDO DE LA PISTA (Umbrales escalados x2.85)
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 3420:
                  LNM.turning_direction = 2
-            elif LNM.blue_area > 3420:
+            elif LNM.blue_area > 3000:
                  LNM.turning_direction = 1
 
         # 2. DETECCIÓN DE CURVAS CERRADAS (Umbrales de área corregidos para 1080p)
-        if front_dist < DIST_CRITICA_CURVA and not girando and LNM.black_area > 36480 and LNM.turning_direction != 0:
+        if front_dist < DIST_CRITICA_CURVA and not girando and LNM.black_area > 30480 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
@@ -211,9 +213,9 @@ while running:
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=75)
+                LNM.turn_right(angle=steering_angle, speed=85)
             elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=75)
+                LNM.turn_left(angle=steering_angle, speed=85)
 
         # =========================================================================
         # 3. CONTROL DE VUELTAS Y FIN DE CARRERA (Áreas de marcas escaladas x2.85)

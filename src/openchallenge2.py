@@ -10,6 +10,8 @@ ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 
 states = {"straight": False, "girando": False}
 
+while LNM.start():
+    pass
 running = True
 loops = 0
 
@@ -30,7 +32,7 @@ girando = False
 conteo = False
 
 # --- CONFIGURACIÓN DEL FRENO DE MANO DE EMERGENCIA ---
-DIST_MIN_CHOQUE = 20.0  
+DIST_MIN_CHOQUE = 12.0  
 steering_angle = 80     
 
 # --- VARIABLES DE TOLERANCIA (EVITAR ZIGZAGUEO) ---
@@ -106,6 +108,7 @@ while running:
             continue
 
         # Avanzamos con la velocidad normal del Open Challenge
+
         LNM.move_forward(speed=130) 
 
         # 1. TRACK TYPE DETECTION
@@ -116,9 +119,10 @@ while running:
                  LNM.turning_direction = 1
 
         # 2. CORNER DETECTION (Detección de Esquinas para Cruzar)
-        if front_dist < 55 and not girando and LNM.black_area > 11000 and LNM.turning_direction != 0:
+        if front_dist < 85 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
+
             prev_error = 0.0
             integral = 0.0
               
@@ -156,9 +160,9 @@ while running:
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
-                LNM.turn_right(angle=steering_angle, speed=50)
+                LNM.turn_right(angle=steering_angle, speed=130)
             elif steering_angle < 80:
-                LNM.turn_left(angle=steering_angle, speed=50)
+                LNM.turn_left(angle=steering_angle, speed=130)
 
         # =========================================================================
         # 3. LOGIC AND LAP COUNTER & CRONÓMETRO DINÁMICO DE CIERRE
@@ -175,13 +179,13 @@ while running:
             n = 1
             loops += 1
 
-        if current_time - orange_timer > 1.7 and LNM.turning_direction == 2: 
+        if current_time - orange_timer > 1.1 and LNM.turning_direction == 2: 
             n = 0
-            print("Timer reset, ready for next orange line detection.")
+            #print("Timer reset, ready for next orange line detection.")
 
-        if current_time - blue_timer > 1.7 and LNM.turning_direction == 1:
+        if current_time - blue_timer > 1.1 and LNM.turning_direction == 1:
             n = 0
-            print("Timer reset, ready for next blue line detection.")
+            #print("Timer reset, ready for next blue line detection.")
 
         #print("Loop count:", loops)
 
