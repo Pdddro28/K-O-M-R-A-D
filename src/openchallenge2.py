@@ -78,9 +78,9 @@ while running:
         black_areas = obtener_areas()
         draw_rois()
 
-        cv2.imshow('Vision HD - Posicion Corregida', LNM.vision.frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        #cv2.imshow('Vision HD - Posicion Corregida', LNM.vision.frame)
+        #if cv2.waitKey(1) & 0xFF == ord('q'):
+           # break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
 

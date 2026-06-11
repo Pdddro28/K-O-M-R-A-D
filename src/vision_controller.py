@@ -15,7 +15,7 @@ class VisionController():
     
     # --- INITIALIZATION AND CAMERA SETUP ---
     def __init__(self):
-        self.image_width  = 1080 #640
+        self.image_width  = 640 #640
         self.image_height = 370 #370
         self.image_lab = 0
         self.frame = None
