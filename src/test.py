@@ -9,9 +9,6 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200)
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 states = {"straight": False, "girando": False}
 
-# while LNM.start():
-#     pass
-
 running = True
 loops = 0
 
@@ -20,7 +17,7 @@ blue_timer = time.time()
 n = 0
 
 # =========================================================================
-# 🎛️ CONTROLADOR PD RECONFIGURADO (PURA DIFERENCIA DE ÁREAS EN 1080p)
+# 🎛️ CONTROLADOR PD (PURA DIFERENCIA DE ÁREAS EN 1080p)
 # =========================================================================
 Kp_vision = 0.007    
 Kd_vision = 0.0018   
@@ -47,11 +44,12 @@ end_game_triggered = False
 end_game_timer = 0.0
 
 # =========================================================================
-# 📐 ROIS SIMÉTRICAS SIN PUNTOS CIEGOS (RESOLUCIÓN 1080p)
+# 📐 ROIS SIMÉTRICAS SIN PUNTOS CIEGOS (RESOLUCIÓN EXACTA: 1080 x 370)
 # =========================================================================
 roi_izq = ROI(0, 100, 540, 150)  
 roi_der = ROI(540, 100, 1080, 150) 
-roi_frontal = ROI(200, 20, 880, 200)
+roi_frontal = ROI(200, 20, 880, 200)  # Perfectamente ubicado en tu escala Y de 370
+
 black_area_right = 0
 black_area_left = 0
 black_area_front = 0
@@ -68,13 +66,13 @@ def obtener_areas_negras():
 
     cnt_front = LNM.vision.find_contours(LNM.mask_black, roi_frontal)
     black_area_front = LNM.vision.max_contour(cnt_front, roi_frontal)[0]
+    
     return [black_area_right, black_area_left, black_area_front]
 
 def draw_rois():
     LNM.vision.draw_roi(roi_izq)
     LNM.vision.draw_roi(roi_der)
     LNM.vision.draw_roi(roi_frontal)
-    #LNM.vision.draw_roi(LNM.rois[1])
     LNM.vision.draw_contours(cnt_left, roi_izq, (0, 255, 255))
     LNM.vision.draw_contours(cnt_right, roi_der, (0, 255, 255))
     LNM.vision.draw_contours(cnt_front, roi_frontal, (0, 255, 255))
@@ -86,17 +84,19 @@ while running:
         LNM.vision.receive_image()
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
-        LNM.obtenerarea_frontal()
         
+        # Extracción síncrona de los datos en cada ciclo
         black_areas = obtener_areas_negras()
         draw_rois()
-        print(f"black area: {black_areas}")
+        
+        # Telemetría en consola para depuración rápida de umbrales
+        print(f"📊 Áreas -> Izq: {black_areas[1]} | Der: {black_areas[0]} | Frente: {black_areas[2]}")
 
         cv2.imshow('Vision HD - Modo Desarrollo Basico', LNM.vision.frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        # Lectura síncrona de la tripleta de sensores ultrasónicos
+        # Lectura síncrona de los sensores ultrasónicos
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
@@ -107,7 +107,6 @@ while running:
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            # Reversa reactiva evaluando cuál pared lateral ofrece más espacio de escape
             angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
             
             LNM.move_backward(angle=angulo_retroceso, speed=65)
@@ -129,13 +128,18 @@ while running:
             elif LNM.blue_area > 3000:
                 LNM.turning_direction = 1
                 print("🏁 Dirección de pista establecida: HORARIO (Línea Azul)")
-        # 2. DETECCIÓN Y EJECUCIÓN AUTOMÁTICA EN ESQUINAS (Giro forzado de 90 grados)
-        if front_dist < DIST_CRITICA_CURVA and not girando and black_area_front > 30480 and LNM.turning_direction != 0:
+
+        # =========================================================================
+        # 2. DETECCIÓN Y EJECUCIÓN EN ESQUINAS CORREGIDA (Lectura real de la lista)
+        # =========================================================================
+        if front_dist < DIST_CRITICA_CURVA and not girando and black_areas[2] > 30480 and LNM.turning_direction != 0:
+            print("↪️ Esquina detectada visualmente. Activando giro forzado.")
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
               
-        if LNM.black_area < 22800 and girando and front_dist > 80:
+        if black_areas[2] < 22800 and girando and front_dist > 80:
+            print("➡️ Recta recuperada. Centrando chasis.")
             LNM.turn_center()
             girando = False
             steering_angle = 80
@@ -145,7 +149,7 @@ while running:
         # =========================================================================
         if not girando and LNM.turning_direction != 0:
             
-            # Algoritmo PD de centrado visual
+            # Algoritmo PD de centrado
             error = black_areas[1] - black_areas[0]  # Izquierda - Derecha
             derivative = error - prev_error
             correction = (Kp_vision * error) + (Kd_vision * derivative)
@@ -154,15 +158,13 @@ while running:
             raw_angle = int(80 + correction)
             steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
 
-            # --- GUARDARRAÍL ELECTRÓNICO POR ULTRASONIDOS (Prioridad Física Suprema) ---
+            # --- GUARDARRAÍL ELECTRÓNICO POR ULTRASONIDOS ---
             if left_dist < DIST_MIN_PARED_FALLBACK and left_dist > 1.0:
-                # Demasiado cerca de la pared izquierda -> Forzar desvío a la derecha
                 steering_angle = max(steering_angle, 92) 
             elif right_dist < DIST_MIN_PARED_FALLBACK and right_dist > 1.0:
-                # Demasiado cerca de la pared derecha -> Forzar desvío a la izquierda
                 steering_angle = min(steering_angle, 55)
 
-            # --- EJECUCIÓN CONTROLADA DE LOS ÁNGULOS DE DIRECCIÓN ---
+            # --- EJECUCIÓN FÍSICA EN LA DIRECCIÓN ACKERMANN ---
             if abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
                 LNM.turn_center()
                 steering_angle = 80
@@ -194,7 +196,6 @@ while running:
         if current_time - blue_timer > lap_time and LNM.turning_direction == 1:
             n = 0
 
-        # Detención automática al completar las 12 vueltas requeridas
         if loops >= 12 and not end_game_triggered:
             end_game_timer = current_time
             end_game_triggered = True
