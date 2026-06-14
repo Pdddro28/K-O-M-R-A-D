@@ -83,7 +83,7 @@ while running:
            # break
 
         front_dist, left_dist, right_dist = LNM.get_distances()
-
+        print(f"black area: {LNM.black_area}")
         # =========================================================================
         # FRENO DE MANO DE EMERGENCIA (Basado en proximidad física frontal)
         # =========================================================================

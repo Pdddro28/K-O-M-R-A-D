@@ -9,8 +9,8 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200)
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 states = {"straight": False, "girando": False}
 
-while LNM.start():
-    pass
+# while LNM.start():
+#     pass
 
 running = True
 loops = 0
@@ -51,25 +51,33 @@ end_game_timer = 0.0
 # =========================================================================
 roi_izq = ROI(0, 100, 540, 150)  
 roi_der = ROI(540, 100, 1080, 150) 
-
+roi_frontal = ROI(200, 20, 880, 200)
 black_area_right = 0
 black_area_left = 0
+black_area_front = 0
 cnt_right = None
 cnt_left = None
+cnt_front = None
 
 def obtener_areas_negras():
-    global black_area_right, black_area_left, cnt_right, cnt_left
+    global black_area_right, black_area_left, black_area_front, cnt_right, cnt_left, cnt_front
     cnt_left = LNM.vision.find_contours(LNM.mask_black, roi_izq)
     cnt_right = LNM.vision.find_contours(LNM.mask_black, roi_der)
     black_area_right = LNM.vision.max_contour(cnt_right, roi_der)[0]
     black_area_left = LNM.vision.max_contour(cnt_left, roi_izq)[0]
-    return [black_area_right, black_area_left]
+
+    cnt_front = LNM.vision.find_contours(LNM.mask_black, roi_frontal)
+    black_area_front = LNM.vision.max_contour(cnt_front, roi_frontal)[0]
+    return [black_area_right, black_area_left, black_area_front]
 
 def draw_rois():
     LNM.vision.draw_roi(roi_izq)
     LNM.vision.draw_roi(roi_der)
+    LNM.vision.draw_roi(roi_frontal)
+    #LNM.vision.draw_roi(LNM.rois[1])
     LNM.vision.draw_contours(cnt_left, roi_izq, (0, 255, 255))
     LNM.vision.draw_contours(cnt_right, roi_der, (0, 255, 255))
+    LNM.vision.draw_contours(cnt_front, roi_frontal, (0, 255, 255))
 
 # --- MAIN CONTROL LOOP ---
 while running:
@@ -82,6 +90,7 @@ while running:
         
         black_areas = obtener_areas_negras()
         draw_rois()
+        print(f"black area: {black_areas}")
 
         cv2.imshow('Vision HD - Modo Desarrollo Basico', LNM.vision.frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -120,9 +129,8 @@ while running:
             elif LNM.blue_area > 3000:
                 LNM.turning_direction = 1
                 print("🏁 Dirección de pista establecida: HORARIO (Línea Azul)")
-
         # 2. DETECCIÓN Y EJECUCIÓN AUTOMÁTICA EN ESQUINAS (Giro forzado de 90 grados)
-        if front_dist < DIST_CRITICA_CURVA and not girando and LNM.black_area > 30480 and LNM.turning_direction != 0:
+        if front_dist < DIST_CRITICA_CURVA and not girando and black_area_front > 30480 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
