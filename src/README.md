@@ -56,7 +56,7 @@ Note: To run any file of the project, you have to follow these steps:
 
 Clone the repository:
 ```
-git clone https://github.com/JD277/K-O-M-R-A-D.git
+git clone https://github.com/Pdddro28/K-O-M-R-A-D.git
 ```
 
 Move to the project folder:
