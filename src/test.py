@@ -9,207 +9,153 @@ LNM = MegaPiController("/dev/ttyUSB0", 115200)
 ROIS = [OPEN_ROI_CENTER, ROI_LINES]
 states = {"straight": False, "girando": False}
 
+while LNM.start():
+    pass
+
 running = True
 loops = 0
 
 orange_timer = time.time()
 blue_timer = time.time()
-time_lap = time.time()
 n = 0
 
 # =========================================================================
-# 🎛️ PARÁMETROS PID PROPORCIONALES (AJUSTADOS PARA 1080p)
+# 🎛️ CONTROLADOR PD RECONFIGURADO (PURA DIFERENCIA DE ÁREAS EN 1080p)
 # =========================================================================
-# Se dividen entre ~2.85 porque el error de área crece al cuadrado
 Kp_vision = 0.007    
-Ki_vision = 0.0
 Kd_vision = 0.0018   
+
 prev_error = 0.0
-integral = 0.0
-MAX_INTEGRAL = 15.0 
 girando = False
 
 # =========================================================================
-# 🛠️ AJUSTES CRÍTICOS DE DIRECCIÓN & CALIBRACIÓN
+# 🛠️ CALIBRACIÓN MECÁNICA DE DIRECCIÓN Y CONFIGURACIÓN CRÍTICA
 # =========================================================================
-LIMIT_IZQ = 40              # Máximo giro permitido a la izquierda
-LIMIT_DER = 105             # Máximo giro permitido a la derecha
-TOLERANCIA_ANGULO = 3       
+LIMIT_IZQ = 40                  # Límite máximo de giro físico izquierdo
+LIMIT_DER = 105                 # Límite máximo de giro físico derecho
+TOLERANCIA_ANGULO = 3           # Banda muerta para forzar el centro directo (80)
+steering_angle = 80             
 
-# --- CONFIGURACIÓN DE EVASIÓN DE OBSTÁCULOS (ESCALA 1080p) ---
-MIN_ANCHO_DETECCION = 40    # Escalado lineal (20 * 1.68)
-MIN_AREA_ROJO = 10300        # Escalado base (1500 * 2.85) para ver de lejos
-MIN_AREA_VERDE = 13800       # 📌 REQUISITO: Mucho más grande para que reaccione solo cuando esté cerca
-primer_color_obstaculo = None  
+# --- AJUSTES DE SEGURIDAD POR ULTRASONIDOS ---
+DIST_MIN_CHOQUE = 10.0          # Freno de mano de emergencia frontal (cm)
+DIST_CRITICA_CURVA = 20.0       # Gatillo de proximidad frontal para forzar cruce
+DIST_MIN_PARED_FALLBACK = 20.0  # Límite lateral seguro (Guardarraíl electrónico)
 
-
-# --- CONFIGURACIÓN DE ULTRASONIDOS Y AJUSTES DE GIRO ---
-DIST_MIN_CHOQUE = 10.0          # Freno de mano de emergencia frontal
-DIST_CRITICA_CURVA = 20.0       # Menor distancia = gira más cerca de la pared
-DIST_MIN_PARED_FALLBACK = 20.0  # Distancia lateral límite para activar el guardarraíl
-steering_angle = 80     
-
-# --- VARIABLES PARA FIN DE CARRERA NO BLOQUEANTE ---
+# --- FIN DE CARRERA (12 VUELTAS) ---
 lap_time = 4.3
 end_game_triggered = False
 end_game_timer = 0.0
 
 # =========================================================================
-# 📐 ROIS PROPORCIONALES (ANCHO TOTAL 1080 - SIN PUNTOS CIEGOS)
+# 📐 ROIS SIMÉTRICAS SIN PUNTOS CIEGOS (RESOLUCIÓN 1080p)
 # =========================================================================
 roi_izq = ROI(0, 100, 540, 150)  
 roi_der = ROI(540, 100, 1080, 150) 
-roi_obstaculo = ROI(0, 60, 1080, 360) 
+
+black_area_right = 0
+black_area_left = 0
+cnt_right = None
+cnt_left = None
 
 def obtener_areas_negras():
+    global black_area_right, black_area_left, cnt_right, cnt_left
     cnt_left = LNM.vision.find_contours(LNM.mask_black, roi_izq)
     cnt_right = LNM.vision.find_contours(LNM.mask_black, roi_der)
-    area_right = LNM.vision.max_contour(cnt_right, roi_der)[0]
-    area_left = LNM.vision.max_contour(cnt_left, roi_izq)[0]
-    return [area_right, area_left]
+    black_area_right = LNM.vision.max_contour(cnt_right, roi_der)[0]
+    black_area_left = LNM.vision.max_contour(cnt_left, roi_izq)[0]
+    return [black_area_right, black_area_left]
 
-def procesar_obstaculos():
-    """ Analiza la ROI buscando bloques con umbrales independientes. """
-    red_ctn = LNM.vision.find_contours(LNM.mask_red, roi_obstaculo)
-    green_ctn = LNM.vision.find_contours(LNM.mask_green, roi_obstaculo)
-    
-    max_red = LNM.vision.max_contour(red_ctn, roi_obstaculo)
-    max_green = LNM.vision.max_contour(green_ctn, roi_obstaculo)
-    
-    # Detección de Bloque Rojo (Sensibilidad normal a la distancia)
-    if max_red[3] is not None and (max_green[3] is None or max_red[0] > max_green[0]):
-        if max_red[0] > MIN_AREA_ROJO: 
-            x, y, w, h = cv2.boundingRect(max_red[3])
-            if w > MIN_ANCHO_DETECCION:
-                x_centro = x + (w // 2)
-                cv2.rectangle(LNM.vision.frame[roi_obstaculo.y1:roi_obstaculo.y2, roi_obstaculo.x1:roi_obstaculo.x2], (x, y), (x+w, y+h), (0, 0, 255), 3)
-                return "ROJO", x_centro, w
-                
-    # Detección de Bloque Verde (Requiere estar más cerca / área mayor)
-    elif max_green[3] is not None:
-        if max_green[0] > MIN_AREA_VERDE:
-            x, y, w, h = cv2.boundingRect(max_green[3])
-            if w > MIN_ANCHO_DETECCION:
-                x_centro = x + (w // 2)
-                cv2.rectangle(LNM.vision.frame[roi_obstaculo.y1:roi_obstaculo.y2, roi_obstaculo.x1:roi_obstaculo.x2], (x, y), (x+w, y+h), (0, 255, 0), 3)
-                return "VERDE", x_centro, w
-                
-    return "NINGUNO", 540, 0 # Centro óptico real corregido a 540 para 1080p
+def draw_rois():
+    LNM.vision.draw_roi(roi_izq)
+    LNM.vision.draw_roi(roi_der)
+    LNM.vision.draw_contours(cnt_left, roi_izq, (0, 255, 255))
+    LNM.vision.draw_contours(cnt_right, roi_der, (0, 255, 255))
 
 # --- MAIN CONTROL LOOP ---
 while running:
     try:
+        # Adquisición de imágenes y telemetría de líneas de la pista
         LNM.vision.receive_image()
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
         
-        color_detectado, x_bloque, ancho_bloque = procesar_obstaculos()
         black_areas = obtener_areas_negras()
+        draw_rois()
 
-        if primer_color_obstaculo is None and color_detectado in ["ROJO", "VERDE"]:
-            primer_color_obstaculo = color_detectado
-            print(f"🎯 [CONFIG] Primer color de obstáculo registrado: {primer_color_obstaculo}")
-
-        LNM.vision.draw_roi(roi_izq)
-        LNM.vision.draw_roi(roi_der)
-        LNM.vision.draw_roi(roi_obstaculo)
-
-        cv2.imshow('Vision HD - Modo Competencia', LNM.vision.frame)
+        cv2.imshow('Vision HD - Modo Desarrollo Basico', LNM.vision.frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
+        # Lectura síncrona de la tripleta de sensores ultrasónicos
         front_dist, left_dist, right_dist = LNM.get_distances()
 
         # =========================================================================
-        # 🚨 FRENO DE MANO CON RETROCESO EN CURVA SEGÚN OBSTÁCULO
+        # 🚨 FRENO DE MANO DE EMERGENCIA (Evasión ante colisión frontal inminente)
         # =========================================================================
         if front_dist < DIST_MIN_CHOQUE and front_dist > 1.0:
-            print(f"🚨 ¡OBSTRUCCIÓN! Frente a {front_dist:.2f} cm. Estatus Bloque: {color_detectado}. Escapando...")
+            print(f"🚨 FRENO DE MANO! Colisión frontal inminente a {front_dist:.2f} cm.")
             LNM.stop(log=False)
             time.sleep(0.05)
             
-            # Reversa inteligente calculada según el color del bloque al frente
-            if color_detectado == "VERDE":
-                print()
-                angulo_retroceso = LIMIT_DER  # Reversa a la derecha orienta la nariz a la izquierda
-            elif color_detectado == "ROJO":
-                angulo_retroceso = LIMIT_IZQ  # Reversa a la izquierda orienta la nariz a la derecha
-            else:
-                angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
+            # Reversa reactiva evaluando cuál pared lateral ofrece más espacio de escape
+            angulo_retroceso = LIMIT_IZQ if left_dist < right_dist else LIMIT_DER
             
             LNM.move_backward(angle=angulo_retroceso, speed=65)
             time.sleep(0.85)
             
             LNM.turn_center(log=False)
             prev_error = 0.0
-            integral = 0.0
             time.sleep(0.1)
             continue
 
-        # Tracción constante en pista libre
+        # Inyección de velocidad constante en el avance libre
         LNM.move_forward(speed=90) 
 
-        # 1. DETECCIÓN DEL SENTIDO DE LA PISTA (Umbrales escalados x2.85)
+        # 1. DETECCIÓN DEL SENTIDO DE GIRO DE LA PISTA (Azul = Horario / Naranja = Antihorario)
         if LNM.turning_direction == 0: 
             if LNM.orange_area > 3420:
-                 LNM.turning_direction = 2
+                LNM.turning_direction = 2
+                print("🏁 Dirección de pista establecida: ANTIHORARIO (Línea Naranja)")
             elif LNM.blue_area > 3000:
-                 LNM.turning_direction = 1
+                LNM.turning_direction = 1
+                print("🏁 Dirección de pista establecida: HORARIO (Línea Azul)")
 
-        # 2. DETECCIÓN DE CURVAS CERRADAS (Umbrales de área corregidos para 1080p)
+        # 2. DETECCIÓN Y EJECUCIÓN AUTOMÁTICA EN ESQUINAS (Giro forzado de 90 grados)
         if front_dist < DIST_CRITICA_CURVA and not girando and LNM.black_area > 30480 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
             prev_error = 0.0
-            integral = 0.0
               
         if LNM.black_area < 22800 and girando and front_dist > 80:
-           LNM.turn_center()
-           girando = False
-           steering_angle = 80
+            LNM.turn_center()
+            girando = False
+            steering_angle = 80
 
         # =========================================================================
-        # CONTROL DE NAVEGACIÓN HÍBRIDO (PAREDES VS EVASIÓN POR BOUNDING BOX)
+        # 🛠️ NAVEGACIÓN BASADA EN ÁREAS LATERALES (CONTROL PD) Y GUARDARRAÍL
         # =========================================================================
         if not girando and LNM.turning_direction != 0:
             
-            # CASO A: EVASIÓN ACTIVA DE OBSTÁCULOS DE COLOR
-            if color_detectado in ["ROJO", "VERDE"]:
-                if color_detectado == "VERDE":
-                    base_izq = 38 
-                    factor_proximidad = int(ancho_bloque * 0.18) # Escalado lineal para evitar giros bruscos
-                    raw_angle = 80 - base_izq - factor_proximidad
-                    steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-                
-                elif color_detectado == "ROJO":
-                    base_der = 38
-                    factor_proximidad = int(ancho_bloque * 0.18)
-                    raw_angle = 80 + base_der + factor_proximidad
-                    steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
+            # Algoritmo PD de centrado visual
+            error = black_areas[1] - black_areas[0]  # Izquierda - Derecha
+            derivative = error - prev_error
+            correction = (Kp_vision * error) + (Kd_vision * derivative)
+            prev_error = error
+            
+            raw_angle = int(80 + correction)
+            steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
 
-            # CASO B: PISTA LIBRE (Centrado clásico por diferencia de áreas negras)
-            else:
-                error = black_areas[1] - black_areas[0]
-                integral += error
-                integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
-                derivative = error - prev_error
-                correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
-                prev_error = error
-                
-                raw_angle = int(80 + correction)
-                steering_angle = max(LIMIT_IZQ, min(LIMIT_DER, raw_angle))
-
-            # =========================================================================
-            # 📌 REQUISITO 2: GUARDARRAÍL DE FALLBACK ELECTRÓNICO
-            # =========================================================================
+            # --- GUARDARRAÍL ELECTRÓNICO POR ULTRASONIDOS (Prioridad Física Suprema) ---
             if left_dist < DIST_MIN_PARED_FALLBACK and left_dist > 1.0:
+                # Demasiado cerca de la pared izquierda -> Forzar desvío a la derecha
                 steering_angle = max(steering_angle, 92) 
             elif right_dist < DIST_MIN_PARED_FALLBACK and right_dist > 1.0:
+                # Demasiado cerca de la pared derecha -> Forzar desvío a la izquierda
                 steering_angle = min(steering_angle, 55)
 
-            # --- EJECUCIÓN FÍSICA DE LA DIRECCIÓN ACKERMANN ---
-            if abs(steering_angle - 80) <= TOLERANCIA_ANGULO and color_detectado == "NINGUNO":
+            # --- EJECUCIÓN CONTROLADA DE LOS ÁNGULOS DE DIRECCIÓN ---
+            if abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
                 LNM.turn_center()
                 steering_angle = 80
             elif steering_angle > 80:
@@ -218,7 +164,7 @@ while running:
                 LNM.turn_left(angle=steering_angle, speed=85)
 
         # =========================================================================
-        # 3. CONTROL DE VUELTAS Y FIN DE CARRERA (Áreas de marcas escaladas x2.85)
+        # ⏱️ CONTROL DE VUELTAS Y CRONÓMETRO DE FINALIZACIÓN
         # =========================================================================
         current_time = time.time() 
 
@@ -226,13 +172,13 @@ while running:
             orange_timer = current_time
             n = 1
             loops += 1
-            print (f"🔶 VUELTA NARANJA DETECTADA - Total Vueltas: {loops}")
+            print(f"🔶 VUELTA NARANJA REGISTRADA - Conteo Actual: {loops}")
 
         if LNM.blue_area > 1425 and n == 0 and LNM.turning_direction == 1: 
             blue_timer = current_time
             n = 1
             loops += 1
-            print (f"🔵 VUELTA AZUL DETECTADA - Total Vueltas: {loops}")
+            print(f"🔵 VUELTA AZUL REGISTRADA - Conteo Actual: {loops}")
 
         if current_time - orange_timer > lap_time and LNM.turning_direction == 2: 
             n = 0
@@ -240,16 +186,18 @@ while running:
         if current_time - blue_timer > lap_time and LNM.turning_direction == 1:
             n = 0
 
+        # Detención automática al completar las 12 vueltas requeridas
         if loops >= 12 and not end_game_triggered:
             end_game_timer = current_time
             end_game_triggered = True
 
         if end_game_triggered:
-            if current_time - end_game_timer >= 1:
+            if current_time - end_game_timer >= 1.0:
+                print("🏁 Reto completado con éxito tras 12 vueltas limpias. Deteniendo...")
                 break
         
     except Exception as e:
-        print("Exception:", e)
+        print("Exception en el ciclo principal:", e)
         LNM.stop()
         break
 
