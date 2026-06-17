@@ -230,9 +230,9 @@ Donde:
 
 # 3.  Software
 
-- ### Utils:
+- ### Utilidades:
 
-	- Color Tester:
+	- Color Tester: 
 
 	- ROI Detector:
 
