@@ -42,7 +42,6 @@ Where:
 - `v-photos`: Vehicle photos. [view](./v-photos/README.md)
 - `videos`: Performance videos of the robot. [view](./videos/README.md)
 
-
 # 1- Mobilidad y diseño
 
 - ### Opciones de diseño:
@@ -63,8 +62,7 @@ Where:
 	<img width="560" height="580" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" />
 
 	</div>
-
-
+	
 	- ### Mecanismo de Dirección Ackermann
 
 		El vehículo utiliza una geometría precisa basada en el **Principio de Dirección Ackermann** para conquistar curvas cerradas con cero deslizamiento lateral y un desgaste mínimo de los neumáticos.
