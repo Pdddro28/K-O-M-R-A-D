@@ -48,9 +48,9 @@ Donde:
 
 	| Foto | Nombre |
 	|---|---|
-	| <img width="787" height="453" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | Cyber Cooper |
-	| <img width="420" height="420" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | Cooper |
-	| <img width="420" height="580" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | Halbi |
+	| <img width="420" height="320" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | Cyber Cooper |
+	| <img width="420" height="320" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | Cooper |
+	| <img width="420" height="500" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | Halbi |
 	| a | The Fridge |
 
  - ### Halbi The Green:
