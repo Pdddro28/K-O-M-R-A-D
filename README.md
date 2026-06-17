@@ -1,14 +1,14 @@
 Intro
 ====
 
-This is the official Github repository proporty of The LNM, before known as Ars Machina, conformed by David Wang Wu and Pedro Catamo. This repository contains all the code, documentation and resources for our project. This is our fourth year participating in WRO.
+Este es el repositorio oficial de GitHub propiedad de The LNM, anteriormente conocido como Ars Machina, formado por David Wang Wu y Pedro Catamo. Este repositorio contiene todo el código, la documentación y los recursos de nuestro proyecto. Este es nuestro cuarto año participando en la WRO.
 
-| Member | Birth Date & Age | Studying | Languages / Misc | Aspirations | Gmail |
+| Miembros | Edad y Fecha de Nacimiento | Colegio | Idiomas | Aspiraciones | Gmail |
 | --- | --- | --- | --- | --- | --- |
-| **David Wang** | 01/04/2011 (15 y/o) | 3rd year at U.E.C. Eduardo Blanco | English, Spanish, Mandarin, Taiwanese | Computer Science at UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
-| **Pedro Catamo** | 01/28/2009 (17 y/o) | 5th year at U.E.C. Eduardo Blanco | English, Spanish | Biomaterials Engineering at UNC Humberto Fernandez Moran | pedrocatamo.2009@gmail.com |
+| **David Wang** | 01/04/2011 (15 años) | 3º año en la U.E.C. Eduardo Blanco | Inglés, español, chino mandarín y taiwanés | Informática en la UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
+| **Pedro Catamo** | 28/01/2009 (17 años) | 5º año en la U.E.C. Eduardo Blanco | Inglés y español | Ingeniería de Biomateriales en la UNC Humberto Fernández Morán | pedrocatamo.2009@gmail.com |
 
-Vehicle photo
+Foto del carro
 ====
 
 <div align="center">
@@ -17,10 +17,10 @@ Vehicle photo
 
 </div>
 
-Folders Structure
+Estructura de carpetas
 ====
 
-Here is our Folder Structure of the repository:
+Esta es la estructura de carpetas de nuestro repositorio:
 
 ```
 LNM/
@@ -33,14 +33,14 @@ LNM/
 
 ```
 
-Where:
+Donde:
 
-- `models`: Every 3D/CAD file used in the car. [view](./models/README.md)
-- `schemes`: Wiring diagram, assembly explanation and components description. [view](./schemes/README.md)
-- `src`: All code necessary to control the robot. [view](./src/README.md) 
-- `t-photos`: Team photos. [view](./t-photos/README.md)
-- `v-photos`: Vehicle photos. [view](./v-photos/README.md)
-- `videos`: Performance videos of the robot. [view](./videos/README.md)
+- `models`: Todos los archivos 3D/CAD utilizados en el coche. [ver](./models/README.md)
+- `schemes`: Esquema de cableado, instrucciones de montaje y descripción de los componentes. [ver](./schemes/README.md)
+- `src`: Todo el código necesario para controlar el robot. [ver](./src/README.md) 
+- `t-photos`: Fotos del equipo. [ver](./t-photos/README.md)
+- `v-photos`: Fotos del vehículo. [ver](./v-photos/README.md)
+- `videos`: Vídeos de las actuaciones del robot. [ver](./videos/README.md)
 
 # 1- Mobilidad y diseño
 
