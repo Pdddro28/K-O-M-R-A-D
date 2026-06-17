@@ -197,9 +197,9 @@ Donde:
 	| 4 | [Lever wire connectors](https://www.amazon.com/Conductor-Compact-Connectors-Electrical-Terminals/dp/B0D9Y5XFQC/ref=sr_1_2_sspa?sr=8-2-spons) | $9.99 | $39.96 |
 	| 1 | [Buck Converter 3A 15W Type-C](https://www.amazon.com/-/es/Convertidor-Impermeable-Adaptador-corriente-compatible/dp/B0D2MTJQK8) | $8.79 | $8.79 |
 	| 1 | [MAKEBLOCK MegaPi (from mbot mega)](https://www.robotshop.com/products/makeblock-mbot-mega-robot-car-bluetooth-dongle?qd=09ee589fedd6f0b70db366bd5f5dcf45) | $136.39 | $136.39 |
-	| 1 | Click Button | $2.50 | $2.50 |
+	| 1 | [Crash Collision Sensor Module]([https://www.amazon.com/Collision-Installation-Vibrating-Activated-Switching/dp/B0G2S7BHJD](https://www.amazon.com/-/es/Generic-detecci%C3%B3n-colisi%C3%B3n-interruptor-Arduino/dp/B0D6GZDV95)) | $5.54 | $5.54 |
 	| 1 | [LED Traffic Light Module](https://www.amazon.com/Traffic-Light-Module-Board-Arduino/dp/B07R1KJ4DT) | $5.49 | $5.49 |
-	| | | | **$505.55** |
+	| | | | **$508.59** |
 
 - ### Descripción:
 
@@ -216,7 +216,15 @@ Donde:
 
 - ### Disposición de Sensores y Justificación:
 
+	El diseño de nuestro vehículo autónomo implementa un sistema de percepción mixto compuesto por una cámara de visión artificial y 		tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación en la pista de la WRO. En la 		parte delantera, se ha colocado un sensor ultrasónico en una posición avanzada respecto a la cámara. Esta configuración permite una 	sincronización ideal entre ambos componentes: mientras la cámara procesa la información visual del entorno (como la detección de 		colores en las líneas y el reconocimiento de objetos a media distancia), el sensor ultrasónico frontal actúa como una medida de 		seguridad y precisión en tiempo real, midiendo con exactitud la distancia hacia los obstáculos que se encuentran inmediatamente 		delante del vehículo antes de ejecutar una acción de frenado o esquive.
+
+	Por otro lado, para el control lateral y la estabilización del coche, se han integrado dos sensores ultrasónicos adicionales, 			situados uno a cada costado del chasis. Estos sensores laterales se encuentran posicionados longitudinalmente entre las ruedas 			delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación es fundamental para el algoritmo 	de navegación, ya que permite medir de forma constante y simétrica la distancia hacia las paredes de la pista. Al mantener esta 		altura y posición central, se minimizan las perturbaciones causadas por los movimientos de balanceo del chasis, garantizando que el 	vehículo pueda calcular de manera óptima el centro del carril y mantener una trayectoria recta, fluida y precisa durante toda la 		competencia.
+
 - ### Batería:
+
+	La Zeee 3S LiPo 11.1V 2200mAh 50C es una batería de polímero de litio de alto rendimiento, diseñada específicamente para 				entusiastas del radiocontrol (RC) que buscan un equilibrio óptimo entre peso, tamaño y potencia. Con una configuración de 3 celdas 		(3S) y un voltaje nominal de 11.1V, este componente proporciona la energía constante y agresiva necesaria para impulsar una amplia 		variedad de modelos, desde drones de carreras y aviones a escala hasta vehículos terrestres RC. Su capacidad de 2200mAh asegura un 		tiempo de juego o vuelo sumamente competitivo, permitiendo exprimir al máximo el rendimiento del motor sin añadir un peso excesivo 		que pueda comprometer la agilidad del modelo.
+
+	El verdadero punto fuerte de esta batería radica en su tasa de descarga de 50C, lo que significa que es capaz de entregar picos de 		corriente elevados de forma segura cuando el acelerador lo demanda, garantizando aceleraciones explosivas y una respuesta inmediata 	a los mandos. Fabricada con materiales de alta calidad y una baja resistencia interna, la Zeee 3S destaca por su ciclo de vida 			prolongado y su estabilidad térmica durante un uso intensivo. Viene equipada habitualmente con conectores de alta conductividad 		(como el Deans T o XT60) y un conector de equilibrado JST-XH, lo que facilita tanto una carga segura celda por celda como una 			compatibilidad directa con la mayoría de los cargadores inteligentes del mercado.
 
 - ### Presupuesto de Energía:
 
