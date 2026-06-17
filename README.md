@@ -1,11 +1,11 @@
 Intro
 ====
 
-Este es el repositorio oficial de GitHub propiedad de The LNM, anteriormente conocido como Ars Machina, formado por David Wang Wu y Pedro Catamo. Este repositorio contiene todo el código, la documentación y los recursos de nuestro proyecto. Este es nuestro cuarto año participando en la WRO.
+Este es el repositorio oficial de GitHub propiedad del equipo LNM, anteriormente conocido como Ars Machina, formado por David Wang Wu y Pedro Catamo. Este repositorio contiene todo el código, la documentación y los recursos de nuestro proyecto. Este es nuestro cuarto año participando en la WRO.
 
 | Miembros | Edad y Fecha de Nacimiento | Colegio | Idiomas | Aspiraciones | Gmail |
 | --- | --- | --- | --- | --- | --- |
-| **David Wang** | 01/04/2011 (15 años) | 3º año en la U.E.C. Eduardo Blanco | Inglés, español, chino mandarín y taiwanés | Informática en la UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
+| **David Wang** | 01/04/2011 (15 años) | 3º año en la U.E.C. Eduardo Blanco | Inglés, español, chino mandarín y taiwanés | Ingenieria en informática en la UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
 | **Pedro Catamo** | 28/01/2009 (17 años) | 5º año en la U.E.C. Eduardo Blanco | Inglés y español | Ingeniería de Biomateriales en la UNC Humberto Fernández Morán | pedrocatamo.2009@gmail.com |
 
 Foto del carro
@@ -46,12 +46,12 @@ Donde:
 
 - ### Opciones de diseño:
 
-	| Foto | Descripción | Nombre |
+	| Foto | Nombre |
 	|---|---|---|
-	|  | a | Cyber Cooper |
-	| <img width="420" height="420" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | a | Cooper |
-	| <img width="420" height="580" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | a | Halbi |
-	| a | a | The Fridge |
+	| <img width="787" height="453" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | Cyber Cooper |
+	| <img width="420" height="420" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | Cooper |
+	| <img width="420" height="580" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | Halbi |
+	| a | The Fridge |
 
  - ### Halbi The Green:
 
