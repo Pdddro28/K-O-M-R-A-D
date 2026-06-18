@@ -1,4 +1,4 @@
-``` If you want to see this repository in English, click here ```
+**[If you want to see this repository in English, click here] (https://github.com/Pdddro28/K-O-M-R-A-D/blob/main/README_EN.md)**
 
 ``` Para mejor visualización, se recomienda ver el repositorio en la computadora ```
 # WRO 2026 Future Engineers – LNM
