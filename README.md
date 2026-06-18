@@ -61,12 +61,12 @@ Donde:
 
 	<img width="560" height="580" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" />
 
-Especificaciones mecánicas principales:
+#### Especificaciones mecánicas principales:
 
-- Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto)
-- Masa total: aproximadamente 1,2kg
-- Configuración de la tracción: Tracción Trasera Mecánica Bifásica 
-- Sistema de dirección: Geometría Ackermann.
+- **Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto)**
+- **Masa total: aproximadamente 1,2kg**
+- **Configuración de la tracción: Tracción Trasera Mecánica Bifásica**
+- **Sistema de dirección: Geometría Ackermann.**
 
 	</div>
 	
