@@ -239,8 +239,8 @@ Donde:
   | Módulo Sensor de Colisión (Crash) | 1 | 5.0 V | 10 mA | 10 mA |
   | Módulo Semáforo LED (Traffic Light) | 1 | 5.0 V | 30 mA | 30 mA |
   | Servomotor de Dirección MG996R | 1 | 5.0 V - 6.0 V | 500 mA / 2500 mA (Stall) | 2500 mA |
-  | Motor de Tracción RS380 | 1 | 7.2 V - 12.0 V | 1200 mA / 6000 mA (Stall) | 6000 mA |
-  | | | | | 10,185 mA (10.18 A) |
+  | Motor de Tracción RS380 | 1 | 7.2 V - 12.0 V | 1200 mA / 2000 mA (Stall) | 2000 mA |
+  | | | | | 10,185 mA (6.18 A) |
 
 - ### Diagrama de Cableado:
 
