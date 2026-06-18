@@ -52,10 +52,10 @@ Donde:
 	
 | Foto | Nombre |
 |---|---|
-| <img width="420" height="320" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | Cyber Cooper |
-| <img width="420" height="320" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | Cooper |
-| <img width="420" height="500" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | Halbi |
-| <img width="765" height="1020" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | The Fridge |
+| <img width="420" height="320" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | **Cyber Cooper** |
+| <img width="420" height="320" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | **Cooper** |
+| <img width="420" height="320" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | **Halbi** |
+| <img width="420" height="320" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** |
 
 </div>
 
@@ -76,10 +76,10 @@ Donde:
 
 	- ### Especificaciones mecánicas principales:
 
-		- Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto).
-		- Masa total: aproximadamente 1,2Kg.
-		- Configuración de la tracción: Tracción Trasera Mecánica Bifásica.
-		- Sistema de dirección: Geometría Ackermann.
+		- **Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto).**
+		- **Masa total: aproximadamente 1,2Kg.**
+		- **Configuración de la tracción: Tracción Trasera Mecánica Bifásica.**
+		- **Sistema de dirección: Geometría Ackermann.**
 	
 	- ### Mecanismo de Dirección Ackermann
 
