@@ -40,7 +40,7 @@ Kd_obstaculo = 0.01   # Amortigua el giro para evitar que la cola derrape y toqu
 estado_carrera = "LINEAL"
 memoria_lado = None  # Guardará "IZQUIERDA" o "DERECHA"
 
-# --- CONFIGURACIÓN DE VELOCIDAD Y AJUSTES (MODERADA A 70) ---
+# --- CONFIGURACIÓN DE VELOCIDAD Y AJUSTES (MODERADA A 65) ---
 VELOCIDAD_BASE = 65
 DIST_MIN_CHOQUE = 12.0  
 steering_angle = 80     
@@ -135,7 +135,7 @@ while running:
             time.sleep(0.1)
             continue
 
-        # Mantenemos la velocidad constante y moderada recomendada para este reto
+        # Mantenemos la velocidad constante
         LNM.move_forward(speed=VELOCIDAD_BASE) 
 
         # Detección del sentido de la pista (Líneas de las esquinas)
@@ -152,79 +152,82 @@ while running:
         # --- ESTADO 1: LINEAL (Centrado de líneas + Giros controlados en Esquinas) ---
         if estado_carrera == "LINEAL":
             
-            # FILTRO DE ENTRADA: Solo evalúa pasar a ESQUIVANDO si NO está ejecutando un giro de esquina forzado
-            if not girando and datos_verde[0] > 450 and datos_verde[0] >= datos_rojo[0]:
+            # FILTRO DE ENTRADA CORREGIDO: Bajamos ligeramente el umbral a 350 píxeles para ganar anticipación
+            # Quitamos los 'continue' para evitar saltos bruscos en el refresco de imagen
+            if datos_verde[0] > 350 and datos_verde[0] >= datos_rojo[0]:
+                print("🟢 ¡Pilar Verde Detectado! Cambiando a ESQUIVANDO.")
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "IZQUIERDA" 
                 prev_error = 0.0
-                continue
-            elif not girando and datos_rojo[0] > 450 and datos_rojo[0] > datos_verde[0]:
+                girando = False # Forzar salida de curva si ve un pilar inmediatamente
+            elif datos_rojo[0] > 350 and datos_rojo[0] > datos_verde[0]:
+                print("🔴 ¡Pilar Rojo Detectado! Cambiando a ESQUIVANDO.")
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "DERECHA"   
                 prev_error = 0.0
-                continue
+                girando = False # Forzar salida de curva si ve un pilar inmediatamente
 
-            # --- CONTROL DE GIROS EN ESQUINAS CERRADAS (REINTEGRADO) ---
-            if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
-                print("↩️ [ESQUINA] Detectada curva cerrada. Forzando giro de esquina.")
-                LNM.turn_direction()
-                girando = True
-                
-            elif LNM.black_area < 8000 and girando and front_dist > 80:
-                print("➡️ [ESQUINA] Pista liberada. Centrando dirección.")
-                LNM.turn_center()
-                girando = False
-                steering_angle = 80
-
-            # Si no está girando en la esquina, ejecuta su PID Lineal de seguimiento
-            if not girando:
-                error = black_areas[1] - black_areas[0]
-                integral += error
-                integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
-                derivative = error - prev_error
-                correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
-                prev_error = error
-                
-                steering_angle = int(80 + correction)
-                steering_angle = max(40, min(120, steering_angle))
-                
-                if abs(error) < UMBRAL_PIXELES_MUERTO or abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
+            # --- CONTROL DE GIROS EN ESQUINAS CERRADAS ---
+            # Solo opera si de verdad no estamos enganchados a un obstáculo
+            if estado_carrera == "LINEAL":
+                if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
+                    print("↩️ [ESQUINA] Detectada curva cerrada. Forzando giro de esquina.")
+                    LNM.turn_direction()
+                    girando = True
+                    
+                elif LNM.black_area < 8000 and girando and front_dist > 80:
+                    print("➡️ [ESQUINA] Pista liberada. Centrando dirección.")
                     LNM.turn_center()
+                    girando = False
                     steering_angle = 80
-                elif steering_angle > 80:
-                    LNM.turn_right(angle=steering_angle, speed=VELOCIDAD_BASE)
-                elif steering_angle < 80:
-                    LNM.turn_left(angle=steering_angle, speed=VELOCIDAD_BASE)
 
-        # --- ESTADO 2: ESQUIVANDO (Control de evasión optimizado por color) ---
+                # Ejecución de PID de líneas estándar
+                if not girando:
+                    error = black_areas[1] - black_areas[0]
+                    integral += error
+                    integral = max(-MAX_INTEGRAL, min(MAX_INTEGRAL, integral))
+                    derivative = error - prev_error
+                    correction = (Kp_vision * error) + (Ki_vision * integral) + (Kd_vision * derivative)
+                    prev_error = error
+                    
+                    steering_angle = int(80 + correction)
+                    steering_angle = max(40, min(120, steering_angle))
+                    
+                    if abs(error) < UMBRAL_PIXELES_MUERTO or abs(steering_angle - 80) <= TOLERANCIA_ANGULO:
+                        LNM.turn_center()
+                        steering_angle = 80
+                    elif steering_angle > 80:
+                        LNM.turn_right(angle=steering_angle, speed=VELOCIDAD_BASE)
+                    elif steering_angle < 80:
+                        LNM.turn_left(angle=steering_angle, speed=VELOCIDAD_BASE)
+
+        # --- ESTADO 2: ESQUIVANDO ---
         elif estado_carrera == "ESQUIVANDO":
             print(f"🔄 [MODO ESQUIVA]: Evadiendo pilar por la {memoria_lado} | L:{left_dist}cm R:{right_dist}cm")
             
             CENTRO_ROI_X = 320 
             
-            # DETECCIÓN DE ENCAJONAMIENTO: Si se pega a la pared mientras esquiva, se fuerza el rebase inmediato
+            # DETECCIÓN DE ENCAJONAMIENTO TOTAL VIA ULTRASONIDOS
             if memoria_lado == "IZQUIERDA" and left_dist < DIST_MIN_PARED and left_dist > 1.0:
-                print("⚠️ Demasiado cerca de la pared izquierda. Forzando REBASANDO.")
+                print("⚠️ Pared izquierda encima. Forzando REBASANDO.")
                 estado_carrera = "REBASANDO"
                 continue
             elif memoria_lado == "DERECHA" and right_dist < DIST_MIN_PARED and right_dist > 1.0:
-                print("⚠️ Demasiado cerca de la pared derecha. Forzando REBASANDO.")
+                print("⚠️ Pared derecha encima. Forzando REBASANDO.")
                 estado_carrera = "REBASANDO"
                 continue
             
-            if memoria_lado == "IZQUIERDA": # PILAR VERDE (Evasión por la izquierda)
+            if memoria_lado == "IZQUIERDA": 
                 if datos_verde[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
-                
                 target_x = datos_verde[1] - 140  
                 error_obs = target_x - CENTRO_ROI_X
                 
-            else: # PILAR ROJO (Evasión por la derecha con corrección simétrica)
+            else: 
                 if datos_rojo[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
-                
                 error_obs = CENTRO_ROI_X - datos_rojo[1] + 140
             
             # --- CÁLCULO PID ---
@@ -240,16 +243,15 @@ while running:
             elif steering_angle < 80:
                 LNM.turn_left(angle=steering_angle, speed=VELOCIDAD_BASE)
 
-        # --- ESTADO 3: REBASANDO (Fijación de escape con control ultrasónico lateral) ---
+        # --- ESTADO 3: REBASANDO ---
         elif estado_carrera == "REBASANDO":
             print(f"⏱️ [MODO REBASE]: Esperando liberación lateral. L:{left_dist}cm | R:{right_dist}cm")
             
             if memoria_lado == "IZQUIERDA":
-                # Si está atrapado entre el pilar y la pared izquierda (lectura lateral baja)
                 if left_dist < DIST_MIN_PARED and left_dist > 1.0:
-                    LNM.turn_right(angle=85, speed=VELOCIDAD_BASE) # Abre leve a la derecha para no raspar pared
+                    LNM.turn_right(angle=85, speed=VELOCIDAD_BASE) 
                 else:
-                    LNM.turn_left(angle=72, speed=VELOCIDAD_BASE)  # Trayectoria estándar
+                    LNM.turn_left(angle=72, speed=VELOCIDAD_BASE)  
                 
                 if right_dist > 40:
                     print("✅ Pilar verde superado por completo.")
@@ -257,11 +259,10 @@ while running:
                     prev_error = 0.0
             
             elif memoria_lado == "DERECHA":
-                # Si está atrapado entre el pilar y la pared derecha (lectura lateral baja)
                 if right_dist < DIST_MIN_PARED and right_dist > 1.0:
-                    LNM.turn_left(angle=75, speed=VELOCIDAD_BASE)  # Abre leve a la izquierda para salvar pared
+                    LNM.turn_left(angle=75, speed=VELOCIDAD_BASE)  
                 else:
-                    LNM.turn_right(angle=88, speed=VELOCIDAD_BASE) # Trayectoria estándar
+                    LNM.turn_right(angle=88, speed=VELOCIDAD_BASE) 
                 
                 if left_dist > 40:
                     print("✅ Pilar rojo superado por completo.")
