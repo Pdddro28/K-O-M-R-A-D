@@ -226,9 +226,9 @@ Donde:
 
 - ### Disposición de Sensores y Justificación:
 
-	El diseño de nuestro vehículo autónomo implementa un sistema de percepción mixto compuesto por una cámara de visión artificial y 		tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación en la pista de la WRO. En la 		parte delantera, se ha colocado un sensor ultrasónico en una posición avanzada respecto a la cámara. Esta configuración permite una 	sincronización ideal entre ambos componentes: mientras la cámara procesa la información visual del entorno (como la detección de 		colores en las líneas y el reconocimiento de objetos a media distancia), el sensor ultrasónico frontal actúa como una medida de 		seguridad y precisión en tiempo real, midiendo con exactitud la distancia hacia los obstáculos que se encuentran inmediatamente 		delante del vehículo antes de ejecutar una acción de frenado o esquive.
+	El diseño de nuestro vehículo autónomo implementa un sistema de percepción mixto compuesto por una cámara de visión artificial y tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación en la pista de la WRO. En la parte delantera, se ha colocado un sensor ultrasónico en una posición avanzada respecto a la cámara. Esta configuración permite una sincronización ideal entre ambos componentes: mientras la cámara procesa la información visual del entorno (como la detección de colores en las líneas y el reconocimiento de objetos a media distancia), el sensor ultrasónico frontal actúa como una medida de seguridad y precisión en tiempo real, midiendo con exactitud la distancia hacia los obstáculos que se encuentran inmediatamente delante del vehículo antes de ejecutar una acción de frenado o esquive.
 
-	Por otro lado, para el control lateral y la estabilización del coche, se han integrado dos sensores ultrasónicos adicionales, 			situados uno a cada costado del chasis. Estos sensores laterales se encuentran posicionados longitudinalmente entre las ruedas 			delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación es fundamental para el algoritmo 	de navegación, ya que permite medir de forma constante y simétrica la distancia hacia las paredes de la pista. Al mantener esta 		altura y posición central, se minimizan las perturbaciones causadas por los movimientos de balanceo del chasis, garantizando que el 	vehículo pueda calcular de manera óptima el centro del carril y mantener una trayectoria recta, fluida y precisa durante toda la 		competencia.
+	Por otro lado, para el control lateral y la estabilización del coche, se han integrado dos sensores ultrasónicos adicionales, situados uno a cada costado del chasis. Estos sensores laterales se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación es fundamental para el algoritmo de navegación, ya que permite medir de forma constante y simétrica la distancia hacia las paredes de la pista. Al mantener esta altura y posición central, se minimizan las perturbaciones causadas por los movimientos de balanceo del chasis, garantizando que el 	vehículo pueda calcular de manera óptima el centro del carril y mantener una trayectoria recta, fluida y precisa durante toda la competencia.
 
 - ### Batería:
 
@@ -248,7 +248,7 @@ Donde:
   | Módulo Semáforo LED (Traffic Light) | 1 | 5.0 V | 30 mA | 30 mA |
   | Servomotor de Dirección MG996R | 1 | 5.0 V - 6.0 V | 500 mA / 2500 mA (Stall) | 2500 mA |
   | Motor de Tracción RS380 | 1 | 7.2 V - 12.0 V | 1200 mA / 2000 mA (Stall) | 2000 mA |
-  | | | | | 10,185 mA (6.18 A) |
+  | | | | | 6,185 mA (6.18 A) |
 
 - ### Diagrama de Cableado:
 
