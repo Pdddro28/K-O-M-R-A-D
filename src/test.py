@@ -13,7 +13,7 @@ ROI_LINES = ROI(200, 300, 440, 350)       # Tu ROI de líneas original
 # NUEVA ROI: Enfocada en el carril central medio para detectar pilares a tiempo
 ROI_OBSTACULOS = ROI(30, 30, 610, 320)
 
-while not LNM.start():
+while LNM.start():
     pass
 running = True
 
@@ -41,7 +41,7 @@ estado_carrera = "LINEAL"
 memoria_lado = None  # Guardará "IZQUIERDA" o "DERECHA"
 
 # --- CONFIGURACIÓN DE VELOCIDAD Y AJUSTES (MODERADA A 70) ---
-VELOCIDAD_BASE = 70
+VELOCIDAD_BASE = 65
 DIST_MIN_CHOQUE = 12.0  
 steering_angle = 80     
 
@@ -158,7 +158,7 @@ while running:
                 memoria_lado = "IZQUIERDA" 
                 prev_error = 0.0
                 continue
-            elif not girando and datos_rojo[0] > 500 and datos_rojo[0] > datos_verde[0]:
+            elif not girando and datos_rojo[0] > 450 and datos_rojo[0] > datos_verde[0]:
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "DERECHA"   
                 prev_error = 0.0
