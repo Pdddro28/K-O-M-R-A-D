@@ -1,7 +1,7 @@
-Intro
+# WRO 2026 Future Engineers – LNM
 ====
 
-Este es el repositorio oficial de GitHub propiedad del equipo LNM, anteriormente conocido como Ars Machina, formado por David Wang Wu y Pedro Catamo. Este repositorio contiene todo el código, la documentación y los recursos de nuestro proyecto. Este es nuestro cuarto año participando en la WRO.
+Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
 
 | Miembros | Edad y Fecha de Nacimiento | Colegio | Idiomas | Aspiraciones | Gmail |
 | --- | --- | --- | --- | --- | --- |
