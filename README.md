@@ -67,14 +67,12 @@ Donde:
 	- **Masa total: aproximadamente 1,2Kg.**
 	- **Configuración de la tracción: Tracción Trasera Mecánica Bifásica.**
 	- **Sistema de dirección: Geometría Ackermann.**
-
-	---
 	
 	- ### Mecanismo de Dirección Ackermann
 
 		El vehículo utiliza una geometría precisa basada en el **Principio de Dirección Ackermann** para conquistar curvas cerradas con cero deslizamiento lateral y un desgaste mínimo de los neumáticos.
 
-		* **La Física Detrás del Principio:** Cuando un vehículo entra en una curva, la rueda delantera interior sigue un radio concéntrico más cerrado y pequeño que la rueda exterior. Si ambas ruedas giraran exactamente al mismo ángulo, los neumáticos 		lucharían entre sí, provocando que el neumático exterior se arrastre, pierda agarre mecánico e introduzca vibraciones estructurales severas que arruinarían el seguimiento visual de los carriles. Para resolver esto, la geometría mecánica obliga a la rueda interior a pivotar a un ángulo más profundo que la rueda exterior, asegurando que las cuatro ruedas roten alrededor de un único centro instantáneo de curvatura (ICC) común.
+		* **La Física Detrás del Principio:** Cuando un vehículo entra en una curva, la rueda delantera interior sigue un radio concéntrico más cerrado y pequeño que la rueda exterior. Si ambas ruedas giraran exactamente al mismo ángulo, los neumáticos lucharían entre sí, provocando que el neumático exterior se arrastre, pierda agarre mecánico e introduzca vibraciones estructurales severas que arruinarían el seguimiento visual de los carriles. Para resolver esto, la geometría mecánica obliga a la rueda interior a pivotar a un ángulo más profundo que la rueda exterior, asegurando que las cuatro ruedas roten alrededor de un único centro instantáneo de curvatura (ICC) común.
 
 		* **La Ejecución Mecánica:** Un servo digital **MG996R** de alto par ($11 \text{ kg}\cdot\text{cm}$ de par) se ancla al mamparo delantero mediante un soporte de aluminio en forma de L mecanizado a medida para eliminar la deflexión estructural. El brazo del servo acciona una cremallera de dirección de doble enlace conectada a tirantes asimétricos y manguetas de dirección. Los brazos de dirección están angulados hacia el interior, apuntando al centro del eje trasero, completando el clásico "Trapezoide de Ackermann". Este diseño mecánico exacto convierte el desplazamiento lineal del servo en ángulos de rueda no lineales de forma automática.
 
@@ -96,7 +94,7 @@ Donde:
 		* $w$ es el ancho de la vía (*track width* o distancia entre las ruedas frontales).
 		* $L$ es la batalla del carro (*wheelbase* o distancia entre el eje delantero y trasero).
 
-		Dado que la cotangente crece más rápido a ángulos pequeños, esta relación obliga mecánicamente a que $\theta_{\text{in}} > \theta_{\text{out}}$ de forma automática en cualquier curva, abriendo el ángulo de la rueda exterior para que dibuje un 			círculo más grande.
+		Dado que la cotangente crece más rápido a ángulos pequeños, esta relación obliga mecánicamente a que $\theta_{\text{in}} > \theta_{\text{out}}$ de forma automática en cualquier curva, abriendo el ángulo de la rueda exterior para que dibuje un círculo más grande.
 
 		<div align="center">
 		<img width="567" height="600" alt="17523247_203569336801744_2788986523412924047_n" src="https://github.com/user-attachments/assets/c36a271c-b45c-492a-805e-b107851429cd" />
@@ -115,12 +113,15 @@ Donde:
 		</div>
 
 		* **Especificaciones Técnicas de los Motores (RS380):** El bloque motriz confía en motores de CC con escobillas imantadas, seleccionados específicamente por su curva de respuesta dinámica y tolerancia a picos transitorios de carga.
+
 	    * **Voltaje Nominal:** $12\text{V}$ (Operando a un voltaje nominal de celda de $11.1\text{V}$ mediante una batería LiPo 3S para asegurar la estabilidad térmica).
+   
  		* **Corriente de Vacío (No-load):** $0.4\text{A}$ | **Corriente de Arranque/Pérdida (Stall):** $4.5\text{A}$ de protección en el driver.
+   
  		* **Velocidad de Rotación de Fábrica:** $15000\text{ RPM}$ en el núcleo del motor, reducida internamente y ajustada finalmente por el engranaje externo para entregar una velocidad final estimada de transferencia de aprox. $450\text{ RPM}$ en el eje de la rueda.
 
 		* **Análisis Cinemático y Cálculo de la Velocidad Teórica Absoluta:**
-		Para determinar el rendimiento del chasis en pista y calibrar las ventanas de tiempo por vuelta (como el parámetro de control `lap_time = 4.3`), se realiza el cálculo cinemático basado en el diámetro de las ruedas motrices de $6.5\text{ cm}$ 			($0.065\text{ m}$). Evaluamos la circunferencia de rodadura ($C$) y la velocidad lineal máxima teórica ($V$):
+		Para determinar el rendimiento del chasis en pista y calibrar las ventanas de tiempo por vuelta (como el parámetro de control `lap_time = 4.3`), se realiza el cálculo cinemático basado en el diámetro de las ruedas motrices de $6.5\text{ cm}$ ($0.065\text{ m}$). Evaluamos la circunferencia de rodadura ($C$) y la velocidad lineal máxima teórica ($V$):
 
 		$$C = \pi \times 0.065\text{ m} \approx 0.2041\text{ m}$$
 
@@ -128,7 +129,7 @@ Donde:
 
 		$$V = \frac{450\text{ RPM}}{60} \times 0.2041\text{ m} \approx 1.53\text{ m/s}$$
 
-		Este valor de $1.53\text{ m/s}$ representa la velocidad límite ideal de la plataforma. En condiciones reales de competencia, este vector se modula por software mediante los comandos de velocidad (`speed=90` u `80`) para absorber la fricción 			estática del suelo, la resistencia al avance de los rodamientos y las demandas instantáneas de corriente solicitadas por la MegaPi al gestionar el cambio de inercias.
+		Este valor de $1.53\text{ m/s}$ representa la velocidad límite ideal de la plataforma. En condiciones reales de competencia, este vector se modula por software mediante los comandos de velocidad (`speed=90` u `80`) para absorber la fricción estática del suelo, la resistencia al avance de los rodamientos y las demandas instantáneas de corriente solicitadas por la MegaPi al gestionar el cambio de inercias.
 
 
 	- ### 3D Printed Parts:
@@ -137,7 +138,7 @@ Donde:
 
    			- **Creality Hi:** Es una de las propuestas más recientes de Creality, diseñada con un fuerte enfoque en competir directamente en el mercado de impresión multicolor accesible.
         
-        		- Volumen de construcción (lo que puedes imprimir): $260 \times 260 \times 300\text{ mm}$. Es un tamaño intermedio-alto, excelente para robótica porque te permite hacer chasis completos en una sola pieza sin tener que 									segmentarlos.
+        		- Volumen de construcción (lo que puedes imprimir): $260 \times 260 \times 300\text{ mm}$. Es un tamaño intermedio-alto, excelente para robótica porque te permite hacer chasis completos en una sola pieza sin tener que segmentarlos.
             
           		- Dimensiones de la máquina: $409 \times 392 \times 477\text{ mm}$ (Peso: $8.75\text{ kg}$).
   
@@ -177,7 +178,7 @@ Donde:
 			|---|---|
 			| El Polietileno Tereftalato Glicol (PETG) es un termoplástico derivado del petróleo, modificado con glicol para evitar la cristalización y fragilidad del PET común. Combina la facilidad de impresión del PLA con la resistencia mecánica del ABS. Se caracteriza por su excelente tenacidad, resistencia al desgaste químico y capacidad de absorber impactos mediante una ligera flexión elástica, lo que lo hace ideal para componentes funcionales. | El Ácido Poliláctico (PLA) es un termoplástico biodegradable de origen natural (derivado del almidón de maíz o caña de azúcar) ampliamente utilizado en impresión 3D por su facilidad de uso. Destaca por su alta rigidez estructural y mínima contracción térmica al enfriarse, lo que permite fabricar piezas con tolerancias geométricas muy precisas y sin deformaciones. Sin embargo, su naturaleza molecular lo hace frágil frente a impactos directos. |
 			| Presenta una alta resistencia al impacto y una notable resistencia a la fatiga mecánica. Cuenta con un módulo elástico que le otorga cierta flexibilidad estructural, permitiéndole soportar torsiones, vibraciones mecánicas y cargas dinámicas sin sufrir fracturas catastróficas. Es el material idóneo para piezas del robot expuestas a colisiones, fuerzas de tracción o movimientos mecánicos constantes. | Ofrece una excelente resistencia a la tracción y una rigidez mecánica superior, lo que significa que no se deforma ni se dobla fácilmente bajo cargas estáticas. Su principal desventaja es la fragilidad extrema; ante esfuerzos mecánicos bruscos o vibraciones continuas, tiende a fisurarse o quebrarse de forma repentina en lugar de flexionarse, limitando su uso en zonas de alta tensión dinámica. |
-			| Destaca por una estabilidad térmica superior, soportando temperaturas de trabajo de hasta 75°C u 80°C sin perder su rigidez ni sufrir deformaciones estructurales. Esto permite colocarlo directamente junto a disipadores, motores DC o 					reguladores de voltaje. Además, posee propiedades hidrofóbicas y una alta resistencia química frente a alcoholes, aceites, grasas y a la degradación por exposición a la intemperie. | Posee una baja resistencia térmica, con un punto de ablandamiento (temperatura de transición vítrea) situado entre los 50°C y 55°C. Esto lo vuelve vulnerable a la deformación geométrica si se expone al calor disipado por motores de alta potencia o si el robot opera en entornos cálidos. Asimismo, su resistencia a la degradación por rayos UV y agentes químicos es limitada a largo plazo. |
+			| Destaca por una estabilidad térmica superior, soportando temperaturas de trabajo de hasta 75°C u 80°C sin perder su rigidez ni sufrir deformaciones estructurales. Esto permite colocarlo directamente junto a disipadores, motores DC o reguladores de voltaje. Además, posee propiedades hidrofóbicas y una alta resistencia química frente a alcoholes, aceites, grasas y a la degradación por exposición a la intemperie. | Posee una baja resistencia térmica, con un punto de ablandamiento (temperatura de transición vítrea) situado entre los 50°C y 55°C. Esto lo vuelve vulnerable a la deformación geométrica si se expone al calor disipado por motores de alta potencia o si el robot opera en entornos cálidos. Asimismo, su resistencia a la degradación por rayos UV y agentes químicos es limitada a largo plazo. |
 			| Exige condiciones de impresión más estrictas, con temperaturas de boquilla de 230°C a 250°C y cama caliente obligatoria entre 70°C y 90°C. Es propenso a generar hilos finos (stringing) y requiere un control riguroso de la humedad, ya que es altamente higroscópico y absorbe el agua del ambiente rápidamente, lo que degrada la calidad de la pieza si el filamento no se almacena en seco. | Es el material más sencillo de procesar en el taller de robótica, requiriendo temperaturas de boquilla bajas (190°C - 220°C) y una temperatura de cama moderada (50°C - 60°C) o incluso nula. No genera gases nocivos, no sufre de warping (despegue de bordes) y tolera altas velocidades de impresión con ventilación de capa al 100%, facilitando el prototipado rápido de piezas complejas. |
 			| Se utiliza de forma prioritaria en los componentes críticos sometidos a estrés físico y térmico. Es la elección correcta para parachoques frontales (bumpers) expuestos a colisiones, soportes para motores DC que generan calor por fricción, estructuras internas que sujetan baterías pesadas (soportando inercias bruscas al frenar o girar) y piezas móviles del varillaje del sistema de dirección. | Se aplica en la fabricación de componentes fijos que exigen máxima precisión dimensional y rigidez absoluta, donde las tolerancias geométricas de los encajes deban ser milimétricas. Es ideal para soportes de sensores ópticos o de líneas (que no deben oscilar), carcasas de cámaras de visión artificial, brackets de sujeción estáticos y maquetas de prueba donde el peso y el ajuste de tornillos sean críticos. |
 
