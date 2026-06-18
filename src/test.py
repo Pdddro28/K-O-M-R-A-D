@@ -27,14 +27,14 @@ n = 0
 # --- PARÁMETROS PID PARA CENTRADO DE LÍNEAS (Ronda Abierta) ---
 Kp_vision = 0.015    
 Ki_vision = 0.0
-Kd_vision = 0.005   
+Kd_vision = 0.035   
 prev_error = 0.0
 integral = 0.0
 MAX_INTEGRAL = 15.0 
 
 # --- PARÁMETROS PID EXCLUSIVOS PARA EVITAR OBSTÁCULOS ---
 Kp_obstaculo = 0.52   # Más agresivo porque el rango de error en píxeles es menor
-Kd_obstaculo = 0.08   # Amortigua el giro para evitar que la cola derrape y toque el pilar
+Kd_obstaculo = 0.01  # Amortigua el giro para evitar que la cola derrape y toque el pilar
 
 # --- MÁQUINA DE ESTADOS PARA OBSTÁCULOS ---
 # Estados: "LINEAL" (Centrado de líneas), "ESQUIVANDO" (Viendo pilar), "REBASANDO" (Memoria ultrasonido)
@@ -152,11 +152,11 @@ while running:
         # --- ESTADO 1: LINEAL (Centrado mediante diferencia de áreas de líneas) ---
         if estado_carrera == "LINEAL":
             # Verificar si entra un obstáculo en el radar visual (Umbral de área > 250 píxeles)
-            if datos_verde[0] > 250 and datos_verde[0] >= datos_rojo[0]:
+            if datos_verde[0] > 450 and datos_verde[0] >= datos_rojo[0]:
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "IZQUIERDA" # El verde se esquiva por la izquierda
                 prev_error = 0.0
-            elif datos_rojo[0] > 250 and datos_rojo[0] > datos_verde[0]:
+            elif datos_rojo[0] > 500 and datos_rojo[0] > datos_verde[0]:
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "DERECHA"   # El rojo se esquiva por la derecha
                 prev_error = 0.0
@@ -252,7 +252,7 @@ while running:
         # CONTEO DE VUELTAS Y CRONÓMETRO DE CIERRE
         # =========================================================================
         current_time = time.time()
-
+        """ 
         if LNM.orange_area > 500 and n == 0 and LNM.turning_direction == 2: 
             orange_timer = current_time
             n = 1
@@ -278,7 +278,7 @@ while running:
             if current_time - end_game_timer >= 1.0:
                 print("⏱️ Tiempo completado. Deteniendo robot.")
                 break
-        
+        """
     except Exception as e:
         print("Exception en el bucle principal:", e)
         LNM.stop()
