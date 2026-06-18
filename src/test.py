@@ -185,38 +185,47 @@ while running:
         elif estado_carrera == "ESQUIVANDO":
             print(f"🔄 [MODO ESQUIVA]: Evadiendo pilar por la {memoria_lado}")
             
+            # Centro real de tu nueva ROI ampliada en el eje X: (30 + 610) / 2 = 320
+            CENTRO_ROI_X = 320 
+            
             if memoria_lado == "IZQUIERDA":
-                # Objetivo espacial: Coordenada X del pilar verde - un offset de seguridad
-                # Restamos 320 para calcular el error respecto al centro de la pantalla
-                target_x = datos_verde[1] - 130
-                error_obs = target_x - 320
-                
-                # Si el pilar desaparece de la ROI central, pasamos al control ultrasónico lateral
                 if datos_verde[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
-            else:
-                # Objetivo espacial: Coordenada X del pilar rojo + un offset de seguridad
-                target_x = datos_rojo[1] + 130
-                error_obs = target_x - 320
                 
+                # Para esquivar el VERDE, queremos que el coche pase por la IZQUIERDA del pilar.
+                # Definimos un Target dinámico: la posición del pilar desplazada a la derecha de nuestro centro.
+                # Al restarle la posición del pilar, si el pilar se acerca al centro, el error se vuelve negativo,
+                # obligando al coche a girar a la izquierda.
+                target_x = datos_verde[1] - 140  
+                error_obs = target_x - CENTRO_ROI_X
+                
+            else: # DERECHA (Pilar Rojo)
                 if datos_rojo[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
+                
+                # Para esquivar el ROJO, queremos pasar por la DERECHA del pilar.
+                # Si el pilar aparece en nuestro camino, calculamos la desviación hacia la derecha
+                # generando un error positivo para que el chasis rompa la dirección en sentido horario.
+                target_x = datos_rojo[1] + 140  
+                error_obs = target_x - CENTRO_ROI_X
             
-            # Aplicamos el PID de obstáculos amortiguado
+            # --- CÁLCULO DE CONTROL PID AMORTIGUADO ---
             derivative_obs = error_obs - prev_error
             correction_obs = (Kp_obstaculo * error_obs) + (Kd_obstaculo * derivative_obs)
             prev_error = error_obs
             
+            # El signo de la corrección ahora se aplica de manera uniforme
             steering_angle = int(80 + correction_obs)
             steering_angle = max(40, min(120, steering_angle))
+            
+            print(f"📊 Obs Error: {error_obs} | Correction: {correction_obs:.2f} | Steering: {steering_angle}")
             
             if steering_angle > 80:
                 LNM.turn_right(angle=steering_angle, speed=VELOCIDAD_BASE)
             elif steering_angle < 80:
                 LNM.turn_left(angle=steering_angle, speed=VELOCIDAD_BASE)
-
         # --- ESTADO 3: REBASANDO (Memoria ultrasónica lateral para no cerrar el giro antes de tiempo) ---
         elif estado_carrera == "REBASANDO":
             print(f"⏱️ [MODO REBASE]: Esperando liberación lateral. L:{left_dist}cm | R:{right_dist}cm")
