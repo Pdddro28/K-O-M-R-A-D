@@ -182,41 +182,39 @@ while running:
                     LNM.turn_left(angle=steering_angle, speed=VELOCIDAD_BASE)
 
         # --- ESTADO 2: ESQUIVANDO (El PID se enfoca en el pilar detectado) ---
+       # --- ESTADO 2: ESQUIVANDO (El PID se enfoca en el pilar detectado) ---
         elif estado_carrera == "ESQUIVANDO":
             print(f"🔄 [MODO ESQUIVA]: Evadiendo pilar por la {memoria_lado}")
             
-            # Centro real de tu nueva ROI ampliada en el eje X: (30 + 610) / 2 = 320
             CENTRO_ROI_X = 320 
             
-            if memoria_lado == "IZQUIERDA":
+            if memoria_lado == "IZQUIERDA": # PILAR VERDE
                 if datos_verde[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
                 
-                # Para esquivar el VERDE, queremos que el coche pase por la IZQUIERDA del pilar.
-                # Definimos un Target dinámico: la posición del pilar desplazada a la derecha de nuestro centro.
-                # Al restarle la posición del pilar, si el pilar se acerca al centro, el error se vuelve negativo,
-                # obligando al coche a girar a la izquierda.
+                # Queremos ir a la IZQUIERDA del pilar verde. 
+                # Si el pilar verde está en el centro o la izquierda, empujamos el error 
+                # hacia el lado negativo para forzar el giro a la izquierda (< 80).
                 target_x = datos_verde[1] - 140  
                 error_obs = target_x - CENTRO_ROI_X
                 
-            else: # DERECHA (Pilar Rojo)
+            else: # PILAR ROJO
                 if datos_rojo[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
                 
-                # Para esquivar el ROJO, queremos pasar por la DERECHA del pilar.
-                # Si el pilar aparece en nuestro camino, calculamos la desviación hacia la derecha
-                # generando un error positivo para que el chasis rompa la dirección en sentido horario.
-                target_x = datos_rojo[1] + 140  
-                error_obs = target_x - CENTRO_ROI_X
+                # CORRECCIÓN PILAR ROJO: Queremos ir a la DERECHA del pilar.
+                # Si el pilar rojo está en la izquierda (X baja), la distancia al revés 
+                # (CENTRO - pilar) nos da un valor positivo, lo que genera una corrección
+                # positiva que hace girar al chasis a la DERECHA (> 80), alejándose del bloque.
+                error_obs = CENTRO_ROI_X - datos_rojo[1] + 140
             
             # --- CÁLCULO DE CONTROL PID AMORTIGUADO ---
             derivative_obs = error_obs - prev_error
             correction_obs = (Kp_obstaculo * error_obs) + (Kd_obstaculo * derivative_obs)
             prev_error = error_obs
             
-            # El signo de la corrección ahora se aplica de manera uniforme
             steering_angle = int(80 + correction_obs)
             steering_angle = max(40, min(120, steering_angle))
             
