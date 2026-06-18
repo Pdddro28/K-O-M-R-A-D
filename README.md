@@ -272,11 +272,17 @@ Donde:
 
 	- Open Challenge:
 
-		- Estrategia: 
+		- Estrategia:
+  
+		    Para cumplir con los desafíos del Open Challenge, se diseñó e implementó una arquitectura de software basada en un bucle de control de alta frecuencia, dividida en cuatro pilares estratégicos: Percepción Visual, Control de Trayectoria (PID), Navegación en Esquinas y Seguridad Activa.
 		
 		- ROIS:
+ 
+    		Para optimizar el procesamiento computacional y evitar falsos positivos con el entorno, la cámara segmenta el espacio en dos ROIs laterales específicas (roi y roi2). Estas regiones buscan activamente las líneas negras que delimitan las paredes o carriles de la pista.
 
 		- Contador de Loops:
+ 
+   			Se procesa el área de los colores clave en los primeros instantes. Si se detecta un área mayor a un umbral crítico 200px de color naranja, el robot asume una orientación de giro a la derecha; si el color es azul, se configura para girar a la izquierda.
 
 		- Diagrama de Flujo:
 
