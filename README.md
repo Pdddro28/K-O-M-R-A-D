@@ -1,4 +1,4 @@
-**[If you want to see this repository in English, click here] (https://github.com/Pdddro28/K-O-M-R-A-D/blob/main/README_EN.md)**
+**If you want to see this repository in English, [click here](https://github.com/Pdddro28/K-O-M-R-A-D/blob/main/README_EN.md)**
 
 ``` Para mejor visualización, se recomienda ver el repositorio en la computadora ```
 # WRO 2026 Future Engineers – LNM
@@ -47,13 +47,17 @@ Donde:
 # 1- Mobilidad y diseño
 
 - ### Opciones de diseño:
+  
+<div align="center">
+	
+| Foto | Nombre |
+|---|---|
+| <img width="420" height="320" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | Cyber Cooper |
+| <img width="420" height="320" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | Cooper |
+| <img width="420" height="500" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | Halbi |
+| a | The Fridge |
 
-	| Foto | Nombre |
-	|---|---|
-	| <img width="420" height="320" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | Cyber Cooper |
-	| <img width="420" height="320" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | Cooper |
-	| <img width="420" height="500" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | Halbi |
-	| a | The Fridge |
+</div>
 
  - ### Halbi The Green:
 
@@ -61,21 +65,21 @@ Donde:
 
 	<div align="center">
 
-	<img width="360" height="380" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" />
-	<img width="360" height="380" alt="Upper-Pov" src="https://github.com/user-attachments/assets/74863cc8-5128-49cf-845e-0f087c50bcf1" />
-	<img width="360" height="380" alt="RightSide-Pov" src="https://github.com/user-attachments/assets/8b9c2020-cc18-441f-9152-c86d9a233b10" />
-	<img width="360" height="380" alt="LeftSide-Pov" src="https://github.com/user-attachments/assets/cdbabe27-6e45-4dab-98e6-e63b24ed7371" />
-	<img width="360" height="380" alt="Front-Pov" src="https://github.com/user-attachments/assets/d9b65dd5-ca97-4087-ba20-77f7cbeb4bf6" />
-	<img width="360" height="380" alt="Back-Pov" src="https://github.com/user-attachments/assets/dd1737be-1173-4cae-9229-25821f05dc22" />
+	<img width="260" height="280" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" />
+	<img width="260" height="280" alt="Upper-Pov" src="https://github.com/user-attachments/assets/74863cc8-5128-49cf-845e-0f087c50bcf1" />
+	<img width="260" height="280" alt="RightSide-Pov" src="https://github.com/user-attachments/assets/8b9c2020-cc18-441f-9152-c86d9a233b10" />
+	<img width="260" height="280" alt="LeftSide-Pov" src="https://github.com/user-attachments/assets/cdbabe27-6e45-4dab-98e6-e63b24ed7371" />
+	<img width="260" height="280" alt="Front-Pov" src="https://github.com/user-attachments/assets/d9b65dd5-ca97-4087-ba20-77f7cbeb4bf6" />
+	<img width="260" height="280" alt="Back-Pov" src="https://github.com/user-attachments/assets/dd1737be-1173-4cae-9229-25821f05dc22" />
 
     </div>
 
-	#### Especificaciones mecánicas principales:
+	- ### Especificaciones mecánicas principales:
 
-	- **Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto).**
-	- **Masa total: aproximadamente 1,2Kg.**
-	- **Configuración de la tracción: Tracción Trasera Mecánica Bifásica.**
-	- **Sistema de dirección: Geometría Ackermann.**
+		- Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto).
+		- Masa total: aproximadamente 1,2Kg.
+		- Configuración de la tracción: Tracción Trasera Mecánica Bifásica.
+		- Sistema de dirección: Geometría Ackermann.
 	
 	- ### Mecanismo de Dirección Ackermann
 
@@ -89,14 +93,16 @@ Donde:
 
 	- ### ¿Qué es la Geometría Ackermann? 
 
-		Entendiendo la Matemática y Cinemática Ackermann, en robótica móvil tradicional (como los robots de la categoría *RoboMission*), se utiliza la tracción diferencial porque es matemáticamente simple: varías la velocidad de dos motores y el robot 		gira sobre su propio eje. Sin embargo, a altas velocidades, la tracción diferencial es inestable e impredecible.
+		Entendiendo la Matemática y Cinemática Ackermann, en robótica móvil tradicional (como los robots de la categoría *RoboMission*), se utiliza la tracción diferencial porque es matemáticamente simple: varías la velocidad de dos motores y el robot gira sobre su propio eje. Sin embargo, a altas velocidades, la tracción diferencial es inestable e impredecible.
 
 		**La Geometría Ackermann** resuelve esto mediante un principio puramente mecánico. Para que un vehículo gire sin deslizarse lateralmente, las líneas extendidas desde los ejes de todas las ruedas deben cruzarse en un único punto en el espacio: el **Centro Instantáneo de Rotación (CIR)** o ICC.
 
 		La ecuación matemática fundamental que gobierna esta cinemática es:
-
+		<div align="center">
+	
 		$$\cot(\theta_{\text{out}}) - \cot(\theta_{\text{in}}) = \frac{w}{L}$$
-
+		
+		</div>
 		Donde:
 		* $\theta_{\text{in}}$ es el ángulo de giro de la rueda interna.
 		* $\theta_{\text{out}}$ es el ángulo de giro de la rueda externa.
