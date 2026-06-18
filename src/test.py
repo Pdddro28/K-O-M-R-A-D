@@ -12,9 +12,9 @@ ROI_LINES = ROI(200, 300, 440, 350)       # Tu ROI de líneas original
 
 # NUEVA ROI: Enfocada en el carril central medio para detectar pilares a tiempo
 # Evita los bordes de la pista (X de 140 a 500) y el parachoques bajo (Y de 130 a 290)
-ROI_OBSTACULOS = ROI(140, 130, 500, 290)
+ROI_OBSTACULOS = ROI(30, 30, 610, 320)
 
-while LNM.start():
+while not LNM.start():
     pass
 running = True
 
@@ -33,7 +33,7 @@ integral = 0.0
 MAX_INTEGRAL = 15.0 
 
 # --- PARÁMETROS PID EXCLUSIVOS PARA EVITAR OBSTÁCULOS ---
-Kp_obstaculo = 0.22   # Más agresivo porque el rango de error en píxeles es menor
+Kp_obstaculo = 0.52   # Más agresivo porque el rango de error en píxeles es menor
 Kd_obstaculo = 0.08   # Amortigua el giro para evitar que la cola derrape y toque el pilar
 
 # --- MÁQUINA DE ESTADOS PARA OBSTÁCULOS ---
@@ -42,7 +42,7 @@ estado_carrera = "LINEAL"
 memoria_lado = None  # Guardará "IZQUIERDA" o "DERECHA"
 
 # --- CONFIGURACIÓN DE VELOCIDAD Y AJUSTES (MODERADA A 85) ---
-VELOCIDAD_BASE = 85
+VELOCIDAD_BASE = 70
 DIST_MIN_CHOQUE = 12.0  
 steering_angle = 80     
 
@@ -73,6 +73,8 @@ def procesar_obstaculos():
     # max_contour devuelve [area, x, y, contorno]
     datos_rojo = LNM.vision.max_contour(cnt_rojo, ROI_OBSTACULOS)
     datos_verde = LNM.vision.max_contour(cnt_verde, ROI_OBSTACULOS)
+    print(f"🔴 Rojo: Área={datos_rojo[0]}, X={datos_rojo[1]}, Y={datos_rojo[2]}")
+    print(f"🟢 Verde: Área={datos_verde[0]}, X={datos_verde[1]}, Y={datos_verde[2]}")
     
     return datos_rojo, datos_verde
 
@@ -96,7 +98,6 @@ while running:
         LNM.obtener_linea_azul()
         LNM.obtener_linea_naranja()
         LNM.obtenerarea_frontal()
-        
         # Distancias físicas de los ultrasonidos
         front_dist, left_dist, right_dist = LNM.get_distances()
         
@@ -106,6 +107,9 @@ while running:
         
         # Dibujar elementos en el frame
         draw_all_rois(datos_rojo, datos_verde)
+        cv2.imshow('Vision HD - Obstacle Challenge', LNM.vision.frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
         # cv2.imshow('Vision HD - Obstacle Challenge', LNM.vision.frame)
         # if cv2.waitKey(1) & 0xFF == ord('q'): break
 
