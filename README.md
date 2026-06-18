@@ -1,4 +1,5 @@
 ``` If you want to see this repository in English, click here ```
+
 ``` Para mejor visualización, se recomienda ver el repositorio en la computadora ```
 # WRO 2026 Future Engineers – LNM
 
