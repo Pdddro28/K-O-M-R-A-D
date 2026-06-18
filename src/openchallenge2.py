@@ -119,14 +119,14 @@ while running:
                  LNM.turning_direction = 1
 
         # 2. CORNER DETECTION (Detección de Esquinas para Cruzar)
-        if front_dist < 85 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
+        if front_dist < 85 and not girando and LNM.black_area > 6500 and LNM.turning_direction != 0:
             LNM.turn_direction()
             girando = True
 
             prev_error = 0.0
             integral = 0.0
               
-        if LNM.black_area < 8000 and girando and front_dist > 80:
+        if LNM.black_area < 6500 and girando and front_dist > 80:
            LNM.turn_center()
            girando = False
            conteo = False

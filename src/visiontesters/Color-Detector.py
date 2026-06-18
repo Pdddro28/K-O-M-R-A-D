@@ -20,7 +20,7 @@ class ROI:
 
 class VisionController():
     def __init__(self):
-        self.image_width  = 640
+        self.image_width  = 1080
         self.image_height = 480
         self.image_lab = None
         self.frame = None
@@ -33,19 +33,25 @@ class VisionController():
         self.picam2.start()
 
     def receive_image(self):
-        try:
-            self.frame = self.picam2.capture_array()
-            self.frame = cv.flip(self.frame, 0)
-            self.frame = cv.flip(self.frame, 1)
-            if self.frame is None:
-                return False
-                
-            self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
-            self.image_lab = cv.GaussianBlur(self.image_lab, (7,7), 0)
-            return True
-        except Exception as e:
-            print(f"Frame capture error: {e}")
-            return False
+        self.frame = self.picam2.capture_array('main')
+        self.frame = cv.flip(self.frame, 0)
+        self.frame = cv.flip(self.frame, 1)
+
+        if self.frame is None:
+            print("No se pudo obtener imagen de la PiCamera.")
+            return
+
+        self.image_lab = cv.cvtColor(self.frame, cv.COLOR_BGR2LAB)
+       
+        l_channel, a_channel, b_channel = cv.split(self.image_lab)
+       
+        clahe = cv.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl_channel = clahe.apply(l_channel)
+       
+        self.image_lab = cv.merge((cl_channel, a_channel, b_channel))
+       
+        self.image_lab = cv.GaussianBlur(self.image_lab, (7, 7), 0)
+        return True
 
     def find_mask(self, color_range, roi):
         img_segmented = self.image_lab[roi.y1:roi.y2, roi.x1:roi.x2]
