@@ -368,14 +368,30 @@ Donde:
 
 # 4. Challenges
 
-- ### Problemas de Hardware:
+# 4. Challenges
 
-	Objetivo: Completar tres vueltas de forma autónoma en circuitos configurados dinámicamente.
+## - Problemas de Hardware
 
-	- Chasis demasiado pequeño 
-	
-	- La batería ocupa demasiado espacio
+**Objetivo:** Completar tres vueltas de forma autónoma en circuitos configurados dinámicamente.
 
+### Problemas de espaciamiento
+Durante el desarrollo temprano de *Halbi the Green*, se presentaron inconvenientes con respecto al posicionamiento de los componentes dentro del chasis base (sin modificar). Debido a que los componentes ocupaban más espacio del disponible, el problema se resolvió temporalmente fijándolos con cinta aislante. Aunque esto funcionó de forma provisional, no era una solución viable a largo plazo. 
+
+Por ello, se decidió implementar una serie de bases impresas en 3D pensadas para agregar **dos niveles adicionales** al vehículo y **tres soportes complementarios** (dos laterales y uno frontal) para ubicar los sensores de ultrasonido, los cuales originalmente no tenían un lugar asignado.
+
+De manera más específica, los problemas de espaciamiento y sus respectivas soluciones fueron los siguientes:
+
+* **Espacio ocupado por las baterías:** * *Problema:* Ocupaban demasiado volumen en el chasis y no dejaban espacio para ubicar los componentes de forma cómoda.
+    * *Solución:* Se les diseñó una base a medida para ubicarlas en el centro del robot y, sobre esta estructura, se construyó el piso superior.
+* **Anclaje de sensores de ultrasonido:** * *Problema:* No tenían puntos previstos para anclarlos al chasis original.
+    * *Solución:* Se diseñaron 3 bases impresas que van adjuntas a 3 caras del chasis.
+    * *Nota técnica:* Esta solución no fue del todo ideal, ya que estas bases sobresalen un poco de la estructura, causando atascamientos mecánicos cuando el vehículo pasa muy cerca de una esquina.
+* **Ubicación de la cámara y controlador:** * *Problema:* No había lugar físico para situar la cámara ni la placa de procesamiento.
+    * *Solución:* Sobre la base de las baterías se diseñó un soporte dedicado para la Raspberry Pi y la cámara. Esta última incluye una base con ángulo graduable para poder ajustar el punto de vista del lente de manera cómoda y precisa.
+
+### Problemas con las conexiones (Cableado)
+* **Problema:** Al tener cables sueltos y expuestos, estos se quedaban atascados constantemente con el entorno e incluso se llevaban por delante los obstáculos del circuito en algunas ocasiones.
+* **Solución:** Se reorganizaron por completo las conexiones para eliminar los bucles y partes sobresalientes del cableado.
 - ### Problemas de Software:
 
 	- a
