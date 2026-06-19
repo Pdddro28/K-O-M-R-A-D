@@ -18,20 +18,29 @@ El Equipo
 - ### Miembros:
 
 	- **David Wang**
+   
 		Nacido en: 01/04/2011 (15 años)
+
 		Estudio: 3º año en la U.E.C. Eduardo Blanco
+
   		Gmail: davidwangwu104@gmail.com
   	  
 	- **Pedro Catamo**
+   
  	  	Nacido en: 28/01/2009 (17 años)
+   
    		Estudio: 5º año en la U.E.C. Eduardo Blanco
+   
    		Gmail: pedrocatamo.2009@gmail.com
 
  - ### Coach:
 
 	- **Jesús Alcalá**
+   
   		Nacido en: 18/11/2005 (21 Años)
+   
    		Estudio: Ingenieria en computación & Ingenieria informática
+   
    		Gmail: Jdam50002@gmail.com
 
 Foto del carro
