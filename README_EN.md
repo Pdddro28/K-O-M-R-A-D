@@ -363,38 +363,38 @@ Where:
 
 		- Flowchart:
 
-# 4. Challenges
+# 4. Challenges:
 
 - ### Hardware Problems
 
-**Objective:** Complete three laps autonomously in dynamically configured circuits.
+	**Objective:** Complete three laps autonomously in dynamically configured circuits.
 
-### Spacing Problems
-During the early development of *Halbi the Green*, issues arose regarding component positioning within the base chassis (unmodified). Because the components occupied more space than available, the problem was temporarily resolved by securing them with electrical tape. While this worked provisionally, it was not a viable long-term solution. 
+	### Spacing Problems
+	During the early development of *Halbi the Green*, issues arose regarding component positioning within the base chassis (unmodified). Because the components occupied more space than available, the problem was temporarily resolved by securing them 	with electrical tape. While this worked provisionally, it was not a viable long-term solution. 
 
-Therefor, it was decided to implement a series of 3D-printed bases designed to add **two additional levels** to the vehicle and **three complementary supports** (two lateral and one frontal) to position the ultrasonic sensors, which originally had no assigned place.
+	Therefor, it was decided to implement a series of 3D-printed bases designed to add **two additional levels** to the vehicle and **three complementary supports** (two lateral and one frontal) to position the ultrasonic sensors, which originally had no assigned place.
 
-More specifically, the spacing issues and their respective solutions were as follows:
-
-* **Space occupied by batteries:** * *Problem:* They occupied too much volume in the chassis and did not leave room to position components comfortably.
+	More specifically, the spacing issues and their respective solutions were as follows:
+	
+	* **Space occupied by batteries:** * *Problem:* They occupied too much volume in the chassis and did not leave room to position components comfortably.
   
-    * *Solution:* A custom base was designed to position them in the center of the robot, and the upper floor was constructed on top of this structure.
+    	* *Solution:* A custom base was designed to position them in the center of the robot, and the upper floor was constructed on top of this structure.
       
-* **Ultrasonic sensor anchoring:** * *Problem:* They had no designated mounting points on the original chassis.
+	* **Ultrasonic sensor anchoring:** * *Problem:* They had no designated mounting points on the original chassis.
   
-    * *Solution:* 3 printed bases were designed to attach to 3 sides of the chassis.
+    	* *Solution:* 3 printed bases were designed to attach to 3 sides of the chassis.
       
-    * *Technical note:* This solution was not completely ideal, as these bases protrude slightly from the structure, causing mechanical jams when the vehicle passes very close to a corner.
+    	* *Technical note:* This solution was not completely ideal, as these bases protrude slightly from the structure, causing mechanical jams when the vehicle passes very close to a corner.
       
-* **Camera and Controller Location:** * *Problem:* There was no physical space to place the camera or the processing board.
+	* **Camera and Controller Location:** * *Problem:* There was no physical space to place the camera or the processing board.
   
-    * *Solution:* A dedicated support for the Raspberry Pi and the camera was designed on top of the battery base. The camera includes a base with an adjustable angle to tweak the lens viewpoint comfortably and precisely.
+    	* *Solution:* A dedicated support for the Raspberry Pi and the camera was designed on top of the battery base. The camera includes a base with an adjustable angle to tweak the lens viewpoint comfortably and precisely.
 
-### Connection Problems (Wiring)
+	### Connection Problems (Wiring)
 
-* **Problem:** Having loose and exposed wires caused them to get stuck constantly in the environment and even knock down circuit obstacles on some occasions.
+	* **Problem:** Having loose and exposed wires caused them to get stuck constantly in the environment and even knock down circuit obstacles on some occasions.
   
-* **Solution:** Connections were completely reorganized to eliminate wire loops and protruding parts.
+	* **Solution:** Connections were completely reorganized to eliminate wire loops and protruding parts.
   
 - ### Software Problems:
 
