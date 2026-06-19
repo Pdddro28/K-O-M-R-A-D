@@ -355,7 +355,7 @@ Donde:
 
 	Esta es una descripción completa de todos los atributos y métodos de la clase, junto con sus argumentos. Te recomendamos que la consultes primero antes de pasar a las demás secciones y que, cuando clones el repositorio, la utilices como guía para orientarte en nuestro código.
 
-	#### MegaPiController.ino (class Carro)
+  	### MegaPiController.ino (class Carro)
 
 	**Dependencies**
 
