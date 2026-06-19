@@ -26,7 +26,7 @@ girando = False  # Inicialización de la bandera de esquinas cerradas
 
 # --- VARIABLES PARA TIEMPO DE GRACIA ---
 tiempo_perdida = 0.0
-TIEMPO_GRACIA = 0.6  # Segundos extra que mantendrá el giro tras perder el pilar de vista
+TIEMPO_GRACIA = 0.2  # Segundos extra que mantendrá el giro tras perder el pilar de vista
 
 # --- PARÁMETROS PID PARA CENTRADO DE LÍNEAS (Ronda Abierta) ---
 Kp_vision = 0.015    
@@ -37,7 +37,7 @@ integral = 0.0
 MAX_INTEGRAL = 15.0 
 
 # --- PARÁMETROS PID EXCLUSIVOS PARA EVITAR OBSTÁCULOS ---
-Kp_obstaculo = 0.42   # Más agresivo porque el rango de error en píxeles es menor
+Kp_obstaculo = 0.32   # Más agresivo porque el rango de error en píxeles es menor
 Kd_obstaculo = 0.01   # Amortigua el giro para evitar que la cola derrape y toque el pilar
 
 # --- MÁQUINA DE ESTADOS PARA OBSTÁCULOS ---
@@ -164,7 +164,7 @@ while running:
                 prev_error = 0.0
                 tiempo_perdida = 0.0
                 girando = False 
-            elif datos_rojo[0] > 350 and datos_rojo[0] > datos_verde[0]:
+            elif datos_rojo[0] > 300 and datos_rojo[0] > datos_verde[0]:
                 print("🔴 ¡Pilar Rojo Detectado! Cambiando a ESQUIVANDO.")
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "DERECHA"   
