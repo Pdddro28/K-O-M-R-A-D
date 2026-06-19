@@ -24,6 +24,10 @@ loops = 0
 n = 0
 girando = False  # Inicialización de la bandera de esquinas cerradas
 
+# --- VARIABLES PARA TIEMPO DE GRACIA ---
+tiempo_perdida = 0.0
+TIEMPO_GRACIA = 0.6  # Segundos extra que mantendrá el giro tras perder el pilar de vista
+
 # --- PARÁMETROS PID PARA CENTRADO DE LÍNEAS (Ronda Abierta) ---
 Kp_vision = 0.015    
 Ki_vision = 0.0
@@ -132,6 +136,7 @@ while running:
             integral = 0.0
             estado_carrera = "LINEAL" 
             girando = False
+            tiempo_perdida = 0.0 # Reset de seguridad
             time.sleep(0.1)
             continue
 
@@ -157,12 +162,14 @@ while running:
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "IZQUIERDA" 
                 prev_error = 0.0
+                tiempo_perdida = 0.0
                 girando = False 
             elif datos_rojo[0] > 350 and datos_rojo[0] > datos_verde[0]:
                 print("🔴 ¡Pilar Rojo Detectado! Cambiando a ESQUIVANDO.")
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "DERECHA"   
                 prev_error = 0.0
+                tiempo_perdida = 0.0
                 girando = False 
 
             # --- CONTROL DE GIROS EN ESQUINAS CERRADAS ---
@@ -218,17 +225,33 @@ while running:
             
             if memoria_lado == "IZQUIERDA": 
                 if datos_verde[0] == 0:
-                    estado_carrera = "REBASANDO"
-                    continue
-                # El error es la diferencia entre la posición actual y tu objetivo de 548
-                error_obs = datos_verde[1] - SETPOINT_VERDE
+                    if tiempo_perdida == 0.0:
+                        tiempo_perdida = time.time()  # Inicia el contador
+                    elif (time.time() - tiempo_perdida) > TIEMPO_GRACIA:
+                        estado_carrera = "REBASANDO"
+                        tiempo_perdida = 0.0
+                        continue
+                    
+                    print(f"⏳ [GRACIA] Manteniendo evasión izquierda por {TIEMPO_GRACIA}s...")
+                    error_obs = prev_error  # Mantiene la inercia del cálculo PID anterior
+                else:
+                    tiempo_perdida = 0.0  # Resetea si vuelve a ver el pilar intermitentemente
+                    error_obs = datos_verde[1] - SETPOINT_VERDE
                 
             else: 
                 if datos_rojo[0] == 0:
-                    estado_carrera = "REBASANDO"
-                    continue
-                # El error es la diferencia entre la posición actual y tu objetivo de 51
-                error_obs = datos_rojo[1] - SETPOINT_ROJO
+                    if tiempo_perdida == 0.0:
+                        tiempo_perdida = time.time()  # Inicia el contador
+                    elif (time.time() - tiempo_perdida) > TIEMPO_GRACIA:
+                        estado_carrera = "REBASANDO"
+                        tiempo_perdida = 0.0
+                        continue
+                    
+                    print(f"⏳ [GRACIA] Manteniendo evasión derecha por {TIEMPO_GRACIA}s...")
+                    error_obs = prev_error  # Mantiene la inercia del cálculo PID anterior
+                else:
+                    tiempo_perdida = 0.0  # Resetea
+                    error_obs = datos_rojo[1] - SETPOINT_ROJO
             
             # --- CÁLCULO PID ---
             derivative_obs = error_obs - prev_error
