@@ -31,7 +31,7 @@ El Equipo
 
 	- **Jesús Alcalá**
   		Nacido en: 18/11/2005 (21 Años)
-   		Estudio: Ingenieria en computación/ Ingenieria informática
+   		Estudio: Ingenieria en computación & Ingenieria informática
    		Gmail: Jdam50002@gmail.com
 
 Foto del carro
