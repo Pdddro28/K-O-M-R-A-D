@@ -13,7 +13,7 @@ ROI_LINES = ROI(200, 300, 440, 350)       # Tu ROI de líneas original
 # NUEVA ROI: Enfocada en el carril central medio para detectar pilares a tiempo
 ROI_OBSTACULOS = ROI(30, 30, 610, 320)
 
-while LNM.start():
+while not LNM.start():
     pass
 running = True
 
@@ -33,7 +33,7 @@ integral = 0.0
 MAX_INTEGRAL = 15.0 
 
 # --- PARÁMETROS PID EXCLUSIVOS PARA EVITAR OBSTÁCULOS ---
-Kp_obstaculo = 0.52   # Más agresivo porque el rango de error en píxeles es menor
+Kp_obstaculo = 0.42   # Más agresivo porque el rango de error en píxeles es menor
 Kd_obstaculo = 0.01   # Amortigua el giro para evitar que la cola derrape y toque el pilar
 
 # --- MÁQUINA DE ESTADOS PARA OBSTÁCULOS ---
@@ -41,7 +41,7 @@ estado_carrera = "LINEAL"
 memoria_lado = None  # Guardará "IZQUIERDA" o "DERECHA"
 
 # --- CONFIGURACIÓN DE VELOCIDAD Y AJUSTES (MODERADA A 65) ---
-VELOCIDAD_BASE = 65
+VELOCIDAD_BASE = 60
 DIST_MIN_CHOQUE = 12.0  
 steering_angle = 80     
 
@@ -101,7 +101,7 @@ while running:
         
         # Distancias físicas de los ultrasonidos
         front_dist, left_dist, right_dist = LNM.get_distances()
-        
+        #print(f"📡 Ultrasonidos - Frente: {front_dist:.1f}cm | Izquierda: {left_dist:.1f}cm | Derecha: {right_dist:.1f}cm")
         # Procesar datos de visión localizados
         black_areas = obtener_areas_lineas()
         datos_rojo, datos_verde = procesar_obstaculos()
