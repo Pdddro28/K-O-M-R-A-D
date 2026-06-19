@@ -41,7 +41,7 @@ estado_carrera = "LINEAL"
 memoria_lado = None  # Guardará "IZQUIERDA" o "DERECHA"
 
 # --- CONFIGURACIÓN DE VELOCIDAD Y AJUSTES (MODERADA A 65) ---
-VELOCIDAD_BASE = 60
+VELOCIDAD_BASE = 68
 DIST_MIN_CHOQUE = 12.0  
 steering_angle = 80     
 
@@ -203,8 +203,8 @@ while running:
             print(f"🔄 [MODO ESQUIVA]: Evadiendo pilar por la {memoria_lado} | L:{left_dist}cm R:{right_dist}cm")
             
             # SETPOINTS ABSOLUTOS EN PÍXELES
-            SETPOINT_VERDE = 548
-            SETPOINT_ROJO = 51
+            SETPOINT_VERDE = 549
+            SETPOINT_ROJO = 50
             
             # DETECCIÓN DE ENCAJONAMIENTO TOTAL VIA ULTRASONIDOS
             if memoria_lado == "IZQUIERDA" and left_dist < DIST_MIN_PARED and left_dist > 1.0:
