@@ -55,10 +55,6 @@ TOLERANCIA_ANGULO = 3
 # --- CONFIGURACIÓN PARA EVITAR PAREDES SEGUIDAS ---
 DIST_MIN_PARED = 18.0  # Si un lateral mide menos de esto, se está encajonando contra la pared
 
-# --- TÁCTICA DE ESQUINA (CUADRATURA) ---
-DIST_ACERCAMIENTO_ESQUINA = 18.0  # Se pegará a esta distancia de la pared frontal
-DIST_RETROCESO_ESQUINA = 90.0     # Medida del frontal para saber que la cola tocó la pared trasera
-
 # --- FIN DE CARRERA ---
 end_game_triggered = False
 end_game_timer = 0.0
@@ -176,50 +172,12 @@ while running:
                 tiempo_perdida = 0.0
                 girando = False 
 
-            # --- CONTROL DE GIROS EN ESQUINAS CERRADAS CON RETROCESO TÁCTICO ---
+            # --- CONTROL DE GIROS EN ESQUINAS CERRADAS ---
             if estado_carrera == "LINEAL":
                 if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
-                    print("↩️ [ESQUINA] Acercándose a la pared para maniobra táctica...")
-                    
-                    # 1. Avanzar hasta pegarse a la pared frontal
-                    LNM.turn_center()
-                    timeout_acercamiento = time.time()
-                    while front_dist > DIST_ACERCAMIENTO_ESQUINA and (time.time() - timeout_acercamiento) < 2.0:
-                        LNM.move_forward(speed=VELOCIDAD_BASE)
-                        front_dist = LNM.get_distances()[0]
-                        time.sleep(0.02)
-                    
-                    LNM.stop(log=False)
-                    time.sleep(0.1)
-                    
-                    # 2. Retroceder orientando la cola hacia el muro exterior
-                    print("🔙 [ESQUINA] Retrocediendo con dirección opuesta para cuadrar...")
-                    
-                    # Determinando el ángulo de retroceso opuesto a la curva
-                    if LNM.turning_direction == 1: 
-                        angulo_retroceso = 120  # Ruedas al lado opuesto (Ajustado para lógica invertida si aplica)
-                    elif LNM.turning_direction == 2:
-                        angulo_retroceso = 40   # Ruedas al lado opuesto
-                    else:
-                        angulo_retroceso = 80   # Centro de seguridad
-
-                    LNM.move_backward(angle=angulo_retroceso, speed=VELOCIDAD_BASE + 5)
-                    
-                    timeout_retroceso = time.time()
-                    while front_dist < DIST_RETROCESO_ESQUINA and (time.time() - timeout_retroceso) < 2.0:
-                        front_dist = LNM.get_distances()[0]
-                        time.sleep(0.02)
-                    
-                    LNM.stop(log=False)
-                    time.sleep(0.1)
-                    
-                    # 3. Posición lista. Iniciar giro a favor de la curva.
-                    print("↪️ [ESQUINA] Vehículo cuadrado. Entrando a la nueva sección.")
+                    print("↩️ [ESQUINA] Detectada curva cerrada. Forzando giro de esquina.")
                     LNM.turn_direction()
                     girando = True
-                    prev_error = 0.0
-                    integral = 0.0
-                    continue # Rompe la iteración actual para que el main loop lo empuje hacia adelante
                     
                 elif LNM.black_area < 8000 and girando and front_dist > 80:
                     print("➡️ [ESQUINA] Pista liberada. Centrando dirección.")
