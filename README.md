@@ -1,14 +1,38 @@
 **If you want to see this repository in English, [click here](https://github.com/Pdddro28/K-O-M-R-A-D/blob/main/README_EN.md)**
 
 ``` Para mejor visualización, se recomienda ver el repositorio en la computadora ```
+
 # WRO 2026 Future Engineers – LNM
 
 Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
 
-| Miembros | Edad y Fecha de Nacimiento | Colegio | Idiomas | Aspiraciones | Gmail |
-| --- | --- | --- | --- | --- | --- |
-| **David Wang** | 01/04/2011 (15 años) | 3º año en la U.E.C. Eduardo Blanco | Inglés, español, chino mandarín y taiwanés | Ingenieria en informática en la UGMA (Universidad Gran Mariscal de Ayacucho) | davidwangwu104@gmail.com |
-| **Pedro Catamo** | 28/01/2009 (17 años) | 5º año en la U.E.C. Eduardo Blanco | Inglés y español | Ingeniería de Biomateriales en la UNC Humberto Fernández Morán | pedrocatamo.2009@gmail.com |
+El Equipo
+====
+
+<div align="center">
+	
+<img width="1280" height="720" alt="Team_pic (1)" src="https://github.com/user-attachments/assets/156c3c29-799e-44e6-a7f0-629da61873b8" />
+
+</div>
+
+- ### Miembros:
+
+	- **David Wang**
+		Nacido en: 01/04/2011 (15 años)
+		Estudio: 3º año en la U.E.C. Eduardo Blanco
+  		Gmail: davidwangwu104@gmail.com
+  	  
+	- **Pedro Catamo**
+ 	  	Nacido en: 28/01/2009 (17 años)
+   		Estudio: 5º año en la U.E.C. Eduardo Blanco
+   		Gmail: pedrocatamo.2009@gmail.com
+
+ - ### Coach:
+
+	- **Jesús Alcalá**
+  		Nacido en: 18/11/2005 (21 Años)
+   		Estudio: Ingenieria en computación/ Ingenieria informática
+   		Gmail: Jdam50002@gmail.com
 
 Foto del carro
 ====
