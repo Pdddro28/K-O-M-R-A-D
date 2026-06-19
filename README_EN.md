@@ -1,5 +1,3 @@
-**If you want to see this repository in English, [click here](https://github.com/Pdddro28/K-O-M-R-A-D/blob/main/README_EN.md)**
-
 ``` For better viewing, it is recommended to view the repository on a computer ```
 
 # WRO 2026 Future Engineers – LNM
@@ -129,8 +127,8 @@ Where:
 		Where:
 		* $\theta_{\text{in}}$ is the steering angle of the inner wheel.
 		* $\theta_{\text{out}}$ is the steering angle of the outer wheel.
-		* $w$ is the track width (distance between the front wheels).
-		* $L$ is the wheelbase (distance between the front and rear axles).
+		* $w$ is the track width (*track width* or distance between the front wheels).
+		* $L$ is the wheelbase (*wheelbase* or distance between the front and rear axles).
 
 		Since the cotangent grows faster at small angles, this relationship mechanically forces $\theta_{\text{in}} > \theta_{\text{out}}$ automatically in any curve, opening the angle of the outer wheel so that it draws a larger circle.
 
@@ -228,7 +226,7 @@ Where:
 
 		| PETG | PLA |
 		|---|---|
-		| Polyethylene Terephthalate Glycol (PETG) is a petroleum-derived thermoplastic, modified with glycol to prevent crystallization and brittleness common to standard PET. It combines the printing ease of PLA with the mechanical resistance of ABS. It is characterized by its excellent toughness, chemical wear resistance, and ability to absorb impacts through slight elastic flexion, making it ideal for functional components. | Polylactic Acid (PLA) is a biodegradable thermoplastic of natural origin (derived from corn starch or sugarcane) widely used in 3D printing due to its ease of use. It stands out for its high structural rigidity and minimal thermal contraction upon cooling, which allows manufacturing parts with highly precise geometric tolerances and no deformations. However, its molecular nature makes it brittle under direct impacts. |
+		| Polyethylene Terephthalate Glycol (PETG) is a petroleum-derived thermoplastic, modified with glycol to prevent crystallization and brittleness common to standard PET. It combines the printing ease of PLA with the mechanical resistance of ABS. It is characterized by its excellent toughness, chemical wear resistance, and ability to absorb impacts through slight elastic flexion, making it ideal for functional components. | Polylactic Acid (PLA) is a biodegradable thermoplastic of natural origin (derived from corn starch or sugarcane) widely used in 3D printing due to its ease of use. Stands out for its high structural rigidity and minimal thermal contraction upon cooling, which allows manufacturing parts with highly precise geometric tolerances and no deformations. However, its molecular nature makes it brittle under direct impacts. |
 		| It presents high impact resistance and notable mechanical fatigue resistance. It features an elastic modulus that grants it certain structural flexibility, allowing it to withstand torsions, mechanical vibrations, and dynamic loads without suffering catastrophic fractures. It is the ideal material for robot parts exposed to collisions, tensile forces, or constant mechanical movements. | It offers excellent tensile strength and superior mechanical rigidity, meaning it does not deform or bend easily under static loads. Its main disadvantage is extreme brittleness; under abrupt mechanical stresses or continuous vibrations, it tends to crack or break suddenly instead of flexing, limiting its use in areas of high dynamic tension. |
 		| It stands out for superior thermal stability, withstanding working temperatures up to 75°C or 80°C without losing its rigidity or suffering structural deformations. This allows it to be placed directly next to heatsinks, DC motors, or voltage regulators. Additionally, it possesses hydrophobic properties and high chemical resistance against alcohols, oils, greases, and degradation from weathering. | It has low thermal resistance, with a softening point (glass transition temperature) located between 50°C and 55°C. This makes it vulnerable to geometric deformation if exposed to heat dissipated by high-power motors or if the robot operates in warm environments. Likewise, its resistance to degradation by UV rays and chemical agents is limited in the long term. |
 		| It requires stricter printing conditions, with nozzle temperatures from 230°C to 250°C and a mandatory heated bed between 70°C and 90°C. It is prone to generating fine strings (stringing) and requires rigorous moisture control, as it is highly hygroscopic and absorbs water from the environment quickly, degrading part quality if the filament is not stored dry. | It is the simplest material to process in the robotics workshop, requiring low nozzle temperatures (190°C - 220°C) and a moderate (50°C - 60°C) or even zero bed temperature. It does not generate harmful gases, does not suffer from warping (edge peeling), and tolerates high printing speeds with 100% layer fan ventilation, facilitating rapid prototyping of complex parts. |
@@ -333,7 +331,7 @@ Where:
 
 	- **Color Detector:** It is an interactive visual calibration tool designed to segment and isolate specific colors in real time using the LAB color space (Luminance, A, and B) and Gaussian blur filters. The system captures the video stream from a Picamera2, applies morphological transformations of erosion and dilation to clean image noise, and generates a binary mask based on maximum and minimum thresholds adjustable via sliders in a graphical user interface (GUI) built with CustomTkinter. Its main function is to preset color signatures (such as red, green, blue, or black) and export these optimal ranges to a JSON configuration file so that the robot can recognize objects or lines stably under different lighting conditions.
 
-	- **ROI Detector:** It is a spatial configuration utility based on OpenCV that allows delimiting custom "Regions of Interest" (ROI) over the camera's video transmission through mouse clicks and drags. The script scales the original frame proportionally within a centered canvas with constant black borders, allowing the user to draw multiple quadrants and dynamically view their dimensions in pixels. Its primary purpose is to clear the cache with the 'C' key or end the capture with the 'ESC' key to trigger a Tkinter popup window that automatically exports the coordinates $(x_1, y_1, x_2, y_2)$ structured as a list of objects into a native Python file (`.py`), isolating the specific visual analysis zones where the robot must process information (such as the floor line) and ignoring environment noise.
+	- **ROI Detector:** It is a spatial configuration utility based on OpenCV that allows delimiting custom "Regions of Interest" (ROI) over the camera's video transmission through mouse clicks and drags. The script scales the original frame proportionally within a centered canvas with constant black borders, allowing the user to draw multiple quadrants and dynamically view their dimensions in pixels. Its primary purpose is to clear the cache with the 'C' key or end the capture with the 'ESC' key to trigger a Tkinter popup window that automatically exports the coordinates $(x_1, y_1, x_2, y_2)$ structured as a list of objects into a native Python file (.py), isolating the specific visual analysis zones where the robot must process information (such as the floor line) and ignoring environment noise.
 
 - ### MegaPiController:
 
@@ -347,7 +345,7 @@ Where:
 		
 		- ROIS:
  
-    		To optimize computational processing and avoid false positives from the surroundings, the camera segments the space into two specific lateral ROIs (`roi` and `roi2`). These regions actively look for the black lines that delimit the track walls or lanes.
+    		To optimize computational processing and avoid false positives from the surroundings, the camera segments the space into two specific lateral ROIs (roi and roi2). These regions actively look for the black lines that delimit the track walls or lanes.
 
 		- Loop Counter:
  
@@ -367,30 +365,37 @@ Where:
 
 # 4. Challenges
 
-# 4. Challenges
-
-## - Hardware Problems
+- ### Hardware Problems
 
 **Objective:** Complete three laps autonomously in dynamically configured circuits.
 
 ### Spacing Problems
-During the early development of *Halbi the Green*, issues arose regarding component positioning within the base chassis (unmodified). Because the components occupied more space than available, the problem was temporarily resolved by securing them with electrical tape. While this worked provisionally, it was not a viable long-term solution.
+During the early development of *Halbi the Green*, issues arose regarding component positioning within the base chassis (unmodified). Because the components occupied more space than available, the problem was temporarily resolved by securing them with electrical tape. While this worked provisionally, it was not a viable long-term solution. 
 
-Therefore, it was decided to implement a series of 3D-printed bases designed to add **two additional levels** to the vehicle and **three complementary supports** (two lateral and one frontal) to position the ultrasonic sensors, which originally had no assigned place.
+Therefor, it was decided to implement a series of 3D-printed bases designed to add **two additional levels** to the vehicle and **three complementary supports** (two lateral and one frontal) to position the ultrasonic sensors, which originally had no assigned place.
 
 More specifically, the spacing issues and their respective solutions were as follows:
 
 * **Space occupied by batteries:** * *Problem:* They occupied too much volume in the chassis and did not leave room to position components comfortably.
+  
     * *Solution:* A custom base was designed to position them in the center of the robot, and the upper floor was constructed on top of this structure.
+      
 * **Ultrasonic sensor anchoring:** * *Problem:* They had no designated mounting points on the original chassis.
+  
     * *Solution:* 3 printed bases were designed to attach to 3 sides of the chassis.
+      
     * *Technical note:* This solution was not completely ideal, as these bases protrude slightly from the structure, causing mechanical jams when the vehicle passes very close to a corner.
+      
 * **Camera and Controller Location:** * *Problem:* There was no physical space to place the camera or the processing board.
+  
     * *Solution:* A dedicated support for the Raspberry Pi and the camera was designed on top of the battery base. The camera includes a base with an adjustable angle to tweak the lens viewpoint comfortably and precisely.
 
 ### Connection Problems (Wiring)
+
 * **Problem:** Having loose and exposed wires caused them to get stuck constantly in the environment and even knock down circuit obstacles on some occasions.
+  
 * **Solution:** Connections were completely reorganized to eliminate wire loops and protruding parts.
+  
 - ### Software Problems:
 
 	- a
