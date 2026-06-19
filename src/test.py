@@ -101,7 +101,7 @@ while running:
         
         # Distancias físicas de los ultrasonidos
         front_dist, left_dist, right_dist = LNM.get_distances()
-        #print(f"📡 Ultrasonidos - Frente: {front_dist:.1f}cm | Izquierda: {left_dist:.1f}cm | Derecha: {right_dist:.1f}cm")
+        
         # Procesar datos de visión localizados
         black_areas = obtener_areas_lineas()
         datos_rojo, datos_verde = procesar_obstaculos()
@@ -152,23 +152,20 @@ while running:
         # --- ESTADO 1: LINEAL (Centrado de líneas + Giros controlados en Esquinas) ---
         if estado_carrera == "LINEAL":
             
-            # FILTRO DE ENTRADA CORREGIDO: Bajamos ligeramente el umbral a 350 píxeles para ganar anticipación
-            # Quitamos los 'continue' para evitar saltos bruscos en el refresco de imagen
             if datos_verde[0] > 350 and datos_verde[0] >= datos_rojo[0]:
                 print("🟢 ¡Pilar Verde Detectado! Cambiando a ESQUIVANDO.")
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "IZQUIERDA" 
                 prev_error = 0.0
-                girando = False # Forzar salida de curva si ve un pilar inmediatamente
+                girando = False 
             elif datos_rojo[0] > 350 and datos_rojo[0] > datos_verde[0]:
                 print("🔴 ¡Pilar Rojo Detectado! Cambiando a ESQUIVANDO.")
                 estado_carrera = "ESQUIVANDO"
                 memoria_lado = "DERECHA"   
                 prev_error = 0.0
-                girando = False # Forzar salida de curva si ve un pilar inmediatamente
+                girando = False 
 
             # --- CONTROL DE GIROS EN ESQUINAS CERRADAS ---
-            # Solo opera si de verdad no estamos enganchados a un obstáculo
             if estado_carrera == "LINEAL":
                 if front_dist < 90 and not girando and LNM.black_area > 8000 and LNM.turning_direction != 0:
                     print("↩️ [ESQUINA] Detectada curva cerrada. Forzando giro de esquina.")
@@ -205,7 +202,9 @@ while running:
         elif estado_carrera == "ESQUIVANDO":
             print(f"🔄 [MODO ESQUIVA]: Evadiendo pilar por la {memoria_lado} | L:{left_dist}cm R:{right_dist}cm")
             
-            CENTRO_ROI_X = 320 
+            # SETPOINTS ABSOLUTOS EN PÍXELES
+            SETPOINT_VERDE = 548
+            SETPOINT_ROJO = 51
             
             # DETECCIÓN DE ENCAJONAMIENTO TOTAL VIA ULTRASONIDOS
             if memoria_lado == "IZQUIERDA" and left_dist < DIST_MIN_PARED and left_dist > 1.0:
@@ -221,14 +220,15 @@ while running:
                 if datos_verde[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
-                target_x = datos_verde[1] - 140  
-                error_obs = target_x - CENTRO_ROI_X
+                # El error es la diferencia entre la posición actual y tu objetivo de 548
+                error_obs = datos_verde[1] - SETPOINT_VERDE
                 
             else: 
                 if datos_rojo[0] == 0:
                     estado_carrera = "REBASANDO"
                     continue
-                error_obs = CENTRO_ROI_X - datos_rojo[1] + 140
+                # El error es la diferencia entre la posición actual y tu objetivo de 51
+                error_obs = datos_rojo[1] - SETPOINT_ROJO
             
             # --- CÁLCULO PID ---
             derivative_obs = error_obs - prev_error
