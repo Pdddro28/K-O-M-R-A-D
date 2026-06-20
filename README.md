@@ -318,7 +318,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 		- **Distribución Lateral:**
 		Para el control y la estabilización, se integraron dos sensores ultrasónicos situados a cada costado del chasis, anclados firmemente al nivel inferior. Estos se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación centralizada es fundamental: al mantener esta altura y posición respecto al centro de masas, se minimizan las perturbaciones causadas por el balanceo del chasis, permitiendo que el vehículo calcule de manera constante y simétrica la distancia hacia las paredes, manteniendo así una trayectoria recta, fluida y precisa.
 
-<div  align="center">
+<div align="center">
 
 <img width="1600" height="1200" alt="WhatsApp Image 2026-06-18 at 11 34 59 PM" src="https://github.com/user-attachments/assets/5bea7abe-f434-4bbd-9ce3-3c26d1443c42" />
 
@@ -334,9 +334,9 @@ Esta es la estructura de carpetas de nuestro repositorio:
 
 	Para garantizar la estabilidad operativa de nuestro carro, hemos implementado una arquitectura de alimentación redundante mediante el uso de dos baterías independientes. Esta división es fundamental para proteger la integridad de nuestros sistemas:
 
-- **Circuito de Potencia:** Una batería dedicada exclusivamente a la placa MegaPi, la cual gestiona los actuadores de alta demanda (el motor de tracción RS380 y el servomotor de dirección MG996R), además de los tres sensores ultrasónicos y el botón de inicio. Este aislamiento evita que las caídas de tensión (transitorios) provocadas por los arranques repentinos o el bloqueo de los motores afecten el procesado de datos.
+	- **Circuito de Potencia:** Una batería dedicada exclusivamente a la placa MegaPi, la cual gestiona los actuadores de alta demanda (el motor de tracción RS380 y el servomotor de dirección MG996R), además de los tres sensores ultrasónicos y el botón de inicio. Este aislamiento evita que las caídas de tensión (transitorios) provocadas por los arranques repentinos o el bloqueo de los motores afecten el procesado de datos.
 
-- **Circuito de Lógica y Visión:** Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
+	- **Circuito de Lógica y Visión:** Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
 
 Esta configuración nos permite operar con la máxima seguridad, garantizando que, incluso bajo condiciones de estrés mecánico severo en la dirección y tracción, nuestro "cerebro" (Raspberry Pi) mantenga una alimentación constante y limpia para procesar la trayectoria con total precisión.
 
@@ -354,41 +354,41 @@ Esta configuración nos permite operar con la máxima seguridad, garantizando qu
 | **Motor de Tracción RS380** | 1 | 6.0 V (vía Driver) | 1200 mA | 2000 mA |
 | | | | 2,735 mA (2.73 A) mA | 6,185 mA (6.18 A) |
 
+</div>
+
 Conclusión del Presupuesto
-	El consumo total del sistema alcanza los 6.18 A en condiciones de carga máxima (stall). La arquitectura de doble batería es vital por dos razones:
+El consumo total del sistema alcanza los 6.18 A en condiciones de carga máxima (stall). La arquitectura de doble batería es vital por dos razones:
 
 - Protección de la Lógica: El circuito de Lógica (1.50 A) opera aislado de los transitorios electromagnéticos de los motores.
 
 - Capacidad de Respuesta: El circuito de Potencia (4.68 A) está dimensionado para soportar los picos de corriente del servo y el motor de tracción simultáneamente. Esta división asegura que, aunque los actuadores alcancen su máximo esfuerzo mecánico, la Raspberry Pi mantenga un voltaje estable, evitando reinicios críticos durante la competencia.
 
-</div>
-
 - ### Diagrama de Cableado:
 
 	La arquitectura eléctrica de nuestro carro ha sido diseñada bajo un principio de aislamiento de buses para garantizar la fiabilidad del sistema en un entorno de alta vibración y demanda de corriente. Como se observa en nuestro diagrama de conexiones, el cableado se divide en dos dominios claramente diferenciados:
 
-	- **Dominio de Potencia (Bus de Fuerza)**
-Alimentado por la batería dedicada a actuadores, este bus gestiona los componentes de alta corriente:
+	- Dominio de Potencia (Bus de Fuerza)
+Alimentado por la batería dedicada a actuadores, este bus de alta corriente alimenta directamente la MegaPi para los motores y el servomotor:
 
-		- **MegaPi:** Actúa como el centro de distribución de energía. Recibe los 7.2V - 12V de la batería principal para alimentar los motores y el servomotor.
+		- MegaPi: Actúa como el centro de distribución de energía principal. Recibe el voltaje directo de la batería de fuerza (7.2V - 12V) para alimentar el motor de tracción RS380 y el servomotor de dirección MG996R en sus puertos dedicados.
 
-		- **Sistema de Tracción y Dirección:** El motor RS380 y el servo MG996R están conectados directamente a los puertos de alta potencia de la MegaPi. Hemos utilizado cables de calibre superior para minimizar la caída de tensión (voltaje drop) durante las maniobras de stall (esfuerzo máximo).
+		- Sistema de Tracción y Dirección: El motor RS380 y el servo MG996R están conectados directamente a los puertos de alta potencia de la MegaPi. Hemos utilizado cables de calibre superior para minimizar la caída de tensión (voltaje drop) durante las maniobras de stall (esfuerzo máximo).
 
-		- **Filtros de Corriente:** Se han integrado condensadores de desacoplo en las terminales del motor para reducir la inducción de ruido eléctrico hacia los sensores ultrasónicos, asegurando lecturas limpias incluso bajo carga.
- 
-  	- **Dominio de Lógica (Bus de Control)**
+		- Regulación y Estabilización de Voltaje (Buck Converter): Se ha integrado un Buck Converter de 3A y 15W con salida Type-C. Este módulo step-down se encarga de reducir de forma eficiente el voltaje de la batería y estabilizarlo a unos 5.0V constantes. Su función es actuar como una barrera de protección frente a los picos de consumo y el ruido eléctrico residual generados por los motores, asegurando un suministro de energía limpio y seguro para los componentes lógicos sensibles y los sensores ultrasónicos, evitando lecturas erráticas.
+
+	- Dominio de Lógica (Bus de Control)
 Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamente independiente:
 
-		- **Procesamiento de Datos:** La Raspberry Pi 4 B alimenta la cámara Arducam a través del puerto CSI, asegurando un flujo de datos de baja latencia y alta integridad.
+		- Procesamiento de Datos: La Raspberry Pi 4 B alimenta la cámara Arducam a través del puerto CSI, asegurando un flujo de datos de baja latencia y alta integridad.
 
-		- **Comunicaciones (Bus I2C/UART):** La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
+		- Comunicaciones (Bus I2C/UART): La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
 
-	- **Optimización de Gestión de Cableado**
+	- Optimización de Gestión de Cableado
 Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos implementado:
 
-		- **Gestión de Ruta (Cable Routing):** Todos los cables siguen trayectorias perpendiculares al chasis, evitando las diagonales que suelen engancharse con los obstáculos.
+		- Gestión de Ruta (Cable Routing): Todos los cables siguen trayectorias perpendiculares al chasis, evitando las diagonales que suelen engancharse con los obstáculos.
 
-		- **Sujeción Estructural:** El cableado está fijado al chasis mediante bridas (zip-ties) en puntos estratégicos para absorber las vibraciones, evitando que el movimiento de la dirección o la tracción fatigue las soldaduras de los pines.
+		- Sujeción Estructural: El cableado está fijado al chasis mediante bridas (zip-ties) en puntos estratégicos para absorber las vibraciones, evitando que el movimiento de la dirección o la tracción fatigue las soldaduras de los pines.
 
 <div align="center">
 
