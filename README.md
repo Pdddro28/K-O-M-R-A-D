@@ -12,8 +12,7 @@
 
 Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
 
-Índice
-====
+## **Índice**
 
 - [Estructura completa de carpetas](#estructura-de-carpetas)
 - [El equipo](#el-equipo)
@@ -22,8 +21,9 @@ Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido 
 - [Sistemas mecánicos](#sistemas-mecanicos)
 - [Arquitectura de software](#arquitectura-de-software)
 
-Estructura de carpetas <a id="estructura-de-carpetas"></a>
-====
+---
+
+## **Estructura de carpetas** <a id="estructura-de-carpetas"></a>
 
 Esta es la estructura de carpetas de nuestro repositorio:
 
@@ -36,8 +36,9 @@ Esta es la estructura de carpetas de nuestro repositorio:
 | **v-photos** | **Documentación del vehículo**<br>• Vistas desde múltiples ángulos | [Explora la documentación de fotos del vehículo](v-photos/README.md) |
 | **video** | **Validación del rendimiento**<br>• Demostraciones del desafío<br>• Pruebas de ingeniería | [Explora la documentación de los vídeos de rendimiento](video/README.md) |
 
-El Equipo <a id="el-equipo"></a>
-====
+---
+
+## **El Equipo** <a id="el-equipo"></a>
 
 <div align="center">
 	
@@ -45,38 +46,37 @@ El Equipo <a id="el-equipo"></a>
 
 </div>
 
-- ### Miembros:
+### **Miembros:**
 
-	- **David Wang**
+- **David Wang**
    
-		Nacido en: 01/04/2011 (15 años)
+	Nacido en: 01/04/2011 (15 años)
 
-		Estudio: 3º año en la U.E.C. Eduardo Blanco
+	Estudio: 3º año en la U.E.C. Eduardo Blanco
 
-  		Gmail: davidwangwu104@gmail.com
+  	Gmail: davidwangwu104@gmail.com
   	  
-	- **Pedro Catamo**
+- **Pedro Catamo**
    
- 	  	Nacido en: 28/01/2009 (17 años)
+ 	Nacido en: 28/01/2009 (17 años)
    
-   		Estudio: 5º año en la U.E.C. Eduardo Blanco
+  	Estudio: 5º año en la U.E.C. Eduardo Blanco
    
-   		Gmail: pedrocatamo.2009@gmail.com
+ 	 Gmail: pedrocatamo.2009@gmail.com
 
- - ### Coach:
+- ### **Coach:**
 
-	- **Jesús Alcalá**
+- **Jesús Alcalá**
    
-  		Nacido en: 18/11/2005 (21 Años)
+  Nacido en: 18/11/2005 (21 Años)
    
-   		Estudio: Ingenieria en computación & Ingenieria informática
+  Estudio: Ingenieria en computación & Ingenieria informática
    
-   		Gmail: Jdam50002@gmail.com
+  Gmail: Jdam50002@gmail.com
 
+---
 
-# 1- Mobilidad y diseño
-
-- ### Diseños anteriores:
+### Diseños anteriores:
   
 <div align="center">
 	
@@ -88,6 +88,10 @@ El Equipo <a id="el-equipo"></a>
 | <img width="920" height="920" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** | En 2025 a diferencia de los modelos anteriores que pertenecían a nuestro coach, "The Fridge" fue un diseño construido enteramente por nosotros. Aquí dimos el salto a la geometría Ackermann e imprimimos la gran mayoría de las piezas en 3D. A nivel motriz, usamos un motor DC con un engranaje acoplado para traccionar ambas ruedas. Físicamente le instalamos 3 sensores ultrasónicos, una Raspberry Pi 4 y un giroscopio MPU6050, pero por falta de tiempo y severos problemas de configuración, la Raspberry y el IMU quedaron como peso muerto y terminamos controlando todo únicamente desde la MegaPi. Sufrimos muchísimo: las piezas de la dirección impresas en 3D se rompían constantemente por el estrés, y programar la navegación autónoma en Arduino dependiendo de puros rebotes ultrasónicos fue casi imposible. Siendo sinceros, terminó siendo el peor proyecto de los tres. |
 
 </div>
+
+---
+
+# 1- Mobilidad y diseño
 
  - ### Halbi The Green: <a id="nuestro-robot"></a>
 
@@ -191,7 +195,21 @@ El Equipo <a id="el-equipo"></a>
 
 	- ### 3D Printed Parts:
 
-		- **Impresora:** Se usó las impresoras Creality Hi y Creality K1.
+   		- #### **Piezas:**
+
+		<div align="center">
+			
+		| Component & Preview | Design & Geometry | Engineering Purpose |
+		|---|---|---|
+		| **Battery Case** <br><br><img width="400" height="400" alt="BatteryCase" src="https://github.com/user-attachments/assets/a5362844-dd0e-4073-bef8-bb034bae3ad9" /> | Diseñado como una jaula de torre vertical estructurada con cuatro pilares reforzados en cada lado, integrada directamente sobre una base de montaje sólida con ojales para tornillos en las esquinas. Las paredes laterales cuentan con grandes recortes circulares para minimizar el peso del material mientras permiten un flujo de aire pasivo máximo para evitar el estrés térmico en las celdas LiPo durante altas tasas de descarga. El pilar superior incluye ojales de retención ranurados para una sujeción segura de las correas. | Centraliza la masa combinada de las celdas de la batería verticalmente a lo largo del eje geométrico central del chasis. Este diseño de jaula abierta garantiza un acceso rápido para el reemplazo de la batería entre carreras, al tiempo que proporciona una contención estructural rígida contra las fuerzas de inercia laterales durante giros a alta velocidad. |
+		| **Camera Case** <br><br><img width="400" height="400" alt="CameraCase" src="https://github.com/user-attachments/assets/7adbc42b-15eb-4677-a0a4-8d9b3c98bab3" /> | Una carcasa protectora rectangular y compacta, diseñada específicamente para encapsular el sensor IMX219 (Arducam). La sección inferior integra una robusta bisagra de pivote cilíndrico que cuenta con dientes de bloqueo externos (perfil de engranaje recto) diseñada para engranar perfectamente con una base de montaje correspondiente para el bloqueo mecánico del ángulo. | Protege el delicado PCB de la cámara de los escombros externos o de los impactos directos en la pista. La bisagra engranada entrelazada permite ajustar y bloquear mecánicamente el ángulo de inclinación de la cámara a un ángulo preciso de 15 grados hacia abajo, evitando cualquier cambio no deseado en el lente causado por las vibraciones de alta frecuencia del chasis durante la operación. |
+		| **MegaPi Case** <br><br><img width="400" height="400" alt="MegaPiBase (1)" src="https://github.com/user-attachments/assets/8db95bf2-a29a-468c-ace8-e21bb1fae9f6" /> | Una bandeja robusta de perfil bajo equipada con cuatro soportes verticales integrados de alta resistencia posicionados en las esquinas para asegurar el PCB principal. La placa base cuenta con guías de distribución internas y cortes de holgura estructural para evitar los componentes en la parte inferior de la placa, manteniendo el perfil lo más cercano posible al chasis. | Funciona como una cuna mecánica rígida para la electrónica de potencia de bajo nivel. Al elevar el PCB mediante los soportes integrados de 3 mm, evita cortocircuitos eléctricos con el chasis al tiempo que amortigua las vibraciones. El perímetro completamente abierto garantiza el acceso inmediato a los terminales de tornillo del motor, los rieles de alimentación y los puertos de sensores para el mantenimiento en campo. |
+		| **RaspberryPi Base** <br><br><img width="400" height="400" alt="RaspberryPiBase (1)" src="https://github.com/user-attachments/assets/2403b708-2e1d-4360-9504-aae68c0027d1" /> | Una plataforma modular plana de nivel medio que cuenta con cuatro soportes de esquina integrados para montar la Raspberry Pi 4 de forma segura. La sección frontal de la base integra un montaje de bisagra de doble oreja equipado con dientes de bloqueo internos que se acoplan directamente con la bisagra de la carcasa de la cámara (Camera Case). | Sirve como un puente estructural de doble propósito. Proporciona un montaje estable y elevado para la computadora de a bordo de alto nivel, asegurando una disipación óptima del calor a través de la convección natural para evitar el estrangulamiento térmico del CPU. Al mismo tiempo, su montaje engranado integrado bloquea firmemente el ensamblaje de la cámara en la parte delantera, eliminando la necesidad de componentes adicionales y ahorrando valioso espacio en el chasis.|
+		| **Ultrasonic Case** <br><br><img width="400" height="400" alt="UltrasonicSensorCase" src="https://github.com/user-attachments/assets/f9696c40-13e6-46b5-9712-2d7849a80005" /> | Un soporte protector compacto de doble barril hecho a medida para encapsular firmemente los cilindros del transmisor y receptor del módulo del sensor ultrasónico. Cuenta con pestañas de montaje traseras integradas y bridas inferiores para un acoplamiento mecánico continuo a las vigas transversales delanteras de la estructura del chasis. | Proporciona una carcasa rígida y aislada de vibraciones que mantiene el sensor ultrasónico perfectamente perpendicular al plano horizontal de la pista. Esta alineación precisa elimina la distorsión de la señal acústica y la dispersión de las ondas, garantizando mediciones de distancia en tiempo real altamente precisas para la detección de obstáculos y mapas de frenado de emergencia. |
+
+		</div>
+
+		- #### **Impresora:** Se usó las impresoras Creality Hi y Creality K1.
 
    			- **Creality Hi:** Es una de las propuestas más recientes de Creality, diseñada con un fuerte enfoque en competir directamente en el mercado de impresión multicolor accesible.
         
@@ -233,7 +251,7 @@ El Equipo <a id="el-equipo"></a>
 
 		<div align="center">
 
-		| Descripción | PETG | PLA |
+		|  | PETG | PLA |
 		|---|---|---|
 		| **¿Que és?** | El Polietileno Tereftalato Glicol (PETG) es un termoplástico derivado del petróleo, modificado con glicol para evitar la cristalización y fragilidad del PET común. Combina la facilidad de impresión del PLA con la resistencia mecánica del ABS. Se caracteriza por su excelente tenacidad, resistencia al desgaste químico y capacidad de absorber impactos mediante una ligera flexión elástica, lo que lo hace ideal para componentes funcionales. | El Ácido Poliláctico (PLA) es un termoplástico biodegradable de origen natural (derivado del almidón de maíz o caña de azúcar) ampliamente utilizado en impresión 3D por su facilidad de uso. Destaca por su alta rigidez estructural y mínima contracción térmica al enfriarse, lo que permite fabricar piezas con tolerancias geométricas muy precisas y sin deformaciones. Sin embargo, su naturaleza molecular lo hace frágil frente a impactos directos. |
 		| **Características** | Presenta una alta resistencia al impacto y una notable resistencia a la fatiga mecánica. Cuenta con un módulo elástico que le otorga cierta flexibilidad estructural, permitiéndole soportar torsiones, vibraciones mecánicas y cargas dinámicas sin sufrir fracturas catastróficas. Es el material idóneo para piezas del robot expuestas a colisiones, fuerzas de tracción o movimientos mecánicos constantes. | Ofrece una excelente resistencia a la tracción y una rigidez mecánica superior, lo que significa que no se deforma ni se dobla fácilmente bajo cargas estáticas. Su principal desventaja es la fragilidad extrema; ante esfuerzos mecánicos bruscos o vibraciones continuas, tiende a fisurarse o quebrarse de forma repentina en lugar de flexionarse, limitando su uso en zonas de alta tensión dinámica. |
@@ -241,20 +259,6 @@ El Equipo <a id="el-equipo"></a>
 		| **Desventajas** |  Exige condiciones de impresión más estrictas, con temperaturas de boquilla de 230°C a 250°C y cama caliente obligatoria entre 70°C y 90°C. Es propenso a generar hilos finos (stringing) y requiere un control riguroso de la humedad, ya que es altamente higroscópico y absorbe el agua del ambiente rápidamente, lo que degrada la calidad de la pieza si el filamento no se almacena en seco. | Es el material más sencillo de procesar en el taller de robótica, requiriendo temperaturas de boquilla bajas (190°C - 220°C) y una temperatura de cama moderada (50°C - 60°C) o incluso nula. No genera gases nocivos, no sufre de warping (despegue de bordes) y tolera altas velocidades de impresión con ventilación de capa al 100%, facilitando el prototipado rápido de piezas complejas. |
 		| **Donde se utiliza** | Se utiliza de forma prioritaria en los componentes críticos sometidos a estrés físico y térmico. Es la elección correcta para parachoques frontales (bumpers) expuestos a colisiones, soportes para motores DC que generan calor por fricción, estructuras internas que sujetan baterías pesadas (soportando inercias bruscas al frenar o girar) y piezas móviles del varillaje del sistema de dirección. | Se aplica en la fabricación de componentes fijos que exigen máxima precisión dimensional y rigidez absoluta, donde las tolerancias geométricas de los encajes deban ser milimétricas. Es ideal para soportes de sensores ópticos o de líneas (que no deben oscilar), carcasas de cámaras de visión artificial, brackets de sujeción estáticos y maquetas de prueba donde el peso y el ajuste de tornillos sean críticos. |
 	
-		</div>
-
-		- #### **Piezas:**
-
-		<div align="center">
-			
-		| Component & Preview | Design & Geometry | Engineering Purpose |
-		|---|---|---|
-		| **Battery Case** <br><br><img width="400" height="400" alt="BatteryCase" src="https://github.com/user-attachments/assets/a5362844-dd0e-4073-bef8-bb034bae3ad9" /> | Diseñado como una jaula de torre vertical estructurada con cuatro pilares reforzados en cada lado, integrada directamente sobre una base de montaje sólida con ojales para tornillos en las esquinas. Las paredes laterales cuentan con grandes recortes circulares para minimizar el peso del material mientras permiten un flujo de aire pasivo máximo para evitar el estrés térmico en las celdas LiPo durante altas tasas de descarga. El pilar superior incluye ojales de retención ranurados para una sujeción segura de las correas. | Centraliza la masa combinada de las celdas de la batería verticalmente a lo largo del eje geométrico central del chasis. Este diseño de jaula abierta garantiza un acceso rápido para el reemplazo de la batería entre carreras, al tiempo que proporciona una contención estructural rígida contra las fuerzas de inercia laterales durante giros a alta velocidad. |
-		| **Camera Case** <br><br><img width="400" height="400" alt="CameraCase" src="https://github.com/user-attachments/assets/7adbc42b-15eb-4677-a0a4-8d9b3c98bab3" /> | Una carcasa protectora rectangular y compacta, diseñada específicamente para encapsular el sensor IMX219 (Arducam). La sección inferior integra una robusta bisagra de pivote cilíndrico que cuenta con dientes de bloqueo externos (perfil de engranaje recto) diseñada para engranar perfectamente con una base de montaje correspondiente para el bloqueo mecánico del ángulo. | Protege el delicado PCB de la cámara de los escombros externos o de los impactos directos en la pista. La bisagra engranada entrelazada permite ajustar y bloquear mecánicamente el ángulo de inclinación de la cámara a un ángulo preciso de 15 grados hacia abajo, evitando cualquier cambio no deseado en el lente causado por las vibraciones de alta frecuencia del chasis durante la operación. |
-		| **MegaPi Case** <br><br><img width="400" height="400" alt="MegaPiBase (1)" src="https://github.com/user-attachments/assets/8db95bf2-a29a-468c-ace8-e21bb1fae9f6" /> | Una bandeja robusta de perfil bajo equipada con cuatro soportes verticales integrados de alta resistencia posicionados en las esquinas para asegurar el PCB principal. La placa base cuenta con guías de distribución internas y cortes de holgura estructural para evitar los componentes en la parte inferior de la placa, manteniendo el perfil lo más cercano posible al chasis. | Funciona como una cuna mecánica rígida para la electrónica de potencia de bajo nivel. Al elevar el PCB mediante los soportes integrados de 3 mm, evita cortocircuitos eléctricos con el chasis al tiempo que amortigua las vibraciones. El perímetro completamente abierto garantiza el acceso inmediato a los terminales de tornillo del motor, los rieles de alimentación y los puertos de sensores para el mantenimiento en campo. |
-		| **RaspberryPi Base** <br><br><img width="400" height="400" alt="RaspberryPiBase (1)" src="https://github.com/user-attachments/assets/2403b708-2e1d-4360-9504-aae68c0027d1" /> | Una plataforma modular plana de nivel medio que cuenta con cuatro soportes de esquina integrados para montar la Raspberry Pi 4 de forma segura. La sección frontal de la base integra un montaje de bisagra de doble oreja equipado con dientes de bloqueo internos que se acoplan directamente con la bisagra de la carcasa de la cámara (Camera Case). | Sirve como un puente estructural de doble propósito. Proporciona un montaje estable y elevado para la computadora de a bordo de alto nivel, asegurando una disipación óptima del calor a través de la convección natural para evitar el estrangulamiento térmico del CPU. Al mismo tiempo, su montaje engranado integrado bloquea firmemente el ensamblaje de la cámara en la parte delantera, eliminando la necesidad de componentes adicionales y ahorrando valioso espacio en el chasis.|
-		| **Ultrasonic Case** <br><br><img width="400" height="400" alt="UltrasonicSensorCase" src="https://github.com/user-attachments/assets/f9696c40-13e6-46b5-9712-2d7849a80005" /> | Un soporte protector compacto de doble barril hecho a medida para encapsular firmemente los cilindros del transmisor y receptor del módulo del sensor ultrasónico. Cuenta con pestañas de montaje traseras integradas y bridas inferiores para un acoplamiento mecánico continuo a las vigas transversales delanteras de la estructura del chasis. | Proporciona una carcasa rígida y aislada de vibraciones que mantiene el sensor ultrasónico perfectamente perpendicular al plano horizontal de la pista. Esta alineación precisa elimina la distorsión de la señal acústica y la dispersión de las ondas, garantizando mediciones de distancia en tiempo real altamente precisas para la detección de obstáculos y mapas de frenado de emergencia. |
-
 		</div>
 
 # 2. Componentes <a id="sistemas-electronicos"></a>
@@ -322,7 +326,7 @@ El Equipo <a id="el-equipo"></a>
 
 	La Zeee 3S LiPo 11.1V 2200mAh 50C es una batería de polímero de litio de alto rendimiento, diseñada específicamente para entusiastas del radiocontrol (RC) que buscan un equilibrio óptimo entre peso, tamaño y potencia. Con una configuración de 3 celdas (3S) y un voltaje nominal de 11.1V, este componente proporciona la energía constante y agresiva necesaria para impulsar una amplia variedad de modelos, desde drones de carreras y aviones a escala hasta vehículos terrestres RC. Su capacidad de 2200mAh asegura un tiempo de juego o vuelo sumamente competitivo, permitiendo exprimir al máximo el rendimiento del motor sin añadir un peso excesivo que pueda comprometer la agilidad del modelo.
 
-	El verdadero punto fuerte de esta batería radica en su tasa de descarga de 50C, lo que significa que es capaz de entregar picos de corriente elevados de forma segura cuando el acelerador lo demanda, garantizando aceleraciones explosivas y una respuesta inmediata a los mandos. Fabricada con materiales de alta calidad y una baja resistencia interna, la Zeee 3S destaca por su ciclo de vida 			prolongado y su estabilidad térmica durante un uso intensivo. Viene equipada habitualmente con conectores de alta conductividad (como el Deans T o XT60) y un conector de equilibrado JST-XH, lo que facilita tanto una carga segura celda por celda como una compatibilidad directa con la mayoría de los cargadores inteligentes del mercado.
+	El verdadero punto fuerte de esta batería radica en su tasa de descarga de 50C, lo que significa que es capaz de entregar picos de corriente elevados de forma segura cuando el acelerador lo demanda, garantizando aceleraciones explosivas y una respuesta inmediata a los mandos. Fabricada con materiales de alta calidad y una baja resistencia interna, la Zeee 3S destaca por su ciclo de vida prolongado y su estabilidad térmica durante un uso intensivo. Viene equipada habitualmente con conectores de alta conductividad (como el Deans T o XT60) y un conector de equilibrado JST-XH, lo que facilita tanto una carga segura celda por celda como una compatibilidad directa con la mayoría de los cargadores inteligentes del mercado.
 
 - ### Presupuesto de Energía:
 
@@ -341,12 +345,19 @@ Esta configuración nos permite operar con la máxima seguridad, garantizando qu
 | **Raspberry Pi 4 B** | 1 | 5.0 V | 600 mA / 1250 mA | 1250 mA |
 | **Arducam 8MP IMX219 (175°)** | 1 | 3.3 V (vía RPi) | 250 mA | 250 mA |
 | **Makeblock MegaPi (Lógica)** | 1 | 5.0 V | 100 mA | 100 mA |
-| **Sensores Ultrasonido HC-SR04** | 3 | 5.0 V | 15 mA (c/u) | 45 mA |
+| **Sensores Ultrasonido HC-SR04** | 3 | 5.0 V | 45 mA (15 mA c/u) | 45 mA |
 | **Módulo Sensor de Colisión (Crash)** | 1 | 5.0 V | 10 mA | 10 mA |
 | **Módulo Semáforo LED (Traffic Light)** | 1 | 5.0 V | 30 mA | 30 mA |
-| **Servomotor de Dirección MG996R** | 1 | 5.0 V - 6.0 V | 500 mA / 2500 mA (Stall) | 2500 mA |
-| **Motor de Tracción RS380** | 1 | 7.2 V - 12.0 V | 1200 mA / 2000 mA (Stall) | 2000 mA |
-| | | | | 6,185 mA (6.18 A) |
+| **Servomotor de Dirección MG996R** | 1 | 5.0 V | 500 mA / 2500 mA | 2500 mA |
+| **Motor de Tracción RS380** | 1 | 6.0 V (vía Driver) | 1200 mA | 2000 mA |
+| | | | 2,735 mA (2.73 A) mA | 6,185 mA (6.18 A) |
+
+Conclusión del Presupuesto
+	El consumo total del sistema alcanza los 6.18 A en condiciones de carga máxima (stall). La arquitectura de doble batería es vital por dos razones:
+
+- Protección de la Lógica: El circuito de Lógica (1.50 A) opera aislado de los transitorios electromagnéticos de los motores.
+
+- Capacidad de Respuesta: El circuito de Potencia (4.68 A) está dimensionado para soportar los picos de corriente del servo y el motor de tracción simultáneamente. Esta división asegura que, aunque los actuadores alcancen su máximo esfuerzo mecánico, la Raspberry Pi mantenga un voltaje estable, evitando reinicios críticos durante la competencia.
 
 </div>
 
