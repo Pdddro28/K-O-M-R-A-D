@@ -100,7 +100,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 
  - ### Halbi The Green: <a id="nuestro-robot"></a>
 
-    - ### Foto:
+    - ### Fotos del vehiculo:
 
 	<div align="center">
 
