@@ -333,6 +333,14 @@ Donde:
 
 - ### Presupuesto de Energía:
 
+	Para garantizar la estabilidad operativa de nuestro carro, hemos implementado una arquitectura de alimentación redundante mediante el uso de dos baterías independientes. Esta división es fundamental para proteger la integridad de nuestros sistemas:
+
+- Circuito de Potencia: Una batería dedicada exclusivamente a la placa MegaPi, la cual gestiona los actuadores de alta demanda (el motor de tracción RS380 y el servomotor de dirección MG996R), además de los tres sensores ultrasónicos y el botón de inicio. Este aislamiento evita que las caídas de tensión (transitorios) provocadas por los arranques repentinos o el bloqueo de los motores afecten el procesado de datos.
+
+- Circuito de Lógica y Visión: Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
+
+Esta configuración nos permite operar con la máxima seguridad, garantizando que, incluso bajo condiciones de estrés mecánico severo en la dirección y tracción, nuestro "cerebro" (Raspberry Pi) mantenga una alimentación constante y limpia para procesar la trayectoria con total precisión.
+
 <div align="center">
 
 | Componentes | Cantidad | Voltaje de Operación | Consumo Nominal/Pico | Consumo Total |
@@ -349,15 +357,32 @@ Donde:
 
 </div>
 
-Para garantizar la estabilidad operativa de nuestro carro, hemos implementado una arquitectura de alimentación redundante mediante el uso de dos baterías independientes. Esta división es fundamental para proteger la integridad de nuestros sistemas:
-
-- Circuito de Potencia: Una batería dedicada exclusivamente a la placa MegaPi, la cual gestiona los actuadores de alta demanda (el motor de tracción RS380 y el servomotor de dirección MG996R), además de los tres sensores ultrasónicos y el botón de inicio. Este aislamiento evita que las caídas de tensión (transitorios) provocadas por los arranques repentinos o el bloqueo de los motores afecten el procesado de datos.
-
-- Circuito de Lógica y Visión: Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
-
-Esta configuración nos permite operar con la máxima seguridad, garantizando que, incluso bajo condiciones de estrés mecánico severo en la dirección y tracción, nuestro "cerebro" (Raspberry Pi) mantenga una alimentación constante y limpia para procesar la trayectoria con total precisión.
-
 - ### Diagrama de Cableado:
+
+	La arquitectura eléctrica de K-O-M-R-A-D ha sido diseñada bajo un principio de aislamiento de buses para garantizar la fiabilidad del sistema en un entorno de alta vibración y demanda de corriente. Como se observa en nuestro diagrama de conexiones, el cableado se divide en dos dominios claramente diferenciados:
+
+	- Dominio de Potencia (Bus de Fuerza)
+Alimentado por la batería dedicada a actuadores, este bus gestiona los componentes de alta corriente:
+
+		- MegaPi: Actúa como el centro de distribución de energía. Recibe los 7.2V - 12V de la batería principal para alimentar los motores y el servomotor.
+
+		- Sistema de Tracción y Dirección: El motor RS380 y el servo MG996R están conectados directamente a los puertos de alta potencia de la MegaPi. Hemos utilizado cables de calibre superior para minimizar la caída de tensión (voltaje drop) durante las maniobras de stall (esfuerzo máximo).
+
+		- Filtros de Corriente: Se han integrado condensadores de desacoplo en las terminales del motor para reducir la inducción de ruido eléctrico hacia los sensores ultrasónicos, asegurando lecturas limpias incluso bajo carga.
+ 
+  	- Dominio de Lógica (Bus de Control)
+Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamente independiente:
+
+		- Procesamiento de Datos: La Raspberry Pi 4 B alimenta la cámara Arducam a través del puerto CSI, asegurando un flujo de datos de baja latencia y alta integridad.
+
+		- Comunicaciones (Bus I2C/UART): La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
+
+	- Optimización de Gestión de Cableado
+Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos implementado:
+
+		- Gestión de Ruta (Cable Routing): Todos los cables siguen trayectorias perpendiculares al chasis, evitando las diagonales que suelen engancharse con los obstáculos.
+
+		- Sujeción Estructural: El cableado está fijado al chasis mediante bridas (zip-ties) en puntos estratégicos para absorber las vibraciones, evitando que el movimiento de la dirección o la tracción fatigue las soldaduras de los pines.
 
 <div align="center">
 
