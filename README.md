@@ -6,7 +6,7 @@
 
 <div align="center">
 	
-<img width="839" height="826" alt="WhatsApp Image 2026-06-19 at 11 43 02 PM" src="https://github.com/user-attachments/assets/f7fbb04b-66f2-47e6-98a5-c69e94db7eae" />
+<img width="840" height="407" alt="WhatsApp Image 2026-06-19 at 11 51 57 PM" src="https://github.com/user-attachments/assets/cee364df-eeba-4338-8f2a-14949adb755b" />
 
 </div>
 
