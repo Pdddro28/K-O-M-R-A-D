@@ -132,7 +132,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 
 	<div align="center">
 
-	Imagen
+	<img width="567" height="600" alt="17523247_203569336801744_2788986523412924047_n" src="https://github.com/user-attachments/assets/c36a271c-b45c-492a-805e-b107851429cd" />
 
 	</div>
 
@@ -160,7 +160,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 
 		<div align="center">
   
-		<img width="567" height="600" alt="17523247_203569336801744_2788986523412924047_n" src="https://github.com/user-attachments/assets/c36a271c-b45c-492a-805e-b107851429cd" />
+		<img width="806" height="426" alt="ackermann_steering_system" src="https://github.com/user-attachments/assets/cfd08a9b-8e7f-428b-a0d0-90fa65cc9667" />
 		
 		</div>
 
