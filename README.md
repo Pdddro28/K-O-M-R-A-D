@@ -10,7 +10,31 @@
 
 </div>
 
-#### Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
+Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
+
+Índice
+====
+
+- [Estructura completa de carpetas](#estructura-de-carpetas)
+- [El equipo](#el-equipo)
+- [Nuestro robot](#nuestro-robot)
+- [Sistemas electrónicos](#sistemas-electronicos)
+- [Sistemas mecánicos](#sistemas-mecanicos)
+- [Arquitectura de software](#arquitectura-de-software)
+
+Estructura de carpetas <a id="estructura-de-carpetas"></a>
+====
+
+Esta es la estructura de carpetas de nuestro repositorio:
+
+| Carpeta | Contenido técnico | Documentación detallada |
+|---|---|---|
+| **models** | Diseños CAD en 3D| [Explora los modelos 3D](models/README.md) |
+| **schemes** | **Sistemas eléctricos**<br>• Diagramas de cableado<br>• Gestión de la alimentación<br>• Esquemas de componentes| [Explora la documentación de esquemas y cableado](schemes/README.md) |
+| **src** | **Algoritmos de software**<br>• Lógica de navegación<br>• Fusión de sensores<br>• Sistemas de control | [Explora la documentación de software y algoritmos](src/README.md) |
+| **t-photos** | **Documentación del equipo**<br>• Perfiles de los miembros | [Explora la documentación de fotos del equipo](t-photos/README.md) |
+| **v-photos** | **Documentación del vehículo**<br>• Vistas desde múltiples ángulos | [Explora la documentación de fotos del vehículo](v-photos/README.md) |
+| **video** | **Validación del rendimiento**<br>• Demostraciones del desafío<br>• Pruebas de ingeniería | [Explora la documentación de los vídeos de rendimiento](video/README.md) |
 
 El Equipo <a id="el-equipo"></a>
 ====
@@ -58,38 +82,7 @@ Foto del carro
 
 </div>
 
-Índice
-====
 
-- [Estructura completa de carpetas](#estructura-de-carpetas)
-- [El equipo](#el-equipo)
-- [Nuestro robot](#nuestro-robot)
-- [Sistemas electrónicos](#sistemas-electronicos)
-- [Sistemas mecánicos](#sistemas-mecanicos)
-- [Arquitectura de software](#arquitectura-de-software)
-
-Estructura de carpetas <a id="estructura-de-carpetas"></a>
-====
-
-Esta es la estructura de carpetas de nuestro repositorio:
-
-| Carpeta | Contenido técnico | Documentación detallada |
-|---|---|---|
-| **models** | Diseños CAD en 3D| [Explora los modelos 3D](models/README.md) |
-| **schemes** | **Sistemas eléctricos**<br>• Diagramas de cableado<br>• Gestión de la alimentación<br>• Esquemas de componentes| [Explora la documentación de esquemas y cableado](schemes/README.md) |
-| **src** | **Algoritmos de software**<br>• Lógica de navegación<br>• Fusión de sensores<br>• Sistemas de control | [Explora la documentación de software y algoritmos](src/README.md) |
-| **t-photos** | **Documentación del equipo**<br>• Perfiles de los miembros | [Explora la documentación de fotos del equipo](t-photos/README.md) |
-| **v-photos** | **Documentación del vehículo**<br>• Vistas desde múltiples ángulos | [Explora la documentación de fotos del vehículo](v-photos/README.md) |
-| **video** | **Validación del rendimiento**<br>• Demostraciones del desafío<br>• Pruebas de ingeniería | [Explora la documentación de los vídeos de rendimiento](video/README.md) |
-
-Donde:
-
-- `models`: Todos los archivos 3D utilizados en el coche. [ver](./models/README.md)
-- `schemes`: Esquema de cableado, instrucciones de montaje y descripción de los componentes. [ver](./schemes/README.md)
-- `src`: Todo el código necesario para controlar el robot. [ver](./src/README.md) 
-- `t-photos`: Fotos del equipo. [ver](./t-photos/README.md)
-- `v-photos`: Fotos del vehículo. [ver](./v-photos/README.md)
-- `videos`: Vídeos de las actuaciones del robot. [ver](./videos/README.md)
 
 # 1- Mobilidad y diseño
 
@@ -99,10 +92,10 @@ Donde:
 	
 | Foto | Nombre | Descripción |
 |---|---|---|
-| <img width="920" height="920" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | **Cyber Cooper** | Teníamos pensado diseñar el coche desde cero, modelando e imprimiendo nuestras propias piezas en 3D, incluidos el chasis y el sistema de dirección. Aunque al principio parecía una buena idea, a medida que avanzábamos empezamos a encontrarnos con un problema tras otro, y nos dimos cuenta de que nuestro diseño actual nos acarrearía más dificultades. Al final, hicimos todo lo que pudimos dentro de las limitaciones de tiempo que teníamos, y este fue el vehículo que presentamos en la WRO 2024. |
-| <img width="920" height="920" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | **Cooper** | Desarrollamos un chasis de PLA naranja estructurado en dos niveles impreso gracias a nuestro patrocinador Fab Lab Caracas. El nivel inferior albergaba los sensores y la electrónica de bajo nivel, mientras que el superior sostenía las baterías y la Raspberry Pi 3 para optimizar el espacio. Aunque logramos un gran avance estético y funcional, sufrimos lecciones duras en pista: el peso hizo que los acoples de la transmisión trasera flexarany tuviera problemas severos de fricción mecánica entre las piezas impresas en plástico. |
-| <img width="920" height="920" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | **Halbi** | Teniendo en cuenta los recursos de los que disponíamos en ese momento, nuestra idea principal era rediseñar el Cybercooper, modificando la base y la estrategia existentes y utilizando mejores componentes electrónicos; empezamos a imprimir las nuevas piezas con material blanco y a pensar en mejores formas de montar el sistema de dirección del coche. Al final, decidimos utilizar una base prefabricada para el chasis; la razón principal fue ahorrar tiempo (y dolores de cabeza) con el diseño mecánico, lo que nos permitía dedicar más tiempo a la electrónica y la programación. |
-| <img width="920" height="920" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** | A diferencia de los modelos anteriores que pertenecían a nuestro coach, "The Fridge" fue un diseño construido enteramente por nosotros. Aquí dimos el salto a la geometría Ackermann e imprimimos la gran mayoría de las piezas en 3D. A nivel motriz, usamos un motor DC con un engranaje acoplado para traccionar ambas ruedas. Físicamente le instalamos 3 sensores ultrasónicos, una Raspberry Pi 4 y un giroscopio MPU6050, pero por falta de tiempo y severos problemas de configuración, la Raspberry y el IMU quedaron como peso muerto y terminamos controlando todo únicamente desde la MegaPi. Sufrimos muchísimo: las piezas de la dirección impresas en 3D se rompían constantemente por el estrés, y programar la navegación autónoma en Arduino dependiendo de puros rebotes ultrasónicos fue casi imposible. Siendo sinceros, terminó siendo el peor proyecto de los tres. |
+| <img width="920" height="920" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | **Cyber Cooper** | En 2023 teníamos pensado diseñar el coche desde cero, modelando e imprimiendo nuestras propias piezas en 3D, incluidos el chasis y el sistema de dirección. Aunque al principio parecía una buena idea, a medida que avanzábamos empezamos a encontrarnos con un problema tras otro, y nos dimos cuenta de que nuestro diseño actual nos acarrearía más dificultades. Al final, hicimos todo lo que pudimos dentro de las limitaciones de tiempo que teníamos. |
+| <img width="920" height="920" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | **Cooper** | En 2024 desarrollamos un chasis con piezas 3D estructurado en dos niveles. El nivel inferior albergaba los sensores y la electrónica de bajo nivel, mientras que el superior sostenía las baterías y la Raspberry Pi 3 para optimizar el espacio. Aunque logramos un gran avance estético y funcional, sufrimos lecciones duras en pista: el peso excesivo provocó la flexión de los acoples en la transmisión trasera, lo cual, a su vez, generó problemas severos de fricción mecánica entre las piezas impresas en 3D. |
+| <img width="920" height="920" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | **Halbi** | En 2025 teniendo en cuenta los recursos de los que disponíamos en ese momento, nuestra idea principal era rediseñar el Cybercooper, modificando la base y la estrategia existentes y utilizando mejores componentes electrónicos; empezamos a imprimir las nuevas piezas con material blanco y a pensar en mejores formas de montar el sistema de dirección del coche. Al final, decidimos utilizar una base prefabricada para el chasis; la razón principal fue ahorrar tiempo (y dolores de cabeza) con el diseño mecánico, lo que nos permitía dedicar más tiempo a la electrónica y la programación. |
+| <img width="920" height="920" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** | En 2025 a diferencia de los modelos anteriores que pertenecían a nuestro coach, "The Fridge" fue un diseño construido enteramente por nosotros. Aquí dimos el salto a la geometría Ackermann e imprimimos la gran mayoría de las piezas en 3D. A nivel motriz, usamos un motor DC con un engranaje acoplado para traccionar ambas ruedas. Físicamente le instalamos 3 sensores ultrasónicos, una Raspberry Pi 4 y un giroscopio MPU6050, pero por falta de tiempo y severos problemas de configuración, la Raspberry y el IMU quedaron como peso muerto y terminamos controlando todo únicamente desde la MegaPi. Sufrimos muchísimo: las piezas de la dirección impresas en 3D se rompían constantemente por el estrés, y programar la navegación autónoma en Arduino dependiendo de puros rebotes ultrasónicos fue casi imposible. Siendo sinceros, terminó siendo el peor proyecto de los tres. |
 
 </div>
 
@@ -112,14 +105,12 @@ Donde:
 
 	<div align="center">
 
-	| **Diferentes ángulos del carro** | **Imagen** |
-	|---|---|
-	| **Superior** | <img width="560" height="580" alt="Upper-Pov" src="https://github.com/user-attachments/assets/74863cc8-5128-49cf-845e-0f087c50bcf1" /> |
-	| **Derecha** | <img width="560" height="580" alt="RightSide-Pov" src="https://github.com/user-attachments/assets/8b9c2020-cc18-441f-9152-c86d9a233b10" /> |
-	| **Izquierda** | <img width="560" height="580" alt="LeftSide-Pov" src="https://github.com/user-attachments/assets/cdbabe27-6e45-4dab-98e6-e63b24ed7371" /> |
-	|**Frontal** | <img width="560" height="580" alt="Front-Pov" src="https://github.com/user-attachments/assets/d9b65dd5-ca97-4087-ba20-77f7cbeb4bf6" /> |
-	| **Trasero** | <img width="560" height="580" alt="Back-Pov" src="https://github.com/user-attachments/assets/dd1737be-1173-4cae-9229-25821f05dc22" /> |
-	| **Libre** | <img width="560" height="580" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" /> |
+	| | **Diferentes ángulos del carro** | |
+	|---|---|---|
+	| **Superior** | **Derecha** | **Izquierda** |
+	| <img width="560" height="580" alt="Upper-Pov" src="https://github.com/user-attachments/assets/74863cc8-5128-49cf-845e-0f087c50bcf1" /> | <img width="560" height="580" alt="RightSide-Pov" src="https://github.com/user-attachments/assets/8b9c2020-cc18-441f-9152-c86d9a233b10" /> | <img width="560" height="580" alt="LeftSide-Pov" src="https://github.com/user-attachments/assets/cdbabe27-6e45-4dab-98e6-e63b24ed7371" /> |
+	|**Frontal** | **Trasero** | **Libre** |
+	| <img width="560" height="580" alt="Front-Pov" src="https://github.com/user-attachments/assets/d9b65dd5-ca97-4087-ba20-77f7cbeb4bf6" /> | <img width="560" height="580" alt="Back-Pov" src="https://github.com/user-attachments/assets/dd1737be-1173-4cae-9229-25821f05dc22" /> | <img width="560" height="580" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" /> |
 	
     </div>
 
