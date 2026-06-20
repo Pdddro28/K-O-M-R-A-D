@@ -12,7 +12,7 @@
 
 #### Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
 
-El Equipo
+El Equipo <a id="El-Equipo"></a>
 ====
 
 <div align="center">
@@ -58,7 +58,20 @@ Foto del carro
 
 </div>
 
-Estructura de carpetas
+Índice
+====
+
+- [📂 Estructura completa de la documentación](#Estructura-de-carpetas)
+- [👥 El equipo](#El-Equipo)
+- [🤖 Nuestro robot](#nuestro-robot)
+- [🔧 Sistemas electrónicos](#sistemas-electronicos)
+- [⚙ Sistemas mecánicos](#sistemas-mecánicos)
+- [💻 Arquitectura de software](#arquitectura-de-software)
+- [📹 Vídeos de rendimiento](#performance-videos)
+- [🌐 Uso y desarrollo en GitHub](#github-utilization--development)
+- [📜 Licencia y réplica](#license--replication)
+
+Estructura de carpetas <a id="Estructura-de-carpetas"></a>
 ====
 
 Esta es la estructura de carpetas de nuestro repositorio:
@@ -98,7 +111,7 @@ Donde:
 
 </div>
 
- - ### Halbi The Green:
+ - ### Halbi The Green: <a id="nuestro-robot"></a>
 
     - ### Foto:
 
@@ -263,7 +276,7 @@ Donde:
 
 		</div>
 
-# 2. Componentes
+# 2. Componentes <a id="sistemas-electronicos"></a>
 
 - ### Precios:
 
