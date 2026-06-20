@@ -137,7 +137,8 @@ Esta es la estructura de carpetas de nuestro repositorio:
 		$$\cot(\theta_{\text{out}}) - \cot(\theta_{\text{in}}) = \frac{w}{L}$$
 		
 		</div>
-		**Donde:**
+		
+		Donde:
 		
 		* $\theta_{\text{in}}$ es el ángulo de giro de la rueda interna.*
 		* $\theta_{\text{out}}$ es el ángulo de giro de la rueda externa.*
