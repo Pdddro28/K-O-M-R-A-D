@@ -14,12 +14,17 @@ Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido 
 
 ## **Índice**
 
-1. [Estructura de carpetas](#estructura-de-carpetas)
-2. [El equipo](#el-equipo)
-3. [Nuestro robot](#nuestro-robot)
-4. [Sistemas electrónicos](#sistemas-electronicos)
-5. [Sistemas mecánicos](#sistemas-mecanicos)
-5. [Arquitectura de software](#arquitectura-de-software)
+**1. [Estructura de carpetas](#estructura-de-carpetas)**
+
+**2. [El equipo](#el-equipo)**
+
+**3. [Nuestro robot](#nuestro-robot)**
+
+**4. [Sistemas electrónicos](#sistemas-electronicos)**
+
+**5. [Sistemas mecánicos](#sistemas-mecanicos)**
+
+**5. [Arquitectura de software](#arquitectura-de-software)**
 
 ---
 
