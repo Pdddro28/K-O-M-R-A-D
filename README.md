@@ -447,7 +447,7 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 	|---|---|---|---|
 	| ```inicializar()``` | Ninguno | void | Configura los recursos de hardware: activa la resistencia de pull-up interna para el botón de inicio, acopla el servo de dirección al pin A7 y fuerza su alineación física al centro geométrico (90°). |
 	| ```botonPresionado()```	| Ninguno | bool | Realiza una lectura digital en el botón de ejecución principal (A9). Devuelve true si el botón está físicamente presionado (estado LOW debido a la resistencia pull-up interna). |
-	| ```obtenerDistancia()``` | trig: int, echo: int long | Retorna una tupla conteniendo las lecturas actuales de los sensores ultrasónicos (Frontal, Izquierdo, Derecho) en centímetros, actualizadas por el hilo de telemetría en segundo plano.
+	| ```obtenerDistancia()``` | trig: int, echo: int long | tuple | Retorna una tupla conteniendo las lecturas actuales de los sensores ultrasónicos (Frontal, Izquierdo, Derecho) en centímetros, actualizadas por el hilo de telemetría en segundo plano. |
 	| ```getDistanciaFront()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el conjunto del sensor ultrasónico delantero (sensorF). |
 	| ```getDistanciaLeft()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el sensor ultrasónico de orientación izquierdo (sensorL). |
 	| ```getDistanciaRight()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el sensor ultrasónico de orientación derecho (sensorD). |
