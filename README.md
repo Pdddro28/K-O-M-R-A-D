@@ -12,7 +12,7 @@
 
 #### Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
 
-El Equipo <a id="El-Equipo"></a>
+El Equipo <a id="el-equipo"></a>
 ====
 
 <div align="center">
@@ -61,8 +61,8 @@ Foto del carro
 Índice
 ====
 
-- [📂 Estructura completa de la documentación](#Estructura-de-carpetas)
-- [👥 El equipo](#El-Equipo)
+- [📂 Estructura completa de carpetas](#estructura-de-carpetas)
+- [👥 El equipo](#el-equipo)
 - [🤖 Nuestro robot](#nuestro-robot)
 - [🔧 Sistemas electrónicos](#sistemas-electronicos)
 - [⚙ Sistemas mecánicos](#sistemas-mecánicos)
@@ -71,7 +71,7 @@ Foto del carro
 - [🌐 Uso y desarrollo en GitHub](#github-utilization--development)
 - [📜 Licencia y réplica](#license--replication)
 
-Estructura de carpetas <a id="Estructura-de-carpetas"></a>
+Estructura de carpetas <a id="estructura-de-carpetas"></a>
 ====
 
 Esta es la estructura de carpetas de nuestro repositorio:
