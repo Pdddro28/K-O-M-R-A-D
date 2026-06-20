@@ -308,21 +308,39 @@ Esta es la estructura de carpetas de nuestro repositorio:
 
 </div>
 
-- ### Disposición de Sensores y Justificación:
+- ### Disposición de Componentes y Justificación:
 
-	El diseño de nuestro vehículo autónomo se fundamenta en una arquitectura modular de dos niveles, optimizada para la gestión eficiente del centro de gravedad y la distribución de componentes electrónicos. Esta configuración en "pisos" permite una separación crítica entre la potencia (actuadores) y la lógica (procesamiento), facilitando tanto la estabilidad mecánica como el mantenimiento del sistema.
+	El diseño de nuestro vehículo autónomo se fundamenta en una arquitectura modular de tres niveles verticales, optimizada para la gestión eficiente del centro de gravedad, el balance de masas y la mitigación de interferencias electromagnéticas y mecánicas. Esta configuración jerárquica por "pisos" permite aislar los elementos mecánicos de potencia frente a los módulos lógicos de procesamiento y visión artificial.
 
-	- **Arquitectura del Chasis:**
-	El chasis se organiza en una estructura vertical de dos niveles. En el nivel inferior se encuentra el núcleo motriz: la placa MegaPi, el motor de tracción DC y el servomotor de dirección. Esta base sólida garantiza que el tren de rodaje tenga un centro de gravedad bajo. Sobre este soporte se eleva una plataforma superior que actúa como el "cerebro" del vehículo, albergando la Raspberry Pi 4, los sistemas de gestión de energía y la base ajustable de la cámara, garantizando que el procesado de datos esté aislado de las vibraciones mecánicas generadas por la transmisión.
+	- Arquitectura del Chasis por Niveles:
 
-	- **Sistema de Percepción:**
- 	Esta organización estructural complementa nuestro sistema de percepción mixto, compuesto por una cámara de visión artificial y tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación:
+	- 1st Level (Planta Baja):
+	Constituye la base estructural y el tren de rodaje del vehículo. En este nivel se ubica el Motor de Tracción RS380, el mecanismo de dirección asistido por el servomotor, y los tres sensores ultrasónicos HC-SR04 (Front-US y los sensores laterales Left-US / Right-US).
 
-		- **Distribución Frontal:**
-		En la parte delantera del nivel inferior, se ha colocado un sensor ultrasónico en una posición adelantada respecto a la cámara. Esta configuración permite una sincronización ideal: mientras la cámara procesa la información visual (detección de colores y líneas), el sensor ultrasónico frontal actúa como medida de seguridad de hardware en tiempo real, midiendo con exactitud la proximidad de obstáculos antes de ejecutar maniobras de frenado o evasión.
+		- Justificación Técnica: Colocar los actuadores más pesados y el sistema de tracción en la planta baja garantiza un centro de gravedad lo más cercano posible al suelo, proporcionando estabilidad cinemática y tracción máxima en las ruedas traseras durante aceleraciones bruscas.
 
-		- **Distribución Lateral:**
-		Para el control y la estabilización, se integraron dos sensores ultrasónicos situados a cada costado del chasis, anclados firmemente al nivel inferior. Estos se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación centralizada es fundamental: al mantener esta altura y posición respecto al centro de masas, se minimizan las perturbaciones causadas por el balanceo del chasis, permitiendo que el vehículo calcule de manera constante y simétrica la distancia hacia las paredes, manteniendo así una trayectoria recta, fluida y precisa.
+	- 2nd Level (Planta Intermedia):
+Situado inmediatamente arriba de la transmisión, este nivel alberga el núcleo de control de bajo nivel y la distribución eléctrica principal. Aquí se encuentran fijadas la placa de expansión Makeblock MegaPi, el Buck Converter (3A 15W) y la jaula vertical contenedora de las Baterías LiPo.
+
+		- Justificación Técnica: La MegaPi actúa como puente físico intermedio para acortar las trayectorias del cableado hacia los motores del primer nivel. Al centralizar las baterías pesadas en este piso medio y alineadas horizontalmente con el centro de masa, se reducen los momentos de inercia polares, evitando subvirajes o sobrevirajes en las curvas cerradas de la pista. El Buck Converter se sitúa estratégicamente al lado de la MegaPi para reducir y estabilizar el voltaje proveniente de las celdas antes de enviarlo al nivel superior.
+
+	- 3rd Level (Planta Superior):
+	Corresponde a la cúspide de la estructura, dedicada de forma exclusiva al procesamiento de alto nivel y la percepción geométrica. Contiene la computadora a bordo Raspberry Pi 4 B (equipada con su disipador térmico y ventilador activo) y el conjunto elevado de la cámara de visión artificial Arducam IMX219.
+
+		- Justificación Técnica: Elevar la Raspberry Pi 4 la aísla por completo de las vibraciones mecánicas directas del motor de tracción y de los bucles de corriente del chasis inferior. Asimismo, la posición superior favorece la convección térmica del ventilador para evitar el estrangulamiento térmico (thermal throttling) del CPU durante la ejecución de los algoritmos de detección.
+
+	- Sistema de Percepción y Orientación Espacial:
+
+	Esta distribución en tres dimensiones complementa la estrategia de nuestro sistema de percepción mixto, asegurando zonas de cobertura óptimas sin interferencias mutuas:
+
+	- Distribución de Visión Artificial (3rd Level):
+	La cámara Arducam IMX219 se posiciona en el punto más alto y adelantado del tercer nivel, sostenida por un brazo articulado impreso en 3D con un ángulo de inclinación fijo hacia abajo de 15 grados. Esta elevación es crítica para expandir la línea de visión del lente de 175°, permitiendo al algoritmo abarcar una Región de Interés (ROI) más amplia de la pista para identificar los códigos de color (semáforos) y líneas guía sin que la propia estructura del carro obstruya el encuadre.
+
+	- Distribución Ultrasónica Frontal (1st Level):
+	El sensor ultrasónico delantero (Front-US) se monta directamente sobre la placa base del chasis en una posición baja y avanzada, justo por debajo de la línea de proyección de la cámara. Esta sincronización geométrica permite que, mientras la cámara procesa las decisiones lógicas en el nivel superior, el ultrasonido actúe en el nivel inferior como un bypass de seguridad de hardware en tiempo real, detectando la presencia física de obstáculos de forma matemática y directa para activar frenados de emergencia.
+
+	- Distribución Ultrasónica Lateral (1st Level):
+	Los dos sensores ultrasónicos de flanco (Left-US y Right-US) están anclados rígidamente a los costados izquierdo y derecho del primer nivel, posicionados de forma longitudinal entre ambos ejes de ruedas y alineados verticalmente a la altura exacta de los neumáticos. Ubicarlos en el piso bajo, simétricos respecto al centro de masa, minimiza drásticamente las lecturas falsas causadas por el cabeceo (frenada) o el balanceo (giro) del chasis. Esto asegura que el algoritmo de estabilización reciba datos limpios y constantes de la distancia real hacia las paredes de la pista para mantener una trayectoria perfectamente recta.
 
 <div align="center">
 
@@ -358,7 +376,7 @@ Esta configuración nos permite operar con la máxima seguridad, garantizando qu
 | **Módulo Semáforo LED (Traffic Light)** | 1 | 5.0 V | 30 mA | 30 mA |
 | **Servomotor de Dirección MG996R** | 1 | 5.0 V | 500 mA / 2500 mA | 2500 mA |
 | **Motor de Tracción RS380** | 1 | 6.0 V (vía Driver) | 1200 mA | 2000 mA |
-| | | | 2,735 mA (2.73 A) mA | 6,185 mA (6.18 A) |
+| Total | | | 2,735 mA (2.73 A) mA | 6,185 mA (6.18 A) |
 
 </div>
 
