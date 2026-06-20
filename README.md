@@ -61,15 +61,12 @@ Foto del carro
 Índice
 ====
 
-- [📂 Estructura completa de carpetas](#estructura-de-carpetas)
-- [👥 El equipo](#el-equipo)
-- [🤖 Nuestro robot](#nuestro-robot)
-- [🔧 Sistemas electrónicos](#sistemas-electronicos)
-- [⚙ Sistemas mecánicos](#sistemas-mecánicos)
-- [💻 Arquitectura de software](#arquitectura-de-software)
-- [📹 Vídeos de rendimiento](#performance-videos)
-- [🌐 Uso y desarrollo en GitHub](#github-utilization--development)
-- [📜 Licencia y réplica](#license--replication)
+- [Estructura completa de carpetas](#estructura-de-carpetas)
+- [El equipo](#el-equipo)
+- [Nuestro robot](#nuestro-robot)
+- [Sistemas electrónicos](#sistemas-electronicos)
+- [Sistemas mecánicos](#sistemas-mecanicos)
+- [Arquitectura de software](#arquitectura-de-software)
 
 Estructura de carpetas <a id="estructura-de-carpetas"></a>
 ====
@@ -77,14 +74,14 @@ Estructura de carpetas <a id="estructura-de-carpetas"></a>
 Esta es la estructura de carpetas de nuestro repositorio:
 
 ```
-LNM/
-├── models/
-├── schemes/
-├── src/
-├── t-photos/
-├── v-photos/
-└── video/
-
+| Carpeta | Contenido técnico | Documentación detallada |
+|-----------|----------------------|---------------------------|
+| **models** | Diseños CAD en 3D| [Explora los modelos 3D](models/README.md) |
+| **schemes** | **Sistemas eléctricos**<br>• Diagramas de cableado<br>• Gestión de la alimentación<br>• Esquemas de componentes| [Explora la documentación de esquemas y cableado](schemes/README.md) |
+| **src** | **Algoritmos de software**<br>• Lógica de navegación<br>• Fusión de sensores<br>• Sistemas de control | [Explora la documentación de software y algoritmos](src/README.md) |
+| **t-photos** | **Documentación del equipo**<br>• Perfiles de los miembros | [Explora la documentación de fotos del equipo](t-photos/README.md) |
+| **v-photos** | **Documentación del vehículo**<br>• Vistas desde múltiples ángulos | [Explora la documentación de fotos del vehículo](v-photos/README.md) |
+| **video** | **Validación del rendimiento**<br>• Demostraciones del desafío<br>• Pruebas de ingeniería | [Explora la documentación de los vídeos de rendimiento](video/README.md) |
 ```
 
 Donde:
@@ -123,7 +120,7 @@ Donde:
 
     </div>
 
-	- ### Especificaciones mecánicas principales:
+	- ### Especificaciones mecánicas principales: <a id="sistemas-mecanicos"></a>
 
 		- **Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto).**
 		- **Peso del carro: aproximadamente 1,2Kg.**
@@ -402,7 +399,7 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 
 </div>
 
-# 3.  Software
+# 3.  Software <a id="arquitectura-de-software"></a>
 
 - ### Herramientas de apoyo:
 
