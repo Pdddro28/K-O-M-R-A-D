@@ -10,7 +10,7 @@
 
 </div>
 
-Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
+#### Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido como Ars Machina, que compite en la categoría **World Robot Olympiad™ (WRO®) Future Engineers 2026**. Nuestro equipo está formado por David Wang y Pedro Catamo que han diseñado un vehículo autónomo compacto e innovador para hacer frente a los retos dinámicos de la competición WRO 2026.
 
 El Equipo
 ====
@@ -103,7 +103,6 @@ Donde:
     - ### Foto:
 
 	<div align="center">
-
 	
 	| Superior | Derecha | Izquierda | Frontal | Trasero |
 	|---|---|---|---|---|
@@ -140,11 +139,11 @@ Donde:
 		$$\cot(\theta_{\text{out}}) - \cot(\theta_{\text{in}}) = \frac{w}{L}$$
 		
 		</div>
-		Donde:
-		* $\theta_{\text{in}}$ es el ángulo de giro de la rueda interna.
-		* $\theta_{\text{out}}$ es el ángulo de giro de la rueda externa.
-		* $w$ es el ancho de la vía (*track width* o distancia entre las ruedas frontales).
-		* $L$ es la batalla del carro (*wheelbase* o distancia entre el eje delantero y trasero).
+		**Donde:**
+		* $\theta_{\text{in}}$ es el ángulo de giro de la rueda interna.*
+		* $\theta_{\text{out}}$ es el ángulo de giro de la rueda externa.*
+		* $w$ es el ancho de la vía (*track width* o distancia entre las ruedas frontales).*
+		* $L$ es la batalla del carro (*wheelbase* o distancia entre el eje delantero y trasero).*
 
 		Dado que la cotangente crece más rápido a ángulos pequeños, esta relación obliga mecánicamente a que $\theta_{\text{in}} > \theta_{\text{out}}$ de forma automática en cualquier curva, abriendo el ángulo de la rueda exterior para que dibuje un círculo más grande.
 
@@ -202,9 +201,9 @@ Donde:
 
    			- **Creality Hi:** Es una de las propuestas más recientes de Creality, diseñada con un fuerte enfoque en competir directamente en el mercado de impresión multicolor accesible.
         
-        		- Volumen de construcción (lo que puedes imprimir): $260 \times 260 \times 300\text{ mm}$. Es un tamaño intermedio-alto, excelente para robótica porque te permite hacer chasis completos en una sola pieza sin tener que segmentarlos.
+        		- **Volumen de construcción (lo que puedes imprimir):** $260 \times 260 \times 300\text{ mm}$. Es un tamaño intermedio-alto, excelente para robótica porque te permite hacer chasis completos en una sola pieza sin tener que segmentarlos.
             
-          		- Dimensiones de la máquina: $409 \times 392 \times 477\text{ mm}$ (Peso: $8.75\text{ kg}$).
+          		- **Dimensiones de la máquina:** $409 \times 392 \times 477\text{ mm}$ (Peso: $8.75\text{ kg}$).
   
         		Es una impresora cartesiana de alta velocidad equipada con motores step-servo en los ejes X/Y para evitar la pérdida de pasos. Su gran fuerte es la compatibilidad nativa con el sistema CFS (Creality Filament System), un módulo externo tipo "banco de filamentos" que te permite alternar de forma automatizada hasta 4 colores diferentes (o hasta 16 si encadenas 4 módulos). Su velocidad máxima es de $500\text{ m/s}$ con una aceleración de $12,000\text{ mm/s}^2$ y alcanza los $300^\circ\text{C}$ en la boquilla.
   
@@ -220,9 +219,9 @@ Donde:
 
 			- **Creality K1:** Lanzada originalmente como la respuesta directa de Creality a la serie P1 de Bambu Lab, es una máquina de nivel profesional diseñada para velocidad pura y materiales exigentes.
 
-     			- Volumen de construcción (lo que puedes imprimir): $220 \times 220 \times 250\text{ mm}$. Es un espacio estándar (ligeramente más pequeña que la Creality Hi).
+     			- **Volumen de construcción (lo que puedes imprimir):** $220 \times 220 \times 250\text{ mm}$. Es un espacio estándar (ligeramente más pequeña que la Creality Hi).
         
-    			- Dimensiones de la máquina: $355 \times 355 \times 480\text{ mm}$ (Peso: $12.5\text{ kg}$).
+    			- **Dimensiones de la máquina:** $355 \times 355 \times 480\text{ mm}$ (Peso: $12.5\text{ kg}$).
   
         		Utiliza un sistema cinemático CoreXY donde el cabezal se mueve de forma ultraligera en los ejes X/Y usando correas cruzadas, mientras la cama solo baja en el eje Z. Al estar completamente cerrada con paneles de vidrio y acrílico, retiene el calor interno en la cámara de impresión. Alcanza una velocidad de $600\text{ mm/s}$ y una aceleración masiva de $20,000\text{ mm/s}^2$ gracias a su firmware basado en Klipper (Creality OS).
   
@@ -305,18 +304,18 @@ Donde:
 
 - ### Disposición de Sensores y Justificación:
 
-	El diseño de nuestro vehículo autónomo, K-O-M-R-A-D, se fundamenta en una arquitectura modular de dos niveles, optimizada para la gestión eficiente del centro de gravedad y la distribución de componentes electrónicos. Esta configuración en "pisos" permite una separación crítica entre la potencia (actuadores) y la lógica (procesamiento), facilitando tanto la estabilidad mecánica como el mantenimiento del sistema.
+	El diseño de nuestro vehículo autónomo se fundamenta en una arquitectura modular de dos niveles, optimizada para la gestión eficiente del centro de gravedad y la distribución de componentes electrónicos. Esta configuración en "pisos" permite una separación crítica entre la potencia (actuadores) y la lógica (procesamiento), facilitando tanto la estabilidad mecánica como el mantenimiento del sistema.
 
-	- Arquitectura del Chasis:
+	- **Arquitectura del Chasis:**
 	El chasis se organiza en una estructura vertical de dos niveles. En el nivel inferior se encuentra el núcleo motriz: la placa MegaPi, el motor de tracción DC y el servomotor de dirección. Esta base sólida garantiza que el tren de rodaje tenga un centro de gravedad bajo. Sobre este soporte se eleva una plataforma superior que actúa como el "cerebro" del vehículo, albergando la Raspberry Pi 4, los sistemas de gestión de energía y la base ajustable de la cámara, garantizando que el procesado de datos esté aislado de las vibraciones mecánicas generadas por la transmisión.
 
-	- Sistema de Percepción:
+	- **Sistema de Percepción:**
  	Esta organización estructural complementa nuestro sistema de percepción mixto, compuesto por una cámara de visión artificial y tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación:
 
-		- Distribución Frontal:
+		- **Distribución Frontal:**
 		En la parte delantera del nivel inferior, se ha colocado un sensor ultrasónico en una posición adelantada respecto a la cámara. Esta configuración permite una sincronización ideal: mientras la cámara procesa la información visual (detección de colores y líneas), el sensor ultrasónico frontal actúa como medida de seguridad de hardware en tiempo real, midiendo con exactitud la proximidad de obstáculos antes de ejecutar maniobras de frenado o evasión.
 
-		- Distribución Lateral:
+		- **Distribución Lateral:**
 		Para el control y la estabilización, se integraron dos sensores ultrasónicos situados a cada costado del chasis, anclados firmemente al nivel inferior. Estos se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación centralizada es fundamental: al mantener esta altura y posición respecto al centro de masas, se minimizan las perturbaciones causadas por el balanceo del chasis, permitiendo que el vehículo calcule de manera constante y simétrica la distancia hacia las paredes, manteniendo así una trayectoria recta, fluida y precisa.
 
 <div  align="center">
@@ -335,9 +334,9 @@ Donde:
 
 	Para garantizar la estabilidad operativa de nuestro carro, hemos implementado una arquitectura de alimentación redundante mediante el uso de dos baterías independientes. Esta división es fundamental para proteger la integridad de nuestros sistemas:
 
-- Circuito de Potencia: Una batería dedicada exclusivamente a la placa MegaPi, la cual gestiona los actuadores de alta demanda (el motor de tracción RS380 y el servomotor de dirección MG996R), además de los tres sensores ultrasónicos y el botón de inicio. Este aislamiento evita que las caídas de tensión (transitorios) provocadas por los arranques repentinos o el bloqueo de los motores afecten el procesado de datos.
+- **Circuito de Potencia:** Una batería dedicada exclusivamente a la placa MegaPi, la cual gestiona los actuadores de alta demanda (el motor de tracción RS380 y el servomotor de dirección MG996R), además de los tres sensores ultrasónicos y el botón de inicio. Este aislamiento evita que las caídas de tensión (transitorios) provocadas por los arranques repentinos o el bloqueo de los motores afecten el procesado de datos.
 
-- Circuito de Lógica y Visión: Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
+- **Circuito de Lógica y Visión:** Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
 
 Esta configuración nos permite operar con la máxima seguridad, garantizando que, incluso bajo condiciones de estrés mecánico severo en la dirección y tracción, nuestro "cerebro" (Raspberry Pi) mantenga una alimentación constante y limpia para procesar la trayectoria con total precisión.
 
@@ -359,30 +358,30 @@ Esta configuración nos permite operar con la máxima seguridad, garantizando qu
 
 - ### Diagrama de Cableado:
 
-	La arquitectura eléctrica de K-O-M-R-A-D ha sido diseñada bajo un principio de aislamiento de buses para garantizar la fiabilidad del sistema en un entorno de alta vibración y demanda de corriente. Como se observa en nuestro diagrama de conexiones, el cableado se divide en dos dominios claramente diferenciados:
+	La arquitectura eléctrica de nuestro carro ha sido diseñada bajo un principio de aislamiento de buses para garantizar la fiabilidad del sistema en un entorno de alta vibración y demanda de corriente. Como se observa en nuestro diagrama de conexiones, el cableado se divide en dos dominios claramente diferenciados:
 
-	- Dominio de Potencia (Bus de Fuerza)
+	- **Dominio de Potencia (Bus de Fuerza)**
 Alimentado por la batería dedicada a actuadores, este bus gestiona los componentes de alta corriente:
 
-		- MegaPi: Actúa como el centro de distribución de energía. Recibe los 7.2V - 12V de la batería principal para alimentar los motores y el servomotor.
+		- **MegaPi:** Actúa como el centro de distribución de energía. Recibe los 7.2V - 12V de la batería principal para alimentar los motores y el servomotor.
 
-		- Sistema de Tracción y Dirección: El motor RS380 y el servo MG996R están conectados directamente a los puertos de alta potencia de la MegaPi. Hemos utilizado cables de calibre superior para minimizar la caída de tensión (voltaje drop) durante las maniobras de stall (esfuerzo máximo).
+		- **Sistema de Tracción y Dirección:** El motor RS380 y el servo MG996R están conectados directamente a los puertos de alta potencia de la MegaPi. Hemos utilizado cables de calibre superior para minimizar la caída de tensión (voltaje drop) durante las maniobras de stall (esfuerzo máximo).
 
-		- Filtros de Corriente: Se han integrado condensadores de desacoplo en las terminales del motor para reducir la inducción de ruido eléctrico hacia los sensores ultrasónicos, asegurando lecturas limpias incluso bajo carga.
+		- **Filtros de Corriente:** Se han integrado condensadores de desacoplo en las terminales del motor para reducir la inducción de ruido eléctrico hacia los sensores ultrasónicos, asegurando lecturas limpias incluso bajo carga.
  
-  	- Dominio de Lógica (Bus de Control)
+  	- **Dominio de Lógica (Bus de Control)**
 Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamente independiente:
 
-		- Procesamiento de Datos: La Raspberry Pi 4 B alimenta la cámara Arducam a través del puerto CSI, asegurando un flujo de datos de baja latencia y alta integridad.
+		- **Procesamiento de Datos:** La Raspberry Pi 4 B alimenta la cámara Arducam a través del puerto CSI, asegurando un flujo de datos de baja latencia y alta integridad.
 
-		- Comunicaciones (Bus I2C/UART): La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
+		- **Comunicaciones (Bus I2C/UART):** La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
 
-	- Optimización de Gestión de Cableado
+	- **Optimización de Gestión de Cableado**
 Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos implementado:
 
-		- Gestión de Ruta (Cable Routing): Todos los cables siguen trayectorias perpendiculares al chasis, evitando las diagonales que suelen engancharse con los obstáculos.
+		- **Gestión de Ruta (Cable Routing):** Todos los cables siguen trayectorias perpendiculares al chasis, evitando las diagonales que suelen engancharse con los obstáculos.
 
-		- Sujeción Estructural: El cableado está fijado al chasis mediante bridas (zip-ties) en puntos estratégicos para absorber las vibraciones, evitando que el movimiento de la dirección o la tracción fatigue las soldaduras de los pines.
+		- **Sujeción Estructural:** El cableado está fijado al chasis mediante bridas (zip-ties) en puntos estratégicos para absorber las vibraciones, evitando que el movimiento de la dirección o la tracción fatigue las soldaduras de los pines.
 
 <div align="center">
 
@@ -392,11 +391,11 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 
 # 3.  Software
 
-- ### Utilidades:
+- ### Herramientas de apoyo:
 
-	- Color Detector: Es una herramienta interactiva de calibración visual diseñada para segmentar y aislar colores específicos en tiempo real mediante el espacio de color LAB (Luminancia, A y B) y filtros de desenfoque gaussiano. El sistema captura el flujo de video de una Picamera2, aplica transformaciones morfológicas de erosión y dilatación para limpiar el ruido de la imagen, y genera una máscara binaria basada en umbrales máximos y mínimos ajustables por deslizadores en una interfaz gráfica (GUI) construida con CustomTkinter. Su función principal es preajustar firmas de color (como rojo, verde, azul o negro) y exportar estos rangos óptimos a un archivo de configuración JSON para que el robot pueda reconocer objetos o líneas de manera 	estable bajo diferentes condiciones de luz.
+	- **Color Detector:** Es una herramienta interactiva de calibración visual diseñada para segmentar y aislar colores específicos en tiempo real mediante el espacio de color LAB (Luminancia, A y B) y filtros de desenfoque gaussiano. El sistema captura el flujo de video de una Picamera2, aplica transformaciones morfológicas de erosión y dilatación para limpiar el ruido de la imagen, y genera una máscara binaria basada en umbrales máximos y mínimos ajustables por deslizadores en una interfaz gráfica (GUI) construida con CustomTkinter. Su función principal es preajustar firmas de color (como rojo, verde, azul o negro) y exportar estos rangos óptimos a un archivo de configuración JSON para que el robot pueda reconocer objetos o líneas de manera 	estable bajo diferentes condiciones de luz.
 
-	- ROI Detector: Es una utilidad de configuración espacial basada en OpenCV que permite delimitar "Regiones de Interés" (ROI) personalizadas sobre la transmisión de video de la cámara mediante clics y arrastres del mouse. El script escala el fotograma original de forma proporcional dentro de un lienzo centrado con bordes negros constantes, permitiendo al usuario dibujar múltiples cuadrantes, visualizando dinámicamente sus dimensiones en píxeles. Su propósito principal es limpiar la memoria caché con la tecla 'C' o finalizar la captura con la tecla 'ESC' para activar una ventana flotante de Tkinter que exporta de forma automatizada las coordenadas $(x_1, y_1, x_2, y_2)$ estructuradas como una lista de objetos en un archivo nativo de Python (.py), aislando las zonas específicas de análisis visual donde el robot debe procesar la información (como la línea del suelo) e ignorando el ruido del entorno.
+	- **ROI Detector:** Es una utilidad de configuración espacial basada en OpenCV que permite delimitar "Regiones de Interés" (ROI) personalizadas sobre la transmisión de video de la cámara mediante clics y arrastres del mouse. El script escala el fotograma original de forma proporcional dentro de un lienzo centrado con bordes negros constantes, permitiendo al usuario dibujar múltiples cuadrantes, visualizando dinámicamente sus dimensiones en píxeles. Su propósito principal es limpiar la memoria caché con la tecla 'C' o finalizar la captura con la tecla 'ESC' para activar una ventana flotante de Tkinter que exporta de forma automatizada las coordenadas $(x_1, y_1, x_2, y_2)$ estructuradas como una lista de objetos en un archivo nativo de Python (.py), aislando las zonas específicas de análisis visual donde el robot debe procesar la información (como la línea del suelo) e ignorando el ruido del entorno.
 
 - ### MegaPiController:
 
@@ -409,8 +408,6 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 	- ```MeMegaPi.h```
 
 	- ```Servo.h```
-
-	- ```Adafruit_MPU6050.h (Optional / Commented)```
 
 	- ```Ultrasonic.h```
 
@@ -444,8 +441,8 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 	| ```avanzar()``` | velocidad: byte | void | Mueve el tren motriz trasero hacia adelante a la intensidad PWM en bruto especificada e indicada por la interfaz del controlador de alto nivel. |
 	| ```retroceder()``` | angulo: byte, velocidad: byte | void | Restablece momentáneamente las ruedas físicas a la alineación central, ajusta el servo de dirección a un vector de recuperación dado y asume la salida inversa del motor DC (-velocidad). |
 	| ```girarIzquierda()``` | angulo: byte, velocidad: byte | void | Aplica el ángulo de dirección entrante al servo MG996R hacia el extremo físico izquierdo y proporciona tracción hacia adelante para navegar en curvas cerradas. |
-	| ```girarDerecha()``` | angulo: byte, velocidad: byte | void	| Aplica el ángulo de dirección entrante al servo MG996R hacia el extremo físico derecho y proporciona tracción hacia adelante para navegar en curvas cerradas. |
-	| ```detenerse()``` | Ninguno	| void | Corta de forma segura todos los suministros de voltaje que van al puente H del motor trasero (motor.stop()) e instantáneamente regresa el mecanismo de dirección al eje neutral. |
+	| ```girarDerecha()``` | angulo: byte, velocidad: byte | void | Aplica el ángulo de dirección entrante al servo MG996R hacia el extremo físico derecho y proporciona tracción hacia adelante para navegar en curvas cerradas. |
+	| ```detenerse()``` | Ninguno | void | Corta de forma segura todos los suministros de voltaje que van al puente H del motor trasero (motor.stop()) e instantáneamente regresa el mecanismo de dirección al eje neutral. |
 	| ```girarCentro()``` | Ninguno | void | Aísla el servo de dirección y fuerza su matriz de rotación directamente al centro predeterminado (90°), sin modificar el estado de velocidad actual del motor de tracción. |
 
 - ### Arduino Controller:
