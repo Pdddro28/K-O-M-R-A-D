@@ -14,12 +14,12 @@ Bienvenidos al repositorio de GitHub del **Equipo LNM**, anteriormente conocido 
 
 ## **Índice**
 
-- [Estructura completa de carpetas](#estructura-de-carpetas)
-- [El equipo](#el-equipo)
-- [Nuestro robot](#nuestro-robot)
-- [Sistemas electrónicos](#sistemas-electronicos)
-- [Sistemas mecánicos](#sistemas-mecanicos)
-- [Arquitectura de software](#arquitectura-de-software)
+1. [Estructura de carpetas](#estructura-de-carpetas)
+2. [El equipo](#el-equipo)
+3. [Nuestro robot](#nuestro-robot)
+4. [Sistemas electrónicos](#sistemas-electronicos)
+5. [Sistemas mecánicos](#sistemas-mecanicos)
+5. [Arquitectura de software](#arquitectura-de-software)
 
 ---
 
@@ -111,7 +111,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 	- ### Especificaciones mecánicas principales: <a id="sistemas-mecanicos"></a>
 
 		- **Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto).**
-		- **Peso del carro: aproximadamente 1,2Kg.**
+		- **Peso del carro: aproximadamente 1.2kg.**
 		- **Sistema de tracción: Tracción Trasera Mecánica Bifásica.**
 		- **Sistema de dirección: Geometría Ackermann.**
 	
@@ -124,6 +124,12 @@ Esta es la estructura de carpetas de nuestro repositorio:
 		* **La Ejecución Mecánica:** Un servo digital **MG996R** de alto par ($11 \text{ kg}\cdot\text{cm}$ de par) se ancla al mamparo delantero mediante un soporte de aluminio en forma de L mecanizado a medida para eliminar la deflexión estructural. El brazo del servo acciona una cremallera de dirección de doble enlace conectada a tirantes asimétricos y manguetas de dirección. Los brazos de dirección están angulados hacia el interior, apuntando al centro del eje trasero, completando el clásico "Trapezoide de Ackermann". Este diseño mecánico exacto convierte el desplazamiento lineal del servo en ángulos de rueda no lineales de forma automática.
 
 		* **El Control Digital y Calibración:** El MG996R es controlado por un tren de pulsos PWM por hardware continuo y libre de fluctuaciones (*jitter*) a $50\text{Hz}$ directamente desde el microcontrolador MegaPi. La dirección está rígidamente mapeada y calibrada a una banda muerta de software donde los $80^\circ$ representan el centro geométrico absoluto. Los puntos finales mecánicos están limitados por software entre $40^\circ$ (Máximo Izquierda) y $105^\circ$ (Máximo Derecha) para evitar que los eslabones de la dirección alcancen un bloqueo mecánico o fuercen los límites de pérdida del motor.
+
+	<div align="center">
+
+	Imagen
+
+	</div>
 
 	- ### ¿Qué es la Geometría Ackermann? 
 
@@ -192,7 +198,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 		
 	</div>
 
-	Este valor de $1.53\text{ m/s}$ representa la velocidad límite ideal de la plataforma. En condiciones reales de competencia, este vector se modula por software mediante los comandos de velocidad (`speed=90` u `80`) para absorber la fricción estática del suelo, la resistencia al avance de los rodamientos y las demandas instantáneas de corriente solicitadas por la MegaPi al gestionar el cambio de inercias.
+	Este valor de $1.53\text{ m/s}$ representa la velocidad límite ideal de la plataforma. En condiciones reales de competencia, este vector se modula por software mediante los comandos de velocidad (`speed = 90` u `80`) para absorber la fricción estática del suelo, la resistencia al avance de los rodamientos y las demandas instantáneas de corriente solicitadas por la MegaPi al gestionar el cambio de inercias.
 
 
 	- ### 3D Printed Parts:
