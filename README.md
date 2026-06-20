@@ -34,7 +34,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 
 | Carpeta | Contenido técnico | Documentación detallada |
 |---|---|---|
-| **models** | Diseños CAD en 3D| [Explora los modelos 3D](models/README.md) |
+| **models** | **Diseños 3D**<br>• Piezas del carro| [Explora los modelos 3D](models/README.md) |
 | **schemes** | **Sistemas eléctricos**<br>• Diagramas de cableado<br>• Gestión de la alimentación<br>• Esquemas de componentes| [Explora la documentación de esquemas y cableado](schemes/README.md) |
 | **src** | **Algoritmos de software**<br>• Lógica de navegación<br>• Fusión de sensores<br>• Sistemas de control | [Explora la documentación de software y algoritmos](src/README.md) |
 | **t-photos** | **Documentación del equipo**<br>• Perfiles de los miembros | [Explora la documentación de fotos del equipo](t-photos/README.md) |
