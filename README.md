@@ -230,7 +230,7 @@ Donde:
   
    					Sí, pero bajo ciertas condiciones. Sigue siendo una máquina excepcionalmente rápida y robusta para piezas de ingeniería. Sin embargo, debes tener en cuenta que la K1 original no es compatible con sistemas de impresión multicolor multihilo modernos de manera nativa (esa característica se reservó para la serie K2 con el nuevo CFS).
 
-		- **PETG vs PLA:**
+		- #### **PETG vs PLA:**
 
 		<div align="center">
 
@@ -244,7 +244,7 @@ Donde:
 	
 		</div>
 
-		- **Piezas:**
+		- #### **Piezas:**
 
 		<div align="center">
 			
@@ -253,7 +253,7 @@ Donde:
 		| **Battery Case** <br><br><img width="400" height="400" alt="BatteryCase" src="https://github.com/user-attachments/assets/a5362844-dd0e-4073-bef8-bb034bae3ad9" /> | Diseñado como una jaula de torre vertical estructurada con cuatro pilares reforzados en cada lado, integrada directamente sobre una base de montaje sólida con ojales para tornillos en las esquinas. Las paredes laterales cuentan con grandes recortes circulares para minimizar el peso del material mientras permiten un flujo de aire pasivo máximo para evitar el estrés térmico en las celdas LiPo durante altas tasas de descarga. El pilar superior incluye ojales de retención ranurados para una sujeción segura de las correas. | Centraliza la masa combinada de las celdas de la batería verticalmente a lo largo del eje geométrico central del chasis. Este diseño de jaula abierta garantiza un acceso rápido para el reemplazo de la batería entre carreras, al tiempo que proporciona una contención estructural rígida contra las fuerzas de inercia laterales durante giros a alta velocidad. |
 		| **Camera Case** <br><br><img width="400" height="400" alt="CameraCase" src="https://github.com/user-attachments/assets/7adbc42b-15eb-4677-a0a4-8d9b3c98bab3" /> | Una carcasa protectora rectangular y compacta, diseñada específicamente para encapsular el sensor IMX219 (Arducam). La sección inferior integra una robusta bisagra de pivote cilíndrico que cuenta con dientes de bloqueo externos (perfil de engranaje recto) diseñada para engranar perfectamente con una base de montaje correspondiente para el bloqueo mecánico del ángulo. | Protege el delicado PCB de la cámara de los escombros externos o de los impactos directos en la pista. La bisagra engranada entrelazada permite ajustar y bloquear mecánicamente el ángulo de inclinación de la cámara a un ángulo preciso de 15 grados hacia abajo, evitando cualquier cambio no deseado en el lente causado por las vibraciones de alta frecuencia del chasis durante la operación. |
 		| **MegaPi Case** <br><br><img width="400" height="400" alt="MegaPiBase (1)" src="https://github.com/user-attachments/assets/8db95bf2-a29a-468c-ace8-e21bb1fae9f6" /> | Una bandeja robusta de perfil bajo equipada con cuatro soportes verticales integrados de alta resistencia posicionados en las esquinas para asegurar el PCB principal. La placa base cuenta con guías de distribución internas y cortes de holgura estructural para evitar los componentes en la parte inferior de la placa, manteniendo el perfil lo más cercano posible al chasis. | Funciona como una cuna mecánica rígida para la electrónica de potencia de bajo nivel. Al elevar el PCB mediante los soportes integrados de 3 mm, evita cortocircuitos eléctricos con el chasis al tiempo que amortigua las vibraciones. El perímetro completamente abierto garantiza el acceso inmediato a los terminales de tornillo del motor, los rieles de alimentación y los puertos de sensores para el mantenimiento en campo. |
-		| **RaspberryPi Base** <br><br><img width="400" height="400" alt="RaspberryPiBase (1)" src="https://github.com/user-attachments/assets/2403b708-2e1d-4360-9504-aae68c0027d1" /> | Una plataforma modular plana de nivel medio que cuenta con cuatro soportes de esquina integrados para montar la Raspberry Pi 4 de forma segura. La sección frontal de la base integra un montaje de bisagra de doble oreja equipado con dientes de bloqueo internos que se acoplan directamente con la bisagra de la carcasa de la cámara (Camera Case). | Sirve como un puente estructural de doble propósito. Proporciona un montaje estable y elevado para la computadora de a bordo de alto nivel, asegurando una disipación óptima del calor a través de la convección natural para evitar el estrangulamiento térmico del CPU. Al mismo tiempo, su montaje engranado integrado bloquea firmemente el ensamblaje de la cámara en la parte delantera, eliminando la necesidad de componentes adicionales y ahorrando valioso espacio en el chasis. |
+		| **RaspberryPi Base** <br><br><img width="400" height="400" alt="RaspberryPiBase (1)" src="https://github.com/user-attachments/assets/2403b708-2e1d-4360-9504-aae68c0027d1" /> | Una plataforma modular plana de nivel medio que cuenta con cuatro soportes de esquina integrados para montar la Raspberry Pi 4 de forma segura. La sección frontal de la base integra un montaje de bisagra de doble oreja equipado con dientes de bloqueo internos que se acoplan directamente con la bisagra de la carcasa de la cámara (Camera Case). | Sirve como un puente estructural de doble propósito. Proporciona un montaje estable y elevado para la computadora de a bordo de alto nivel, asegurando una disipación óptima del calor a través de la convección natural para evitar el estrangulamiento térmico del CPU. Al mismo tiempo, su montaje engranado integrado bloquea firmemente el ensamblaje de la cámara en la parte delantera, eliminando la necesidad de componentes adicionales y ahorrando valioso espacio en el chasis.|
 		| **Ultrasonic Case** <br><br><img width="400" height="400" alt="UltrasonicSensorCase" src="https://github.com/user-attachments/assets/f9696c40-13e6-46b5-9712-2d7849a80005" /> | Un soporte protector compacto de doble barril hecho a medida para encapsular firmemente los cilindros del transmisor y receptor del módulo del sensor ultrasónico. Cuenta con pestañas de montaje traseras integradas y bridas inferiores para un acoplamiento mecánico continuo a las vigas transversales delanteras de la estructura del chasis. | Proporciona una carcasa rígida y aislada de vibraciones que mantiene el sensor ultrasónico perfectamente perpendicular al plano horizontal de la pista. Esta alineación precisa elimina la distorsión de la señal acústica y la dispersión de las ondas, garantizando mediciones de distancia en tiempo real altamente precisas para la detección de obstáculos y mapas de frenado de emergencia. |
 
 		</div>
@@ -342,6 +342,14 @@ Donde:
 | | | | | 6,185 mA (6.18 A) |
 
 </div>
+
+Para garantizar la estabilidad operativa de nuestro carro, hemos implementado una arquitectura de alimentación redundante mediante el uso de dos baterías independientes. Esta división es fundamental para proteger la integridad de nuestros sistemas:
+
+- Circuito de Potencia: Una batería dedicada exclusivamente a la placa MegaPi, la cual gestiona los actuadores de alta demanda (el motor de tracción RS380 y el servomotor de dirección MG996R), además de los tres sensores ultrasónicos y el botón de inicio. Este aislamiento evita que las caídas de tensión (transitorios) provocadas por los arranques repentinos o el bloqueo de los motores afecten el procesado de datos.
+
+- Circuito de Lógica y Visión: Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
+
+Esta configuración nos permite operar con la máxima seguridad, garantizando que, incluso bajo condiciones de estrés mecánico severo en la dirección y tracción, nuestro "cerebro" (Raspberry Pi) mantenga una alimentación constante y limpia para procesar la trayectoria con total precisión.
 
 - ### Diagrama de Cableado:
 
