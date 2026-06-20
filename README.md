@@ -299,9 +299,19 @@ Donde:
 
 - ### Disposición de Sensores y Justificación:
 
-	El diseño de nuestro vehículo autónomo implementa un sistema de percepción mixto compuesto por una cámara de visión artificial y tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación en la pista de la WRO. En la parte delantera, se ha colocado un sensor ultrasónico en una posición avanzada respecto a la cámara. Esta configuración permite una sincronización ideal entre ambos componentes: mientras la cámara procesa la información visual del entorno (como la detección de colores en las líneas y el reconocimiento de objetos a media distancia), el sensor ultrasónico frontal actúa como una medida de seguridad y precisión en tiempo real, midiendo con exactitud la distancia hacia los obstáculos que se encuentran inmediatamente delante del vehículo antes de ejecutar una acción de frenado o esquive.
+	El diseño de nuestro vehículo autónomo, K-O-M-R-A-D, se fundamenta en una arquitectura modular de dos niveles, optimizada para la gestión eficiente del centro de gravedad y la distribución de componentes electrónicos. Esta configuración en "pisos" permite una separación crítica entre la potencia (actuadores) y la lógica (procesamiento), facilitando tanto la estabilidad mecánica como el mantenimiento del sistema.
 
-	Por otro lado, para el control lateral y la estabilización del coche, se han integrado dos sensores ultrasónicos adicionales, situados uno a cada costado del chasis. Estos sensores laterales se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación es fundamental para el algoritmo de navegación, ya que permite medir de forma constante y simétrica la distancia hacia las paredes de la pista. Al mantener esta altura y posición central, se minimizan las perturbaciones causadas por los movimientos de balanceo del chasis, garantizando que el vehículo pueda calcular de manera óptima el centro del carril y mantener una trayectoria recta, fluida y precisa durante toda la competencia.
+	- Arquitectura del Chasis:
+	El chasis se organiza en una estructura vertical de dos niveles. En el nivel inferior se encuentra el núcleo motriz: la placa MegaPi, el motor de tracción DC y el servomotor de dirección. Esta base sólida garantiza que el tren de rodaje tenga un centro de gravedad bajo. Sobre este soporte se eleva una plataforma superior que actúa como el "cerebro" del vehículo, albergando la Raspberry Pi 4, los sistemas de gestión de energía y la base ajustable de la cámara, garantizando que el procesado de datos esté aislado de las vibraciones mecánicas generadas por la transmisión.
+
+	- Sistema de Percepción:
+ 	Esta organización estructural complementa nuestro sistema de percepción mixto, compuesto por una cámara de visión artificial y tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación:
+
+	- Distribución Frontal:
+	En la parte delantera del nivel inferior, se ha colocado un sensor ultrasónico en una posición adelantada respecto a la cámara. Esta configuración permite una sincronización ideal: mientras la cámara procesa la información visual (detección de colores y líneas), el sensor ultrasónico frontal actúa como medida de seguridad de hardware en tiempo real, midiendo con exactitud la proximidad de obstáculos antes de ejecutar maniobras de frenado o evasión.
+
+	- Distribución Lateral:
+	Para el control y la estabilización, se integraron dos sensores ultrasónicos situados a cada costado del chasis, anclados firmemente al nivel inferior. Estos se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación centralizada es fundamental: al mantener esta altura y posición respecto al centro de masas, se minimizan las perturbaciones causadas por el balanceo del chasis, permitiendo que el vehículo calcule de manera constante y simétrica la distancia hacia las paredes, manteniendo así una trayectoria recta, fluida y precisa.
 
 <div  align="center">
 
