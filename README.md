@@ -138,6 +138,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 		
 		</div>
 		**Donde:**
+		
 		* $\theta_{\text{in}}$ es el ángulo de giro de la rueda interna.*
 		* $\theta_{\text{out}}$ es el ángulo de giro de la rueda externa.*
 		* $w$ es el ancho de la vía (*track width* o distancia entre las ruedas frontales).*
