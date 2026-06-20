@@ -383,13 +383,6 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 		- Comunicaciones (Bus I2C/UART): La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
 
-	- Optimización de Gestión de Cableado
-Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos implementado:
-
-		- Gestión de Ruta (Cable Routing): Todos los cables siguen trayectorias perpendiculares al chasis, evitando las diagonales que suelen engancharse con los obstáculos.
-
-		- Sujeción Estructural: El cableado está fijado al chasis mediante bridas (zip-ties) en puntos estratégicos para absorber las vibraciones, evitando que el movimiento de la dirección o la tracción fatigue las soldaduras de los pines.
-
 <div align="center">
 
 <img width="2960" height="1625" alt="L-N-M@1 25x" src="https://github.com/user-attachments/assets/13e15df3-6f13-4d22-9dfd-a9a075e6561c" />
