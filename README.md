@@ -307,11 +307,11 @@ Donde:
 	- Sistema de Percepción:
  	Esta organización estructural complementa nuestro sistema de percepción mixto, compuesto por una cámara de visión artificial y tres sensores ultrasónicos, ubicados estratégicamente para cubrir los puntos críticos de navegación:
 
-	- Distribución Frontal:
-	En la parte delantera del nivel inferior, se ha colocado un sensor ultrasónico en una posición adelantada respecto a la cámara. Esta configuración permite una sincronización ideal: mientras la cámara procesa la información visual (detección de colores y líneas), el sensor ultrasónico frontal actúa como medida de seguridad de hardware en tiempo real, midiendo con exactitud la proximidad de obstáculos antes de ejecutar maniobras de frenado o evasión.
+		- Distribución Frontal:
+		En la parte delantera del nivel inferior, se ha colocado un sensor ultrasónico en una posición adelantada respecto a la cámara. Esta configuración permite una sincronización ideal: mientras la cámara procesa la información visual (detección de colores y líneas), el sensor ultrasónico frontal actúa como medida de seguridad de hardware en tiempo real, midiendo con exactitud la proximidad de obstáculos antes de ejecutar maniobras de frenado o evasión.
 
-	- Distribución Lateral:
-	Para el control y la estabilización, se integraron dos sensores ultrasónicos situados a cada costado del chasis, anclados firmemente al nivel inferior. Estos se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación centralizada es fundamental: al mantener esta altura y posición respecto al centro de masas, se minimizan las perturbaciones causadas por el balanceo del chasis, permitiendo que el vehículo calcule de manera constante y simétrica la distancia hacia las paredes, manteniendo así una trayectoria recta, fluida y precisa.
+		- Distribución Lateral:
+		Para el control y la estabilización, se integraron dos sensores ultrasónicos situados a cada costado del chasis, anclados firmemente al nivel inferior. Estos se encuentran posicionados longitudinalmente entre las ruedas delanteras y traseras, y alineados verticalmente a la altura del eje de las ruedas. Esta ubicación centralizada es fundamental: al mantener esta altura y posición respecto al centro de masas, se minimizan las perturbaciones causadas por el balanceo del chasis, permitiendo que el vehículo calcule de manera constante y simétrica la distancia hacia las paredes, manteniendo así una trayectoria recta, fluida y precisa.
 
 <div  align="center">
 
@@ -391,7 +391,6 @@ Donde:
 	|---|---|---|
 	| ```motorTraccion``` | ```MeMegaPiDCMotor``` | Objeto de la biblioteca Makeblock que se utiliza para regular el ciclo de trabajo del PWM y el vector de rotación del motor de tracción de corriente continua trasero. |
 	| ```servoDireccion```  | ```Servo``` | Objeto Servo estándar de Arduino que maneja el tren de pulsos PWM de hardware ($50\text{Hz}$) para controlar la posición del servomotor de dirección Ackermann delantero MG996R. |
-	| ```mpu``` | ```Adafruit_MPU6050``` | Instancia de la Unidad de Medición Inercial (IMU) I2C destinada a rastrear la aceleración angular del chasis y las tasas de guiñada (actualmente reservada para una futura integración). |
 
 	#### Descripción de métodos:
 
