@@ -70,7 +70,7 @@ LNM/
 
 Donde:
 
-- `models`: Todos los archivos 3D/CAD utilizados en el coche. [ver](./models/README.md)
+- `models`: Todos los archivos 3D utilizados en el coche. [ver](./models/README.md)
 - `schemes`: Esquema de cableado, instrucciones de montaje y descripción de los componentes. [ver](./schemes/README.md)
 - `src`: Todo el código necesario para controlar el robot. [ver](./src/README.md) 
 - `t-photos`: Fotos del equipo. [ver](./t-photos/README.md)
@@ -83,12 +83,12 @@ Donde:
   
 <div align="center">
 	
-| Foto | Nombre |
-|---|---|
-| <img width="420" height="320" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | **Cyber Cooper** |
-| <img width="420" height="320" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | **Cooper** |
-| <img width="420" height="320" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | **Halbi** |
-| <img width="420" height="320" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** |
+| Foto | Nombre | Descripción |
+|---|---|---|
+| <img width="420" height="320" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | **Cyber Cooper** | Teníamos pensado diseñar el coche desde cero, modelando e imprimiendo nuestras propias piezas en 3D, incluidos el chasis y el sistema de dirección. Aunque al principio parecía una buena idea, a medida que avanzábamos empezamos a encontrarnos con un problema tras otro, y nos dimos cuenta de que nuestro diseño actual nos acarrearía más dificultades. Al final, hicimos todo lo que pudimos dentro de las limitaciones de tiempo que teníamos, y este fue el vehículo que presentamos en la WRO 2024. |
+| <img width="420" height="320" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | **Cooper** | Desarrollamos un chasis de PLA naranja estructurado en dos niveles impreso gracias a nuestro patrocinador Fab Lab Caracas. El nivel inferior albergaba los sensores y la electrónica de bajo nivel, mientras que el superior sostenía las baterías y la Raspberry Pi 3 para optimizar el espacio. Aunque logramos un gran avance estético y funcional, sufrimos lecciones duras en pista: el peso hizo que los acoples de la transmisión trasera flexarany tuviera problemas severos de fricción mecánica entre las piezas impresas en plástico. |
+| <img width="420" height="320" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | **Halbi** | Teniendo en cuenta los recursos de los que disponíamos en ese momento, nuestra idea principal era rediseñar el Cybercooper, modificando la base y la estrategia existentes y utilizando mejores componentes electrónicos; empezamos a imprimir las nuevas piezas con material blanco y a pensar en mejores formas de montar el sistema de dirección del coche. Al final, decidimos utilizar una base prefabricada para el chasis; la razón principal fue ahorrar tiempo (y dolores de cabeza) con el diseño mecánico, lo que nos permitía dedicar más tiempo a la electrónica y la programación. |
+| <img width="420" height="320" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** |  |
 
 </div>
 
@@ -98,20 +98,18 @@ Donde:
 
 	<div align="center">
 
-	<img width="260" height="280" alt="604003001-cc130bf0-8547-48cc-847e-28dbd9029fba" src="https://github.com/user-attachments/assets/f1dc12a1-dbfc-46f3-9a21-a679aa1aa3db" />
-	<img width="260" height="280" alt="Upper-Pov" src="https://github.com/user-attachments/assets/74863cc8-5128-49cf-845e-0f087c50bcf1" />
-	<img width="260" height="280" alt="RightSide-Pov" src="https://github.com/user-attachments/assets/8b9c2020-cc18-441f-9152-c86d9a233b10" />
-	<img width="260" height="280" alt="LeftSide-Pov" src="https://github.com/user-attachments/assets/cdbabe27-6e45-4dab-98e6-e63b24ed7371" />
-	<img width="260" height="280" alt="Front-Pov" src="https://github.com/user-attachments/assets/d9b65dd5-ca97-4087-ba20-77f7cbeb4bf6" />
-	<img width="260" height="280" alt="Back-Pov" src="https://github.com/user-attachments/assets/dd1737be-1173-4cae-9229-25821f05dc22" />
+	
+	| Superior | Derecha | Izquierda | Frontal | Trasero |
+	|---|---|---|---|---|
+	| <img width="360" height="380" alt="Upper-Pov" src="https://github.com/user-attachments/assets/74863cc8-5128-49cf-845e-0f087c50bcf1" /> | <img width="360" height="380" alt="RightSide-Pov" src="https://github.com/user-attachments/assets/8b9c2020-cc18-441f-9152-c86d9a233b10" /> | <img width="360" height="380" alt="LeftSide-Pov" src="https://github.com/user-attachments/assets/cdbabe27-6e45-4dab-98e6-e63b24ed7371" /> | <img width="360" height="380" alt="Front-Pov" src="https://github.com/user-attachments/assets/d9b65dd5-ca97-4087-ba20-77f7cbeb4bf6" /> | <img width="360" height="380" alt="Back-Pov" src="https://github.com/user-attachments/assets/dd1737be-1173-4cae-9229-25821f05dc22" /> |
 
     </div>
 
 	- ### Especificaciones mecánicas principales:
 
 		- **Dimensiones totales: 24.4 cm (largo) × 15.4 cm (ancho) × 15.9 cm (alto).**
-		- **Masa total: aproximadamente 1,2Kg.**
-		- **Configuración de la tracción: Tracción Trasera Mecánica Bifásica.**
+		- **Peso del carro: aproximadamente 1,2Kg.**
+		- **Sistema de tracción: Tracción Trasera Mecánica Bifásica.**
 		- **Sistema de dirección: Geometría Ackermann.**
 	
 	- ### Mecanismo de Dirección Ackermann
@@ -168,7 +166,7 @@ Donde:
 
 	    * **Voltaje Nominal:** $12\text{V}$ (Operando a un voltaje nominal de celda de $11.1\text{V}$ mediante una batería LiPo 3S para asegurar la estabilidad térmica).
    
- 		* **Corriente de Vacío (No-load):** $0.4\text{A}$ | **Corriente de Arranque/Pérdida (Stall):** $4.5\text{A}$ de protección en el driver.
+ 		* **Corriente de Vacío (No-load):** $0.3\text{A}$ | **Corriente de Arranque/Pérdida (Stall):** $3\text{A}$ de protección en el driver.
    
  		* **Velocidad de Rotación de Fábrica:** $15000\text{ RPM}$ en el núcleo del motor, reducida internamente y ajustada finalmente por el engranaje externo para entregar una velocidad final estimada de transferencia de aprox. $450\text{ RPM}$ en el eje de la rueda.
 
