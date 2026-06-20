@@ -403,7 +403,7 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 
   	### MegaPiController.ino (class Carro)
 
-	**Dependencies**
+	**Dependencias**
 
 	- ```MeMegaPi.h```
 
@@ -413,7 +413,7 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 
 	- ```Wire.h```
 
-	#### Description of the constructor method
+	#### Descripción del método constructor
 
 	```
 	Carro() : motorTraccion(PORT4B) {}
@@ -434,10 +434,10 @@ Para evitar los fallos mecánicos experimentados en proyectos anteriores, hemos 
 	|---|---|---|---|
 	| ```inicializar()``` | Ninguno | void | Configura los recursos de hardware: activa la resistencia de pull-up interna para el botón de inicio, acopla el servo de dirección al pin A7 y fuerza su alineación física al centro geométrico (90°). |
 	| ```botonPresionado()```	| Ninguno | bool | Realiza una lectura digital en el botón de ejecución principal (A9). Devuelve true si el botón está físicamente presionado (estado LOW debido a la resistencia pull-up interna). |
-	| ```obtenerDistancia()``` | trig: int, echo: int	long | Genera un pulso de disparo en bruto en los pines del sensor ultrasónico especificados y evalúa el tiempo de retroalimentación del eco. Devuelve automáticamente un umbral seguro de respaldo de 400 cm si está fuera de rango.|
+	| ```obtenerDistancia()``` | trig: int, echo: int long | Retorna una tupla conteniendo las lecturas actuales de los sensores ultrasónicos (Frontal, Izquierdo, Derecho) en centímetros, actualizadas por el hilo de telemetría en segundo plano.
 	| ```getDistanciaFront()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el conjunto del sensor ultrasónico delantero (sensorF). |
 	| ```getDistanciaLeft()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el sensor ultrasónico de orientación izquierdo (sensorL). |
-	| ```getDistanciaRight()``` | Ninguno	| long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el sensor ultrasónico de orientación derecho (sensorD). |
+	| ```getDistanciaRight()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el sensor ultrasónico de orientación derecho (sensorD). |
 	| ```avanzar()``` | velocidad: byte | void | Mueve el tren motriz trasero hacia adelante a la intensidad PWM en bruto especificada e indicada por la interfaz del controlador de alto nivel. |
 	| ```retroceder()``` | angulo: byte, velocidad: byte | void | Restablece momentáneamente las ruedas físicas a la alineación central, ajusta el servo de dirección a un vector de recuperación dado y asume la salida inversa del motor DC (-velocidad). |
 	| ```girarIzquierda()``` | angulo: byte, velocidad: byte | void | Aplica el ángulo de dirección entrante al servo MG996R hacia el extremo físico izquierdo y proporciona tracción hacia adelante para navegar en curvas cerradas. |
