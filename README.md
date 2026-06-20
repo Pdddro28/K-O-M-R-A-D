@@ -113,7 +113,7 @@ Donde:
 	<div align="center">
 	
 	| Superior | Derecha | Izquierda | Frontal | Trasero |
-	|----|----|----|----|----|
+	|------|------|------|------|------|
 	| <img width="1360" height="1380" alt="Upper-Pov" src="https://github.com/user-attachments/assets/74863cc8-5128-49cf-845e-0f087c50bcf1" /> | <img width="1360" height="1380" alt="RightSide-Pov" src="https://github.com/user-attachments/assets/8b9c2020-cc18-441f-9152-c86d9a233b10" /> | <img width="1360" height="1380" alt="LeftSide-Pov" src="https://github.com/user-attachments/assets/cdbabe27-6e45-4dab-98e6-e63b24ed7371" /> | <img width="1360" height="1380" alt="Front-Pov" src="https://github.com/user-attachments/assets/d9b65dd5-ca97-4087-ba20-77f7cbeb4bf6" /> | <img width="1360" height="1380" alt="Back-Pov" src="https://github.com/user-attachments/assets/dd1737be-1173-4cae-9229-25821f05dc22" /> |
 
     </div>
