@@ -601,7 +601,7 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 		</div>
 
-		- **Estrategia:** La estrategia diseñada para abordar el primer reto (Open Challenge) se fundamenta en un sistema de navegación rápido, estable y de alta predictibilidad. A diferencia de la ronda de obstáculos, aquí el objetivo es maximizar la velocidad (VELOCIDAD_BASE = 130) manteniendo el chasis en el centro geométrico del carril y contando las vueltas de forma infalible.
+		- **Estrategia:** La estrategia diseñada para abordar el primer reto (Open Challenge) se fundamenta en un sistema de navegación rápido, estable y de alta predictibilidad. A diferencia de la ronda de obstáculos, aquí el objetivo es maximizar la velocidad (`VELOCIDAD_BASE = 130`) manteniendo el chasis en el centro geométrico del carril y contando las vueltas de forma infalible.
 
 		El software está construido sobre un enfoque de "Sensor Fusión" (cámara + ultrasonidos) y se rige por tres pilares fundamentales:
 
@@ -614,7 +614,7 @@ El constructor establece un canal de comunicación a través de puerto serial po
 	- **ROIS:** Para optimizar la carga de la CPU y enfocarse únicamente en los límites de la pista, la visión se restringió a dos Regiones de Interés laterales simétricas: `roi2 (0, 100, 320, 150)` para la izquierda y `roi (320, 100, 640, 150)` para la derecha. Estas ventanas capturan exclusivamente el suelo negro de la pista, ignorando el horizonte.
 
 		Adicionalmente, el lazo de control se ajustó con un PID visual suave y amortiguado:
-		- **PID de Línea Base:** (Kp = 0.015, Kd = 0.005). El Kp bajo evita giros bruscos, mientras que el Kd mínimo estabiliza la trayectoria. Para complementar este PID, se introdujo un `UMBRAL_PIXELES_MUERTO = 150` y una `TOLERANCIA_ANGULO = 3`. Esto significa que si el error diferencial es minúsculo, el software fuerza un ángulo de dirección perfectamente recto (80°), eliminando las oscilaciones mecánicas parasitarias.
+		- **PID de Línea Base:** (`Kp = 0.015`, `Kd = 0.005`). El Kp bajo evita giros bruscos, mientras que el Kd mínimo estabiliza la trayectoria. Para complementar este PID, se introdujo un `UMBRAL_PIXELES_MUERTO = 150` y una `TOLERANCIA_ANGULO = 3`. Esto significa que si el error diferencial es minúsculo, el software fuerza un ángulo de dirección perfectamente recto (80°), eliminando las oscilaciones mecánicas parasitarias.
 
 		- **Implementación de la Máquina de Estados:** Durante la carrera abierta, el robot alterna dinámicamente entre tres estados de operación:
 
