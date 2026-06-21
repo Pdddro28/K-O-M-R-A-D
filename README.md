@@ -589,15 +589,19 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 	De manera más específica, los problemas de espaciamiento y sus respectivas soluciones fueron los siguientes:
 
-	* **Espacio ocupado por las baterías:** * *Problema:* Ocupaban demasiado volumen en el chasis y no dejaban espacio para ubicar los componentes de forma cómoda.
+	- **Espacio ocupado por las baterías:**
 
-    	* *Solución:* Se les diseñó una base a medida para ubicarlas en el centro del robot y, sobre esta estructura, se construyó el piso superior.
+		- * *Problema:* Ocupaban demasiado volumen en el chasis y no dejaban espacio para ubicar los componentes de forma cómoda.
+
+    	- *Solución:* Se les diseñó una base a medida para ubicarlas en el centro del robot y, sobre esta estructura, se construyó el piso superior.
        
-	* **Anclaje de sensores de ultrasonido:** * *Problema:* No tenían puntos previstos para anclarlos al chasis original.
+	- **Anclaje de sensores de ultrasonido:**
+   
+		- *Problema:* No tenían puntos previstos para anclarlos al chasis original.
 
-    * *Solución:* Se diseñaron 3 bases impresas que van adjuntas a 3 caras del chasis.
+    	- *Solución:* Se diseñaron 3 bases impresas que van adjuntas a 3 caras del chasis.
       
-    * *Nota técnica:* Esta solución no fue del todo ideal, ya que estas bases sobresalen un poco de la estructura, causando atascamientos mecánicos cuando el vehículo pasa muy cerca de una esquina.
+    - *Nota técnica:* Esta solución no fue del todo ideal, ya que estas bases sobresalen un poco de la estructura, causando atascamientos mecánicos cuando el vehículo pasa muy cerca de una esquina.
       
 	* **Ubicación de la cámara y controlador:** * *Problema:* No había lugar físico para situar la cámara ni la placa de procesamiento.
   
