@@ -465,7 +465,7 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 	#### Descripción del atributo
 
-	| Atributo | Tipo de datos | Funcionalidad|
+	| Atributo | Tipo de dato | Funcionalidad|
 	|---|---|---|
 	| ```motorTraccion``` | ```MeMegaPiDCMotor``` | Objeto de la biblioteca Makeblock que se utiliza para regular el ciclo de trabajo del PWM y el vector de rotación del motor de tracción de corriente continua trasero. |
 	| ```servoDireccion```  | ```Servo``` | Objeto Servo estándar de Arduino que maneja el tren de pulsos PWM de hardware ($50\text{Hz}$) para controlar la posición del servomotor de dirección Ackermann delantero MG996R. |
