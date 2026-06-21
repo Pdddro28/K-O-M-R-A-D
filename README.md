@@ -310,42 +310,48 @@ Esta es la estructura de carpetas de nuestro repositorio:
 | **ArduCam IMX219 8MP** <div  align="center"> ![Encorder](https://cdn.arducam.com/wp-content/uploads/2022/04/Arducam_IMX219_MIPI_Pi_B0392-8.jpg) </div> | La ArduCam IMX219 de 8MP es un módulo de cámara compacto basado en el sensor Sony IMX219, el mismo estándar de la Raspberry Pi Camera v2, que equilibra resolución y rendimiento para proyectos de visión artificial y robótica. Se conecta mediante la interfaz CSI (Camera Serial Interface), lo que garantiza una transferencia de datos a alta velocidad y con baja latencia hacia computadoras como Raspberry Pi o Jetson Nano. Este diseño la convierte en una solución eficiente y de fácil integración para sistemas embebidos que requieren procesamiento de imagen en tiempo real. |
 | **Buck Converter 3A 15W Type-C** <div  align="center"> ![camera](https://m.media-amazon.com/images/I/61pOfxNxUnL._AC_UF1000,1000_QL80_.jpg) </div> | El módulo **convertidor buck tipo C de 3A y 15W** es un regulador reductor de CC-CC que transforma voltajes de entrada elevados en una salida baja y estable con una eficiencia del 85 al 95%. En este proyecto, se utilizó para conectar la batería **LiPo Zeee 3S** (de hasta 12.6V) a la **Raspberry Pi 4B**, la cual exige un suministro constante de **5V y hasta 3A**. Debido a que el voltaje directo de la batería dañaría la placa, el convertidor reduce y regula la tensión de manera segura, protegiendo los componentes contra sobrevoltajes, minimizando las pérdidas de energía por calor y garantizando un rendimiento estable del sistema a medida que la batería se descarga. |
 | **Ultrasonic Sensor HC-SR04** <div  align="center"> <img width="466" height="466" alt="61CXJgLZwUL _SX466_" src="https://github.com/user-attachments/assets/1345b129-76f7-4f39-8ec2-b839398ea61b" /> </div> | El sensor ultrasónico HC-SR04 es un dispositivo compacto de medición de distancia que opera bajo el principio del eco de sonar, ideal para la evasión de obstáculos en robótica. Está equipado con dos transductores que emiten una ráfaga de ondas de alta frecuencia ($40\text{ kHz}$) y reciben su rebote tras chocar con un objeto. Al calcular con precisión el tiempo que tarda la señal en ir y venir, el módulo determina la distancia lineal en un rango efectivo de 2 a 400 centímetros con una precisión de 3 milímetros, proporcionando datos en tiempo real cruciales para la navegación del vehículo.|
+| **Vl53l0x-v2 Sensor** <div  align="center"> <img width="525" height="478" alt="D_NQ_NP_2X_916413-MLV51649751397_092022-F" src="https://github.com/user-attachments/assets/c3c39671-3595-4e15-aefc-0836d1a81e33" /> </div> | Es un sensor de distancia láser de Tiempo de Vuelo (ToF) que mide distancias de hasta 2 metros con precisión milimétrica mediante la emisión de un pulso infrarrojo invisible de 940 nm. A diferencia de los sensores tradicionales, calcula el tiempo exacto que tarda la luz en rebotar sobre el objeto, lo que le permite ofrecer lecturas estables e independientes del color, reflejo o textura de la superficie. Cuenta con interfaz de comunicación I²C, es compatible con voltajes de 3.3V y 5V, y es ideal para proyectos de robótica, detección de presencia y evitación de obstáculos con tarjetas como Arduino o ESP32 |
+
 
 </div>
 
-- ### Disposición de Componentes y Justificación:
+- ### **Disposición de Componentes y Justificación:**
 
 	El diseño de nuestro vehículo autónomo se fundamenta en una arquitectura modular de tres niveles verticales, optimizada para la gestión eficiente del centro de gravedad, el balance de masas y la mitigación de interferencias electromagnéticas y mecánicas. Esta configuración jerárquica por "pisos" permite aislar los elementos mecánicos de potencia frente a los módulos lógicos de procesamiento y visión artificial.
 
-	- Arquitectura del Chasis por Niveles:
+	- **Arquitectura del Chasis por Niveles:**
 
-	- 1st Level (Planta Baja):
-	Constituye la base estructural y el tren de rodaje del vehículo. En este nivel se ubica el Motor de Tracción RS380, el mecanismo de dirección asistido por el servomotor, y los tres sensores ultrasónicos HC-SR04 (Front-US y los sensores laterales Left-US / Right-US).
+	- **1st Level (Planta Baja):**
+	Constituye la base estructural y el tren de rodaje del vehículo. En este nivel se ubica el Motor de Tracción RS380, el mecanismo de dirección asistido por el servomotor, los tres sensores ultrasónicos HC-SR04 (Front-US y los sensores laterales Left-US / Right-US), y dos sensores de distancia láser de tiempo de vuelo (ToF) VL53L0X-V2 ubicados a los flancos del sensor ultrasónico central.
 
-		- Justificación Técnica: Colocar los actuadores más pesados y el sistema de tracción en la planta baja garantiza un centro de gravedad lo más cercano posible al suelo, proporcionando estabilidad cinemática y tracción máxima en las ruedas traseras durante aceleraciones bruscas.
+		- *Justificación Técnica:* Colocar los actuadores más pesados y el sistema de tracción en la planta baja garantiza un centro de gravedad lo más cercano posible al suelo, proporcionando estabilidad cinemática y tracción máxima en las ruedas traseras durante aceleraciones bruscas. La integración de los sensores ToF en esta base amplía la resolución de detección exactamente a la altura de impacto físico de los obstáculos.
 
-	- 2nd Level (Planta Intermedia):
-Situado inmediatamente arriba de la transmisión, este nivel alberga el núcleo de control de bajo nivel y la distribución eléctrica principal. Aquí se encuentran fijadas la placa de expansión Makeblock MegaPi, el Buck Converter (3A 15W) y la jaula vertical contenedora de las Baterías LiPo.
+	- **2nd Level (Planta Intermedia):**
+	Situado inmediatamente arriba de la transmisión, este nivel alberga el núcleo de control de bajo nivel y la distribución eléctrica principal. Aquí se encuentran fijadas la placa de expansión Makeblock MegaPi, el Buck Converter (3A 15W) y la jaula vertical contenedora de las Baterías LiPo.
 
-		- Justificación Técnica: La MegaPi actúa como puente físico intermedio para acortar las trayectorias del cableado hacia los motores del primer nivel. Al centralizar las baterías pesadas en este piso medio y alineadas horizontalmente con el centro de masa, se reducen los momentos de inercia polares, evitando subvirajes o sobrevirajes en las curvas cerradas de la pista. El Buck Converter se sitúa estratégicamente al lado de la MegaPi para reducir y estabilizar el voltaje proveniente de las celdas antes de enviarlo al nivel superior.
+		- *Justificación Técnica:* La MegaPi actúa como puente físico intermedio para acortar las trayectorias del cableado hacia los motores del primer nivel. Al centralizar las baterías pesadas en este piso medio y alineadas horizontalmente con el centro de masa, se reducen los momentos de inercia polares, evitando subvirajes o sobrevirajes en las curvas cerradas de la pista. El Buck Converter se sitúa estratégicamente al lado de la MegaPi para reducir y estabilizar el voltaje proveniente de las celdas antes de enviarlo al nivel superior.
 
-	- 3rd Level (Planta Superior):
+	- **3rd Level (Planta Superior):**
 	Corresponde a la cúspide de la estructura, dedicada de forma exclusiva al procesamiento de alto nivel y la percepción geométrica. Contiene la computadora a bordo Raspberry Pi 4 B (equipada con su disipador térmico y ventilador activo) y el conjunto elevado de la cámara de visión artificial Arducam IMX219.
 
-		- Justificación Técnica: Elevar la Raspberry Pi 4 la aísla por completo de las vibraciones mecánicas directas del motor de tracción y de los bucles de corriente del chasis inferior. Asimismo, la posición superior favorece la convección térmica del ventilador para evitar el estrangulamiento térmico (thermal throttling) del CPU durante la ejecución de los algoritmos de detección.
+		- *Justificación Técnica:* Elevar la Raspberry Pi 4 la aísla por completo de las vibraciones mecánicas directas del motor de tracción y de los bucles de corriente del chasis inferior. Asimismo, la posición superior favorece la convección térmica del ventilador para evitar el estrangulamiento térmico (thermal throttling) del CPU durante la ejecución de los algoritmos de detección.
 
-	- Sistema de Percepción y Orientación Espacial:
+	**Sistema de Percepción y Orientación Espacial:**
+	Esta distribución en tres dimensiones complementa la estrategia de nuestro sistema de percepción mixto (Visión + Acústica + Óptica Infrarroja), asegurando zonas de cobertura óptimas sin interferencias mutuas:
 
 	Esta distribución en tres dimensiones complementa la estrategia de nuestro sistema de percepción mixto, asegurando zonas de cobertura óptimas sin interferencias mutuas:
 
-	- Distribución de Visión Artificial (3rd Level):
+	- **Distribución de Visión Artificial (3rd Level):**
 	La cámara Arducam IMX219 se posiciona en el punto más alto y adelantado del tercer nivel, sostenida por un brazo articulado impreso en 3D con un ángulo de inclinación fijo hacia abajo de 15 grados. Esta elevación es crítica para expandir la línea de visión del lente de 175°, permitiendo al algoritmo abarcar una Región de Interés (ROI) más amplia de la pista para identificar los códigos de color (semáforos) y líneas guía sin que la propia estructura del carro obstruya el encuadre.
 
-	- Distribución Ultrasónica Frontal (1st Level):
-	El sensor ultrasónico delantero (Front-US) se monta directamente sobre la placa base del chasis en una posición baja y avanzada, justo por debajo de la línea de proyección de la cámara. Esta sincronización geométrica permite que, mientras la cámara procesa las decisiones lógicas en el nivel superior, el ultrasonido actúe en el nivel inferior como un bypass de seguridad de hardware en tiempo real, detectando la presencia física de obstáculos de forma matemática y directa para activar frenados de emergencia.
+	- **Distribución Ultrasónica Frontal (1st Level):**
+	El sensor ultrasónico delantero (Front-US) se monta directamente sobre la placa base del chasis en una posición baja y avanzada, justo por debajo de la línea de proyección de la cámara. Actúa en el nivel inferior como un bypass de seguridad de hardware en tiempo real, detectando la presencia física de paredes de forma matemática para activar frenados de emergencia.
 
-	- Distribución Ultrasónica Lateral (1st Level):
-	Los dos sensores ultrasónicos de flanco (Left-US y Right-US) están anclados rígidamente a los costados izquierdo y derecho del primer nivel, posicionados de forma longitudinal entre ambos ejes de ruedas y alineados verticalmente a la altura exacta de los neumáticos. Ubicarlos en el piso bajo, simétricos respecto al centro de masa, minimiza drásticamente las lecturas falsas causadas por el cabeceo (frenada) o el balanceo (giro) del chasis. Esto asegura que el algoritmo de estabilización reciba datos limpios y constantes de la distancia real hacia las paredes de la pista para mantener una trayectoria perfectamente recta.
+	- **Distribución Láser de Precisión ToF (1st Level, Flanqueo Frontal):**
+	Ubicados a los lados del sensor ultrasónico central, los sensores láser VL53L0X-V2 operan apuntando paralelamente a la pista. Mientras que el ultrasonido emite un cono acústico disperso ideal para la detección masiva del circuito cerrado, los haces infrarrojos de los ToF actúan como perfiladores direccionales de alta resolución. Esta configuración garantiza que los obstáculos cilíndricos estrechos sean detectados con precisión milimétrica, blindando los puntos ciegos laterales del ultrasonido a corta distancia.
+
+	- **Distribución Ultrasónica Lateral (1st Level):**
+	Los dos sensores ultrasónicos de flanco (Left-US y Right-US) están anclados rígidamente a los costados izquierdo y derecho del primer nivel, posicionados de forma longitudinal entre ambos ejes de ruedas y alineados verticalmente a la altura exacta de los neumáticos. Ubicarlos en el piso bajo minimiza drásticamente las lecturas falsas causadas por el cabeceo (frenada) o el balanceo (giro) del chasis. Esto asegura que el algoritmo de estabilización reciba datos limpios de la distancia hacia los muros para mantener una trayectoria recta.
 
 <div align="center">
 
@@ -359,6 +365,12 @@ Situado inmediatamente arriba de la transmisión, este nivel alberga el núcleo 
 
 	El verdadero punto fuerte de esta batería radica en su tasa de descarga de 50C, lo que significa que es capaz de entregar picos de corriente elevados de forma segura cuando el acelerador lo demanda, garantizando aceleraciones explosivas y una respuesta inmediata a los mandos. Fabricada con materiales de alta calidad y una baja resistencia interna, la Zeee 3S destaca por su ciclo de vida prolongado y su estabilidad térmica durante un uso intensivo. Viene equipada habitualmente con conectores de alta conductividad (como el Deans T o XT60) y un conector de equilibrado JST-XH, lo que facilita tanto una carga segura celda por celda como una compatibilidad directa con la mayoría de los cargadores inteligentes del mercado.
 
+<div align="center">
+
+<img width="698" height="718" alt="Captura de pantalla 2026-06-21 185733" src="https://github.com/user-attachments/assets/165be46b-0187-4bd8-9dd5-e95a580baaea" />
+
+</div>
+
 - ### Presupuesto de Energía:
 
 	Para garantizar la estabilidad operativa de nuestro carro, hemos implementado una arquitectura de alimentación redundante mediante el uso de dos baterías independientes. Esta división es fundamental para proteger la integridad de nuestros sistemas:
@@ -367,50 +379,44 @@ Situado inmediatamente arriba de la transmisión, este nivel alberga el núcleo 
 
 	- **Circuito de Lógica y Visión:** Una segunda batería independiente alimenta exclusivamente a la Raspberry Pi 4 y la cámara Arducam. Esta separación es crítica; al no compartir el bus de energía con los motores, eliminamos el riesgo de interferencia electromagnética (EMI) y picos de voltaje que podrían inducir ruido en la señal de video o, en el peor de los casos, provocar reinicios inesperados del sistema de visión artificial durante la competencia.
 
-Esta configuración nos permite operar con la máxima seguridad, garantizando que, incluso bajo condiciones de estrés mecánico severo en la dirección y tracción, nuestro "cerebro" (Raspberry Pi) mantenga una alimentación constante y limpia para procesar la trayectoria con total precisión.
+	Esta configuración nos permite operar con la máxima seguridad, garantizando que, incluso bajo condiciones de estrés mecánico severo en la dirección y tracción, nuestro "cerebro" (Raspberry Pi) mantenga una alimentación constante y limpia para procesar la trayectoria con total precisión.
 
 <div align="center">
 
 | Componentes | Cantidad | Voltaje de Operación | Consumo Nominal/Pico | Consumo Total |
 |---|---|---|---|---|
 | **Raspberry Pi 4 B** | 1 | 5.0 V | 600 mA / 1250 mA | 1250 mA |
-| **Arducam 8MP IMX219 (175°)** | 1 | 3.3 V (vía RPi) | 250 mA | 250 mA |
+| **Arducam 8MP IMX219 (175°)** | 1 | 3.3 V | 250 mA | 250 mA |
 | **Makeblock MegaPi (Lógica)** | 1 | 5.0 V | 100 mA | 100 mA |
-| **Sensores Ultrasonido HC-SR04** | 3 | 5.0 V | 45 mA (15 mA c/u) | 45 mA |
+| **Sensores Ultrasonido HC-SR04** | 3 | 5.0 V | 15 mA c/u | 45 mA |
 | **Módulo Sensor de Colisión (Crash)** | 1 | 5.0 V | 10 mA | 10 mA |
 | **Módulo Semáforo LED (Traffic Light)** | 1 | 5.0 V | 30 mA | 30 mA |
 | **Servomotor de Dirección MG996R** | 1 | 5.0 V | 500 mA / 2500 mA | 2500 mA |
-| **Motor de Tracción RS380** | 1 | 6.0 V (vía Driver) | 1200 mA | 2000 mA |
-| Total | | | 2,735 mA (2.73 A) mA | 6,185 mA (6.18 A) |
+| **Motor de Tracción RS380** | 1 | 11.0 V | 2000 mA | 2000 mA |
+| **Vl53l0x-v2 Sensor** | 2 | 5V | 10.0 mA | 20 mA |
+| Total | | | 4.175 mA (4.17 A) mA | 6.205 mA (6.2 A) |
 
 </div>
-
-Conclusión del Presupuesto
-El consumo total del sistema alcanza los 6.18 A en condiciones de carga máxima (stall). La arquitectura de doble batería es vital por dos razones:
-
-- Protección de la Lógica: El circuito de Lógica (1.50 A) opera aislado de los transitorios electromagnéticos de los motores.
-
-- Capacidad de Respuesta: El circuito de Potencia (4.68 A) está dimensionado para soportar los picos de corriente del servo y el motor de tracción simultáneamente. Esta división asegura que, aunque los actuadores alcancen su máximo esfuerzo mecánico, la Raspberry Pi mantenga un voltaje estable, evitando reinicios críticos durante la competencia.
 
 - ### Diagrama de Cableado:
 
 	La arquitectura eléctrica de nuestro carro ha sido diseñada bajo un principio de aislamiento de buses para garantizar la fiabilidad del sistema en un entorno de alta vibración y demanda de corriente. Como se observa en nuestro diagrama de conexiones, el cableado se divide en dos dominios claramente diferenciados:
 
-	- Dominio de Potencia (Bus de Fuerza)
+	- **Dominio de Potencia (Bus de Fuerza)**
 Alimentado por la batería dedicada a actuadores, este bus de alta corriente alimenta directamente la MegaPi para los motores y el servomotor:
 
-		- MegaPi: Actúa como el centro de distribución de energía principal. Recibe el voltaje directo de la batería de fuerza (7.2V - 12V) para alimentar el motor de tracción RS380 y el servomotor de dirección MG996R en sus puertos dedicados.
+		- **MegaPi:** Actúa como el centro de distribución de energía principal. Recibe el voltaje directo de la batería de fuerza (7.2V - 12V) para alimentar el motor de tracción RS380 y el servomotor de dirección MG996R en sus puertos dedicados.
 
-		- Sistema de Tracción y Dirección: El motor RS380 y el servo MG996R están conectados directamente a los puertos de alta potencia de la MegaPi. Hemos utilizado cables de calibre superior para minimizar la caída de tensión (voltaje drop) durante las maniobras de stall (esfuerzo máximo).
+		- **Sistema de Tracción y Dirección:** El motor RS380 y el servo MG996R están conectados directamente a los puertos de alta potencia de la MegaPi. Hemos utilizado cables de calibre superior para minimizar la caída de tensión (voltaje drop) durante las maniobras de stall (esfuerzo máximo).
 
-		- Regulación y Estabilización de Voltaje (Buck Converter): Se ha integrado un Buck Converter de 3A y 15W con salida Type-C. Este módulo step-down se encarga de reducir de forma eficiente el voltaje de la batería y estabilizarlo a unos 5.0V constantes. Su función es actuar como una barrera de protección frente a los picos de consumo y el ruido eléctrico residual generados por los motores, asegurando un suministro de energía limpio y seguro para los componentes lógicos sensibles y los sensores ultrasónicos, evitando lecturas erráticas.
+		- **Regulación y Estabilización de Voltaje (Buck Converter):** Se ha integrado un Buck Converter de 3A y 15W con salida Type-C. Este módulo step-down se encarga de reducir de forma eficiente el voltaje de la batería y estabilizarlo a unos 5.0V constantes. Su función es actuar como una barrera de protección frente a los picos de consumo y el ruido eléctrico residual generados por los motores, asegurando un suministro de energía limpio y seguro para los componentes lógicos sensibles y los sensores ultrasónicos, evitando lecturas erráticas.
 
-	- Dominio de Lógica (Bus de Control)
+	- **Dominio de Lógica (Bus de Control)**
 Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamente independiente:
 
-		- Procesamiento de Datos: La Raspberry Pi 4 B alimenta la cámara Arducam a través del puerto CSI, asegurando un flujo de datos de baja latencia y alta integridad.
+	  	- **Procesamiento de Datos:** La Raspberry Pi 4 B alimenta la cámara Arducam a través del puerto CSI, asegurando un flujo de datos de baja latencia y alta integridad.
 
-		- Comunicaciones (Bus I2C/UART): La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
+		- **Comunicaciones (Bus I2C/UART):** La comunicación entre la Raspberry Pi y la MegaPi se realiza mediante un puente serial (USB/UART) debidamente blindado. Para evitar "ground loops" (bucles de tierra) que son la principal causa de fallos en robots autónomos, hemos unificado las tierras (GND) solo en el punto de entrada de la MegaPi, manteniendo el resto del cableado de sensores con rutas cortas y directas para minimizar la captación de EMI (Interferencia Electromagnética).
 
 <div align="center">
 
@@ -426,40 +432,38 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 	Esta herramienta nos permite calibrar en tiempo real los umbrales matemáticos de los colores de la pista (bloques rojos/verdes, líneas azules/naranjas y paredes negras) y exportar estos parámetros directamente al cerebro del robot.
 
-	1. Arquitectura de Procesamiento de Imagen (Pipeline)
+	1. **Arquitectura de Procesamiento de Imagen (Pipeline)**
 	A diferencia de los enfoques básicos que usan el espacio de color RGB o HSV, nuestro script transforma el flujo de video al espacio de color LAB (CIE Lab)*. Esta decisión técnica es crucial porque el espacio LAB aísla completamente la luminosidad (Canal L) de la información pura del color (Canales A y B). El proceso interno antes de mostrar la imagen sigue estos pasos:
 
-		- Extracción y Ecualización (CLAHE): Tras convertir la imagen a LAB, separamos el canal de luminosidad (L) y le aplicamos un algoritmo CLAHE (Contrast Limited Adaptive Histogram Equalization). Esto redistribuye el contraste localmente, mitigando las sombras duras o los destellos en la pista sin alterar el color real de los objetos.
+		- **Extracción y Ecualización (CLAHE):** Tras convertir la imagen a LAB, separamos el canal de luminosidad (L) y le aplicamos un algoritmo CLAHE (Contrast Limited Adaptive Histogram Equalization). Esto redistribuye el contraste localmente, mitigando las sombras duras o los destellos en la pista sin alterar el color real de los objetos.
 
-		- Filtro de Suavizado (Gaussian Blur): Se aplica un desenfoque gaussiano de 7x7 para difuminar el ruido de alta frecuencia del sensor de la cámara, evitando píxeles "muertos" o artefactos.
+		- **Filtro de Suavizado (Gaussian Blur):** Se aplica un desenfoque gaussiano de 7x7 para difuminar el ruido de alta frecuencia del sensor de la cámara, evitando píxeles "muertos" o artefactos.
 
-		- Coperaciones Morfológicas: Una vez que el usuario define los límites del color con los deslizadores, el script genera una máscara binaria (cv.inRange). Para limpiarla, aplicamos "Erosión" (elimina pequeños píxeles ruidosos o falsos positivos) seguida de "Dilatación" (restaura el tamaño original del objeto detectado).
+		- **Coperaciones Morfológicas:** Una vez que el usuario define los límites del color con los deslizadores, el script genera una máscara binaria (cv.inRange). Para limpiarla, aplicamos "Erosión" (elimina pequeños píxeles ruidosos o falsos positivos) seguida de "Dilatación" (restaura el tamaño original del objeto detectado).
 
-	2. Interfaz de Usuario y Flujo de Trabajo (GUI)
+	2. **Interfaz de Usuario y Flujo de Trabajo (GUI)**
 	La interfaz gráfica ha sido construida con CustomTkinter para ofrecer un entorno oscuro de bajo contraste que no fatigue la vista durante las largas sesiones de calibración en los pits. El flujo de uso es el siguiente:
 
-		- Selección de Presets: El operador inicia seleccionando un color base en el menú desplegable (ej. RED, GREEN, BLACK). Esto carga valores predeterminados seguros (COLOR_PRESETS).
+		- **Selección de Presets:** El operador inicia seleccionando un color base en el menú desplegable (ej. RED, GREEN, BLACK). Esto carga valores predeterminados seguros (COLOR_PRESETS).
 
-		- Ajuste Fino mediante Deslizadores (Sliders): * L-min / L-max: Se ajusta la tolerancia a las sombras y a los brillos.
+		- **Ajuste Fino mediante Deslizadores (Sliders):** L-min / L-max: Se ajusta la tolerancia a las sombras y a los brillos.
 
-			- A-min / A-max: Se ajusta el espectro del eje Verde-Rojo.
+			- **A-min / A-max: Se ajusta el espectro del eje Verde-Rojo.**
 
-			- B-min / B-max: Se ajusta el espectro del eje Azul-Amarillo.
+			- **B-min / B-max: Se ajusta el espectro del eje Azul-Amarillo.**
   
 		*(Nota: Se utiliza la escala adaptada de OpenCV de 0 a 255 para todos los canales).*
 
-		- Telemetría Visual Combinada: La pantalla principal consolida tres vistas en tiempo real (960x240 píxeles):
+		- **Telemetría Visual Combinada:** La pantalla principal consolida tres vistas en tiempo real (960x240 píxeles):
 
-			- Izquierda: El video original crudo.
+			- **Izquierda:** El video original crudo.
 
-			- Centro: La máscara binaria (blanco sobre negro) que muestra exactamente lo que la computadora "ve" como un área válida.
+			- **Centro:** La máscara binaria (blanco sobre negro) que muestra exactamente lo que la computadora "ve" como un área válida.
 
-			- Derecha: El resultado aislado (el color original extraído sobre un fondo negro) para verificar que no se estén capturando elementos del exterior de la pista.
+			- **Derecha:** El resultado aislado (el color original extraído sobre un fondo negro) para verificar que no se estén capturando elementos del exterior de la pista.
 
-	3. Generación y Exportación de Archivos de Configuración
+	3. **Generación y Exportación de Archivos de Configuración**
 	Para evitar modificar el código fuente principal (hardcoding) cada vez que calibramos un color, el botón "SAVE JSON" empaqueta los umbrales mínimos y máximos actuales y los exporta como un archivo .json ligero (ej. mask_red.json). Este archivo incluye un sello de tiempo (timestamp) para control de versiones y es leído dinámicamente por el robot durante el arranque en la competencia.
-
-	Para ayudarte a visualizar e internalizar cómo interactúan los canales L, A y B (lo cual es vital para explicarle tu código a los jueces), he generado un simulador interactivo de este espacio de color. Puedes jugar con los deslizadores a continuación para entender exactamente qué estás alterando en tu script:
 
    	<div align="center">
 
@@ -471,26 +475,26 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 	El funcionamiento del script está diseñado para ser rápido e intuitivo, permitiendo al equipo reajustar los parámetros visuales en los pits antes de cada ronda si las condiciones de la pista cambian:
 
-	1. Inicialización de Video: Al ejecutar el script, se abre una ventana redimensionable que captura el flujo de video en tiempo real. El código ajusta automáticamente la escala de la imagen para mantener la relación de aspecto sin distorsionar la perspectiva de la pista.
+	1. **Inicialización de Video:** Al ejecutar el script, se abre una ventana redimensionable que captura el flujo de video en tiempo real. El código ajusta automáticamente la escala de la imagen para mantener la relación de aspecto sin distorsionar la perspectiva de la pista.
 
-	2. Trazado Interactivo (Mouse Callbacks): Utilizando el cursor, el usuario puede dibujar rectángulos directamente sobre el video en vivo.
+	2. **Trazado Interactivo (Mouse Callbacks):** Utilizando el cursor, el usuario puede dibujar rectángulos directamente sobre el video en vivo.
 
-		- Al hacer clic y arrastrar, se visualiza un cuadro amarillo (temp_rect) que muestra una vista previa del área seleccionada.
+		- **Al hacer clic y arrastrar, se visualiza un cuadro amarillo (temp_rect) que muestra una vista previa del área seleccionada.**
 
-		- Al soltar el clic, la región queda fijada en pantalla con un recuadro verde, mostrando una etiqueta con sus dimensiones exactas en píxeles (ancho x alto).
+		- **Al soltar el clic, la región queda fijada en pantalla con un recuadro verde, mostrando una etiqueta con sus dimensiones exactas en píxeles (ancho x alto).**
 
-	3. Gestión de Errores: Si se comete un error al trazar las zonas, el usuario puede presionar la tecla 'C' (Clear) en su teclado para borrar instantáneamente todas las regiones dibujadas en la memoria y comenzar de nuevo.
+	3. **Gestión de Errores:** Si se comete un error al trazar las zonas, el usuario puede presionar la tecla 'C' (Clear) en su teclado para borrar instantáneamente todas las regiones dibujadas en la memoria y comenzar de nuevo.
 
-	4. Exportación Automática de Datos: Una vez definidas las áreas correspondientes para escanear las líneas de giro y los bloques de color, se presiona la tecla 'ESC'. Esto cierra el flujo de video y despliega una ventana de diálogo del sistema (vía Tkinter).
+	4. **Exportación Automática de Datos:** Una vez definidas las áreas correspondientes para escanear las líneas de giro y los bloques de color, se presiona la tecla 'ESC'. Esto cierra el flujo de video y despliega una ventana de diálogo del sistema (vía Tkinter).
 
-	5. Generación de Código: El script toma las coordenadas espaciales (x1, y1, x2, y2) de cada ROI dibujada y escribe automáticamente un archivo de Python (.py). Este archivo generado contiene las estructuras de datos (usando @dataclass) listas para ser importadas directamente por el cerebro principal del robot, sin necesidad de transcribir números a mano.
+	5. **Generación de Código:** El script toma las coordenadas espaciales (x1, y1, x2, y2) de cada ROI dibujada y escribe automáticamente un archivo de Python (.py). Este archivo generado contiene las estructuras de datos (usando @dataclass) listas para ser importadas directamente por el cerebro principal del robot, sin necesidad de transcribir números a mano.
 
-	Justificación de Ingeniería
+	**Justificación de Ingeniería**
 	La creación de esta herramienta resuelve dos problemas críticos en el desarrollo de vehículos autónomos:
 
-	- Optimización de Procesamiento: Al calibrar ROIs precisas, obligamos a la Raspberry Pi a buscar colores solo en porciones muy pequeñas de la imagen en lugar de analizar el fotograma completo. Esto reduce drásticamente la carga de la CPU y mantiene el bucle de control a una alta frecuencia.
+	- **Optimización de Procesamiento:** Al calibrar ROIs precisas, obligamos a la Raspberry Pi a buscar colores solo en porciones muy pequeñas de la imagen en lugar de analizar el fotograma completo. Esto reduce drásticamente la carga de la CPU y mantiene el bucle de control a una alta frecuencia.
 
-	- Reducción de Falsos Positivos: Al aislar el campo de visión estrictamente a la pista mediante esta calibración, evitamos que el robot detecte accidentalmente objetos externos (como los zapatos de un juez o luces de la sala) que compartan el mismo color que los obstáculos.
+	- **Reducción de Falsos Positivos:** Al aislar el campo de visión estrictamente a la pista mediante esta calibración, evitamos que el robot detecte accidentalmente objetos externos (como los zapatos de un juez o luces de la sala) que compartan el mismo color que los obstáculos.
 
    	<div align="center">
 
