@@ -530,7 +530,7 @@ El constructor establece un canal de comunicación a través de puerto serial po
 - ### Arduino Controller:
 
 	- Open Challenge:
-
+			https://youtu.be/WPSj0BXfQ5U
 		- **Estrategia:** Para cumplir con los desafíos del Open Challenge, se diseñó e implementó una arquitectura de software basada en un bucle de control de alta frecuencia, dividida en cuatro pilares estratégicos: Percepción Visual, Control de Trayectoria (PID), Navegación en Esquinas y Seguridad Activa.
 		
 		- **ROIS:** Para optimizar el procesamiento computacional y evitar falsos positivos con el entorno, la cámara segmenta el espacio en dos ROIs laterales específicas (roi y roi2). Estas regiones buscan activamente las líneas negras que delimitan las paredes o carriles de la pista.
