@@ -530,8 +530,12 @@ El constructor establece un canal de comunicación a través de puerto serial po
 - ### Arduino Controller:
 
 	- Open Challenge:
+  
+		Open Challenge Video:
 
+		<div align="center">
 		[![Open Challenge Video](https://img.youtube.com/vi/WPSj0BXfQ5U/0.jpg)](https://youtu.be/WPSj0BXfQ5U)
+		</div>
 
 		- **Estrategia:** Para cumplir con los desafíos del Open Challenge, se diseñó e implementó una arquitectura de software basada en un bucle de control de alta frecuencia. La estrategia central no depende de un solo sensor, sino de un Control Híbrido (Sensor Fusión) que alterna dinámicamente entre la Visión Artificial (cámara) y la Telemetría Acústica (sensores ultrasónicos) según las condiciones de la pista. El sistema se divide en cuatro pilares de ejecución: Detección de Sentido, Control de Trayectoria (PIDs independientes), Navegación en Esquinas y Seguridad Activa (Anticolisión).
 		
