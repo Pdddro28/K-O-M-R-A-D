@@ -612,7 +612,7 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 
 		<div align="center">
 	
-	  	Ángulo Escapatoria = 160°
+	  	$$\text{Ángulo Escapatoria} = 160^\circ_\text{steering\_angle}$$
 
 		</div>
 	
