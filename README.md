@@ -531,7 +531,7 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 	- Open Challenge:
   
-		**Open Challenge Video:**
+		- **Open Challenge Video:**
 
 		<div align="center">
 			
