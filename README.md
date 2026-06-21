@@ -422,7 +422,44 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 - ### Herramientas de apoyo:
 
-	- **Color Detector:** Es una herramienta interactiva de calibración visual diseñada para segmentar y aislar colores específicos en tiempo real mediante el espacio de color LAB (Luminancia, A y B) y filtros de desenfoque gaussiano. El sistema captura el flujo de video de una Picamera2, aplica transformaciones morfológicas de erosión y dilatación para limpiar el ruido de la imagen, y genera una máscara binaria basada en umbrales máximos y mínimos ajustables por deslizadores en una interfaz gráfica (GUI) construida con CustomTkinter. Su función principal es preajustar firmas de color (como rojo, verde, azul o negro) y exportar estos rangos óptimos a un archivo de configuración JSON para que el robot pueda reconocer objetos o líneas de manera 	estable bajo diferentes condiciones de luz.
+	- **Color Detector:** El entorno de iluminación en las competencias de robótica rara vez es idéntico al de nuestro laboratorio. Para evitar que el sistema de visión artificial falle por cambios en la luz ambiental (sombras, reflejos o luces LED del recinto), hemos diseñado una aplicación gráfica interactiva llamada Color-Detector.py.
+
+	Esta herramienta nos permite calibrar en tiempo real los umbrales matemáticos de los colores de la pista (bloques rojos/verdes, líneas azules/naranjas y paredes negras) y exportar estos parámetros directamente al cerebro del robot.
+
+	1. Arquitectura de Procesamiento de Imagen (Pipeline)
+	A diferencia de los enfoques básicos que usan el espacio de color RGB o HSV, nuestro script transforma el flujo de video al espacio de color LAB (CIE Lab)*. Esta decisión técnica es crucial porque el espacio LAB aísla completamente la luminosidad (Canal L) de la información pura del color (Canales A y B). El proceso interno antes de mostrar la imagen sigue estos pasos:
+
+		- Extracción y Ecualización (CLAHE): Tras convertir la imagen a LAB, separamos el canal de luminosidad (L) y le aplicamos un algoritmo CLAHE (Contrast Limited Adaptive Histogram Equalization). Esto redistribuye el contraste localmente, mitigando las sombras duras o los destellos en la pista sin alterar el color real de los objetos.
+
+		- Filtro de Suavizado (Gaussian Blur): Se aplica un desenfoque gaussiano de 7x7 para difuminar el ruido de alta frecuencia del sensor de la cámara, evitando píxeles "muertos" o artefactos.
+
+		- cOperaciones Morfológicas: Una vez que el usuario define los límites del color con los deslizadores, el script genera una máscara binaria (cv.inRange). Para limpiarla, aplicamos "Erosión" (elimina pequeños píxeles ruidosos o falsos positivos) seguida de "Dilatación" (restaura el tamaño original del objeto detectado).
+
+	2. Interfaz de Usuario y Flujo de Trabajo (GUI)
+	La interfaz gráfica ha sido construida con CustomTkinter para ofrecer un entorno oscuro de bajo contraste que no fatigue la vista durante las largas sesiones de calibración en los pits. El flujo de uso es el siguiente:
+
+		- Selección de Presets: El operador inicia seleccionando un color base en el menú desplegable (ej. RED, GREEN, BLACK). Esto carga valores predeterminados seguros (COLOR_PRESETS).
+
+		- Ajuste Fino mediante Deslizadores (Sliders): * L-min / L-max: Se ajusta la tolerancia a las sombras y a los brillos.
+
+			- A-min / A-max: Se ajusta el espectro del eje Verde-Rojo.
+
+			- B-min / B-max: Se ajusta el espectro del eje Azul-Amarillo.
+  
+		*(Nota: Se utiliza la escala adaptada de OpenCV de 0 a 255 para todos los canales).*
+
+		- Telemetría Visual Combinada: La pantalla principal consolida tres vistas en tiempo real (960x240 píxeles):
+
+			- Izquierda: El video original crudo.
+
+			- Centro: La máscara binaria (blanco sobre negro) que muestra exactamente lo que la computadora "ve" como un área válida.
+
+			- Derecha: El resultado aislado (el color original extraído sobre un fondo negro) para verificar que no se estén capturando elementos del exterior de la pista.
+
+	3. Generación y Exportación de Archivos de Configuración
+	Para evitar modificar el código fuente principal (hardcoding) cada vez que calibramos un color, el botón "SAVE JSON" empaqueta los umbrales mínimos y máximos actuales y los exporta como un archivo .json ligero (ej. mask_red.json). Este archivo incluye un sello de tiempo (timestamp) para control de versiones y es leído dinámicamente por el robot durante el arranque en la competencia.
+
+	Para ayudarte a visualizar e internalizar cómo interactúan los canales L, A y B (lo cual es vital para explicarle tu código a los jueces), he generado un simulador interactivo de este espacio de color. Puedes jugar con los deslizadores a continuación para entender exactamente qué estás alterando en tu script:
 
    	<div align="center">
 
@@ -430,7 +467,30 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 	</div>
 
-	- **ROI Detector:** Es una utilidad de configuración espacial basada en OpenCV que permite delimitar "Regiones de Interés" (ROI) personalizadas sobre la transmisión de video de la cámara mediante clics y arrastres del mouse. El script escala el fotograma original de forma proporcional dentro de un lienzo centrado con bordes negros constantes, permitiendo al usuario dibujar múltiples cuadrantes, visualizando dinámicamente sus dimensiones en píxeles. Su propósito principal es limpiar la memoria caché con la tecla 'C' o finalizar la captura con la tecla 'ESC' para activar una ventana flotante de Tkinter que exporta de forma automatizada las coordenadas $(x_1, y_1, x_2, y_2)$ estructuradas como una lista de objetos en un archivo nativo de Python (.py), aislando las zonas específicas de análisis visual donde el robot debe procesar la información (como la línea del suelo) e ignorando el ruido del entorno.
+	- **ROI Detector:** Para garantizar que nuestro sistema de visión artificial procese las imágenes de forma eficiente, hemos desarrollado un script auxiliar llamado ROI-Detector.py. Esta herramienta de interfaz gráfica permite calibrar de forma interactiva las Regiones de Interés (ROIs) de la cámara, delimitando las áreas exactas donde el algoritmo debe buscar y calibrar los colores de los obstáculos (rojo/verde) y las paredes de la pista.
+
+	El funcionamiento del script está diseñado para ser rápido e intuitivo, permitiendo al equipo reajustar los parámetros visuales en los pits antes de cada ronda si las condiciones de la pista cambian:
+
+	1. Inicialización de Video: Al ejecutar el script, se abre una ventana redimensionable que captura el flujo de video en tiempo real. El código ajusta automáticamente la escala de la imagen para mantener la relación de aspecto sin distorsionar la perspectiva de la pista.
+
+	2. Trazado Interactivo (Mouse Callbacks): Utilizando el cursor, el usuario puede dibujar rectángulos directamente sobre el video en vivo.
+
+		- Al hacer clic y arrastrar, se visualiza un cuadro amarillo (temp_rect) que muestra una vista previa del área seleccionada.
+
+		- Al soltar el clic, la región queda fijada en pantalla con un recuadro verde, mostrando una etiqueta con sus dimensiones exactas en píxeles (ancho x alto).
+
+	3. Gestión de Errores: Si se comete un error al trazar las zonas, el usuario puede presionar la tecla 'C' (Clear) en su teclado para borrar instantáneamente todas las regiones dibujadas en la memoria y comenzar de nuevo.
+
+	4. Exportación Automática de Datos: Una vez definidas las áreas correspondientes para escanear las líneas de giro y los bloques de color, se presiona la tecla 'ESC'. Esto cierra el flujo de video y despliega una ventana de diálogo del sistema (vía Tkinter).
+
+	5. Generación de Código: El script toma las coordenadas espaciales (x1, y1, x2, y2) de cada ROI dibujada y escribe automáticamente un archivo de Python (.py). Este archivo generado contiene las estructuras de datos (usando @dataclass) listas para ser importadas directamente por el cerebro principal del robot, sin necesidad de transcribir números a mano.
+
+	Justificación de Ingeniería
+	La creación de esta herramienta resuelve dos problemas críticos en el desarrollo de vehículos autónomos:
+
+	- Optimización de Procesamiento: Al calibrar ROIs precisas, obligamos a la Raspberry Pi a buscar colores solo en porciones muy pequeñas de la imagen en lugar de analizar el fotograma completo. Esto reduce drásticamente la carga de la CPU y mantiene el bucle de control a una alta frecuencia.
+
+	- Reducción de Falsos Positivos: Al aislar el campo de visión estrictamente a la pista mediante esta calibración, evitamos que el robot detecte accidentalmente objetos externos (como los zapatos de un juez o luces de la sala) que compartan el mismo color que los obstáculos.
 
    	<div align="center">
 
