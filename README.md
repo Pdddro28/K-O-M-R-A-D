@@ -759,7 +759,3 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 	* **Problema:** Al tener cables sueltos y expuestos, estos se quedaban atascados constantemente con el entorno e incluso se llevaban por delante los obstáculos del circuito en algunas ocasiones.
   
 	* **Solución:** Se reorganizaron por completo las conexiones para eliminar los bucles y partes sobresalientes del cableado.
-  
-- ### Problemas de Software:
-
-	- a
