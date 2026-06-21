@@ -18,7 +18,7 @@ class ROI:
 class MegaPiController:
 
     # --- INITIALIZATION AND HARDWARE SETUP ---
-    def __init__(self, port='COM9', baudrate=115200 ):
+    def __init__(self, port='COM9', baudrate=115200):
         try:
             self.ser = serial.Serial(port, baudrate, timeout=0.1)
             time.sleep(2) 
@@ -27,6 +27,10 @@ class MegaPiController:
             self.dist_front = 0
             self.dist_left = 0
             self.dist_right = 0
+            
+            # --- NUEVO: Inicialización de variables para sensores IR (0% a 100%) ---
+            self.ir_left = 0
+            self.ir_right = 0
             
             self.data_log = []
             self.log_index = 0
@@ -53,7 +57,6 @@ class MegaPiController:
             self.green_area = 0
             self.red_area = 0
             
-            
             self.rois = [
                 ROI(200, 20, 430, 200),
                 ROI(200, 300, 440, 350),
@@ -65,27 +68,34 @@ class MegaPiController:
 
     # --- SERIAL BACKGROUND DATA PACKET READING ---
     def _read_telemetry(self):
-            while self.running:
-                try:
-                    if self.ser.in_waiting >= 6:
-                        header = self.ser.read(1)
+        while self.running:
+            try:
+                # MODIFICADO: Ahora esperamos un paquete mínimo de 8 bytes (1 header + 7 datos)
+                if self.ser.in_waiting >= 8:
+                    header = self.ser.read(1)
+                    
+                    if header == b'\xaa':
+                        # Leemos los 7 bytes restantes del payload
+                        payload = self.ser.read(7)
                         
-                        if header == b'\xaa':
-                            payload = self.ser.read(5)
-                            
-                            self.dist_front = payload[0]
-                            self.dist_left  = payload[1]
-                            self.dist_right = payload[2]
-                            self.button_value = payload[3]  
-                            
-                        else:
-                            line = self.ser.readline().decode('ascii', errors='ignore').strip()
-                            if line:
-                                print(f"   [MegaPi Debug]: {line}")
-                except Exception as e:
-                    print(f"Telemetry Error: {e}")
-                
-                time.sleep(0.01) 
+                        self.dist_front = payload[0]
+                        self.dist_left  = payload[1]
+                        self.dist_right = payload[2]
+                        self.button_value = payload[3]  
+                        
+                        # --- NUEVO: Extraer valores de los sensores TCRT5000 ---
+                        self.ir_left    = payload[4] # Byte 5 del paquete completo
+                        self.ir_right   = payload[5] # Byte 6 del paquete completo
+                        # payload[6] es el byte 7 de relleno (0x00), se ignora.
+                        
+                    else:
+                        line = self.ser.readline().decode('ascii', errors='ignore').strip()
+                        if line:
+                            print(f"   [MegaPi Debug]: {line}")
+            except Exception as e:
+                print(f"Telemetry Error: {e}")
+            
+            time.sleep(0.01) 
     
     # --- LOW-LEVEL SERIAL COMMAND SENDING ---
     def _send_command(self, action, v1=0, v2=0):
@@ -110,7 +120,6 @@ class MegaPiController:
         self.mask_black = self.get_masks('negro')
 
     def obtenerarea_frontal(self):
-        # Mantiene la máscara negra por defecto (o 'lab' según tu VisionController)
         self.cnt_front_wall = self.vision.find_contours(self.mask_black, self.rois[0])
         self.black_area = self.vision.max_contour(self.cnt_front_wall, self.rois[0])[0]
 
@@ -118,7 +127,6 @@ class MegaPiController:
         self.cnt_blue_line = self.vision.find_contours(self.mask_blue, self.rois[1])
         self.blue_max = self.vision.max_contour(self.cnt_blue_line, self.rois[1])
         self.blue_area = self.blue_max[0]
-
 
     def obtener_linea_naranja(self):
         self.cnt_orange_line = self.vision.find_contours(self.mask_orange, self.rois[1])
@@ -137,12 +145,16 @@ class MegaPiController:
     # --- TELEMETRY DATA LOGGING ---
     def log_step(self, action_code):
         d_front, d_left, d_right = self.get_distances()
+        ir_l, ir_r = self.get_ir_reflectance() # Capturar datos analógicos actuales
 
         self.data_log.append({
             'index': self.log_index,
             'dist_front_cm': d_front,
             'dist_left_cm': d_left,
             'dist_right_cm': d_right,
+            # --- NUEVO: Columnas añadidas al registro de entrenamiento ---
+            'ir_left_pct': ir_l,
+            'ir_right_pct': ir_r,
         })
         
         self.log_index += 1
@@ -180,6 +192,11 @@ class MegaPiController:
     def get_distances(self):
         return (self.dist_front, self.dist_left, self.dist_right)
 
+    # --- NUEVO MÉTODO: Obtener datos de reflectancia de los TCRT5000 ---
+    def get_ir_reflectance(self):
+        """Devuelve una tupla (ir_izquierdo, ir_derecho) con valores de 0 a 100%"""
+        return (self.ir_left, self.ir_right)
+
     # --- SYSTEM EXITS AND RESOURCE MANAGEMENT ---
     def save_data_to_csv(self, filename='training_data.csv'):
         if not self.data_log:
@@ -202,7 +219,7 @@ class MegaPiController:
             self.ser.close()
             print("System: Connection closed.")
 
-    def start (self):
+    def start(self):
         return self.button_value == 0
     
 

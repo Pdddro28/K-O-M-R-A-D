@@ -12,20 +12,21 @@
 #define SENSOR_TIMEOUT  25000
 
 // Pines de Hardware
-#define BUTTON          A9
-#define pinServo        A7
-#define trig_front      A15
-#define echo_front      A14
-#define trig_left       29
-#define echo_left       39
-#define trig_right      A11
-#define echo_right      A10
-#define centro          90
+#define BUTTON           A9
+#define pinServo         A7
+#define trig_front       A15
+#define echo_front       A14
+#define trig_left        29
+#define echo_left        39
+#define trig_right       A11
+#define echo_right       A10
+#define centro           90
+#define Ir_izquierda     A12  // Sensor IR Izquierdo
+#define Ir_derecha       A13  // Sensor IR Derecho
 
-Ultrasonic sensorF(A15,A14);
-Ultrasonic sensorL(29,39);
-Ultrasonic sensorD(A11,A10);
-
+Ultrasonic sensorF(A15, A14);
+Ultrasonic sensorL(29, 39);
+Ultrasonic sensorD(A11, A10);
 
 class Carro {
   private:
@@ -34,12 +35,16 @@ class Carro {
     Adafruit_MPU6050 mpu;
     
   public:
-    // Motor conectado al Puerto 1 de la MegaPi
+    // Motor conectado al Puerto 4B de la MegaPi
     Carro() : motorTraccion(PORT4B) {}
 
     void inicializar() {
       // Configuración del botón (Pull-up interna)
       pinMode(BUTTON, INPUT_PULLUP);
+
+      // Configuración de pines analógicos para los TCRT5000
+      pinMode(Ir_izquierda, INPUT);
+      pinMode(Ir_derecha, INPUT);
 
       // Configuración del Servo
       servoDireccion.attach(pinServo);
@@ -64,23 +69,22 @@ class Carro {
       return digitalRead(BUTTON) == LOW; // LOW porque usa INPUT_PULLUP
     }
 
-    long obtenerDistancia(int trig, int echo) {
-      digitalWrite(trig, LOW);
-      delayMicroseconds(2);
-      digitalWrite(trig, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trig, LOW);
-      
-      long duracion = pulseIn(echo, HIGH, SENSOR_TIMEOUT);
-      long distancia = duracion * 0.034 / 2;
-      
-      // Si el sensor da 0 (fuera de rango), devolvemos 400cm como valor seguro
-      return (distancia <= 0) ? 400 : distancia;
-    }
-
     long getDistanciaFront() { return sensorF.read(); }
     long getDistanciaLeft()  { return sensorL.read(); }
     long getDistanciaRight() { return sensorD.read(); }
+
+    // --- Métodos Nuevos: Lectura de Sensores IR (TCRT5000) ---
+    // Devuelven el porcentaje de reflexión (0% a 100%)
+    int getPorcentajeIRIzquierdo() {
+      int valorRaw = analogRead(Ir_izquierda);
+      // Mapeo de 0-1023 a 0-100%. Si necesitas invertirlo, cambia a: map(valorRaw, 0, 1023, 100, 0)
+      return map(valorRaw, 0, 1023, 0, 100); 
+    }
+
+    int getPorcentajeIRDerecho() {
+      int valorRaw = analogRead(Ir_derecha);
+      return map(valorRaw, 0, 1023, 0, 100);
+    }
 
     // --- Lógica de Movimiento ---
     void avanzar(byte velocidad) {
@@ -91,7 +95,6 @@ class Carro {
       servoDireccion.write(centro);
       servoDireccion.write(angulo);
       motorTraccion.run(-velocidad);
-
     }
 
     void girarIzquierda(byte angulo, byte velocidad) {
@@ -134,7 +137,7 @@ void loop() {
 
       switch (accion) {
         case 1: miCarro.avanzar(v1); break;
-        case 2: miCarro.retroceder(v1,v2); break;
+        case 2: miCarro.retroceder(v1, v2); break;
         case 3: miCarro.girarIzquierda(v1, v2); break;
         case 4: miCarro.girarDerecha(v1, v2); break;
         case 5: miCarro.detenerse(); break;
@@ -152,13 +155,19 @@ void loop() {
     int d_right = (int)miCarro.getDistanciaRight();
     byte estadoBoton = miCarro.botonPresionado() ? 1 : 0;
     
-    // Paquete de Telemetría (6 bytes en total)
+    // Obtenemos los porcentajes de los TCRT5000
+    byte ir_izq = (byte)constrain(miCarro.getPorcentajeIRIzquierdo(), 0, 100);
+    byte ir_der = (byte)constrain(miCarro.getPorcentajeIRDerecho(), 0, 100);
+    
+    // NUEVO: Paquete de Telemetría Expandido (8 bytes en total)
     Serial.write(0xAA);                        // Byte 0: Header
-    Serial.write(constrain(d_front, 0, 255));  // Byte 1: Frontal
-    Serial.write(constrain(d_left, 0, 255));   // Byte 2: Izquierda
-    Serial.write(constrain(d_right, 0, 255));  // Byte 3: Derecha
+    Serial.write(constrain(d_front, 0, 255));  // Byte 1: Ultrasonido Frontal
+    Serial.write(constrain(d_left, 0, 255));   // Byte 2: Ultrasonido Izquierda
+    Serial.write(constrain(d_right, 0, 255));  // Byte 3: Ultrasonido Derecha
     Serial.write(estadoBoton);                 // Byte 4: Botón (0 o 1)
-    Serial.write(0x00);                        // Byte 5: Relleno (Padding)
+    Serial.write(ir_izq);                      // Byte 5: Porcentaje IR Izquierdo (0-100)
+    Serial.write(ir_der);                      // Byte 6: Porcentaje IR Derecho (0-100)
+    Serial.write(0x00);                        // Byte 7: Relleno (Padding) para mantener estructura
     
     timerSensores = millis();
   }
