@@ -474,6 +474,8 @@ def __init__(self, port='COM9', baudrate=115200):
 
 El constructor establece un canal de comunicación a través de puerto serial por hardware con el microcontrolador MegaPi. Inicia automáticamente un hilo de escucha en segundo plano (`_read_telemetry`) para capturar las métricas de hardware entrantes de forma asíncrona, inicializa el subsistema de visión artificial (`VisionController`), carga las máscaras de color predefinidas desde estructuras JSON específicas y prepara los registros internos, las variables de estado y las Regiones de Interés (ROIs) para el seguimiento espacial y de líneas.
 
+<div align="center">
+
 **Descripción de atributos:**
 
 | Atributo | Tipo de dato | Funcionalidad |
@@ -493,7 +495,11 @@ El constructor establece un canal de comunicación a través de puerto serial po
 | `turning_direction` | `int` | Rastrea la configuración del diseño del carril ($0$: No asignado, $1$: Sentido horario/Azul, $2$: Sentido antihorario/Naranja). |
 | `rois` | `list[ROI]` | Define cuadros de procesamiento fijos en código para el análisis del área de la pared frontal y las líneas de la pista. |
 
+</div
+
 **Descripción de métodos:**
+
+<div align="center">
 
 | Método | Argumentos | Retorno | Descripción |
 | --- | --- | --- | --- |
@@ -519,6 +525,8 @@ El constructor establece un canal de comunicación a través de puerto serial po
 | `close()` | Ninguno | `None` | Libera los manejadores de procesos, envía un comando de parada total y cierra de forma segura los puertos seriales abiertos. |
 | `start()` | Ninguno | `bool` | Evalúa los estados del botón. Devuelve `True` si el botón está liberado (HIGH/0), manteniendo el bucle en ejecución. |
 
+</div>
+
 - ### Arduino Controller:
 
 	- Open Challenge:
@@ -531,6 +539,12 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 		- **Diagrama de Flujo:**
 
+	<div align="center">
+
+	<img width="3505" height="4877" alt="untitled (1)" src="https://github.com/user-attachments/assets/94f21db8-a8a3-445f-988f-bbd1e25d0978" />
+
+	</div>
+
 	- **Obstacle Challenge:**
 
 		- **Estrategia:**
@@ -540,6 +554,12 @@ El constructor establece un canal de comunicación a través de puerto serial po
 		- **Contador de Loops:**
 
 		- **Diagrama de Flujo:**
+ 
+	<div align="center">
+
+	<img width="3533" height="5354" alt="untitled" src="https://github.com/user-attachments/assets/9ba2ee32-f8ed-4207-aa86-ce3b5ed009fa" />
+
+	</div>
 
 # 4. Challenges
 
