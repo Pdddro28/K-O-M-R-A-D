@@ -447,9 +447,9 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 ---
 
-# mega_pi_controller.py (clase MegaPiController)
+ **mega_pi_controller.py (clase MegaPiController)**
 
-## Dependencias
+ **Dependencias**
 
 * `serial`
 * `time`
@@ -461,7 +461,7 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 * `src.vision_controller.VisionController`
 * `dataclasses.dataclass`
 
-## Descripción del método constructor
+**Descripción del método constructor**
 
 ```python
 def __init__(self, port='COM9', baudrate=115200):
@@ -474,7 +474,7 @@ def __init__(self, port='COM9', baudrate=115200):
 
 El constructor establece un canal de comunicación a través de puerto serial por hardware con el microcontrolador MegaPi. Inicia automáticamente un hilo de escucha en segundo plano (`_read_telemetry`) para capturar las métricas de hardware entrantes de forma asíncrona, inicializa el subsistema de visión artificial (`VisionController`), carga las máscaras de color predefinidas desde estructuras JSON específicas y prepara los registros internos, las variables de estado y las Regiones de Interés (ROIs) para el seguimiento espacial y de líneas.
 
-## Descripción de atributos:
+**Descripción de atributos:**
 
 | Atributo | Tipo de dato | Funcionalidad |
 | --- | --- | --- |
@@ -493,7 +493,7 @@ El constructor establece un canal de comunicación a través de puerto serial po
 | `turning_direction` | `int` | Rastrea la configuración del diseño del carril ($0$: No asignado, $1$: Sentido horario/Azul, $2$: Sentido antihorario/Naranja). |
 | `rois` | `list[ROI]` | Define cuadros de procesamiento fijos en código para el análisis del área de la pared frontal y las líneas de la pista. |
 
-## Descripción de métodos:
+**Descripción de métodos:**
 
 | Método | Argumentos | Retorno | Descripción |
 | --- | --- | --- | --- |
