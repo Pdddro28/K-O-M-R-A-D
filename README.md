@@ -601,43 +601,43 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 		</div>
 
-		- **Estrategia:** La estrategia diseñada para abordar el primer reto (Open Challenge) se fundamenta en un sistema de navegación rápido, estable y de alta predictibilidad. A diferencia de la ronda de obstáculos, aquí el objetivo es maximizar la velocidad (`VELOCIDAD_BASE = 130`) manteniendo el chasis en el centro geométrico del carril y contando las vueltas de forma infalible.
+		- **Estrategia:** La estrategia diseñada para abordar el Open Challenge se fundamenta en un sistema de navegación rápido y de alta predictibilidad. El objetivo es maximizar la velocidad constante (VELOCIDAD_BASE = 130) manteniendo el chasis estable mediante un enfoque de "Sensor Fusión" (cámara + ultrasonidos). 
 
-		El software está construido sobre un enfoque de "Sensor Fusión" (cámara + ultrasonidos) y se rige por tres pilares fundamentales:
+			El comportamiento dinámico del vehículo se rige por una máquina de estados finitos que conmuta entre la navegación lineal, giros cerrados y el cierre de carrera.
 
-		- **Centrado Geométrico (Visión Computacional):** Cálculo diferencial del área negra visible en los extremos inferiores de la pantalla.
-   
-		- **Filtros Anti-Windup y Tolerancia:** Implementación de bandas muertas para evitar el zigzagueo en las rectas, conservando la inercia del vehículo.
-    
-		- **Máquina de Estados de Navegación:** Algoritmos dedicados para transicionar entre conducción lineal, giro en esquinas de 90° y maniobras de emergencia.
+			- **Estado de Ejecución de Esquinas (Giros de 90°)**
+			A velocidades altas, un lazo de control PID estándar no tiene la capacidad de respuesta física para tomar curvas ortogonales sin derrapar o chocar. Por ello, se diseñó un 	estado de interrupción. Cuando la cámara detecta una saturación de pista (área negra mayor a 6500 px) y el sistema ya conoce el sentido del circuito (`LNM.turning_direction != 0`), el robot asume una esquina de 90°. 
 
-	- **ROIS:** Para optimizar la carga de la CPU y enfocarse únicamente en los límites de la pista, la visión se restringió a dos Regiones de Interés laterales simétricas: `roi2 (0, 100, 320, 150)` para la izquierda y `roi (320, 100, 640, 150)` para la derecha. Estas ventanas capturan exclusivamente el suelo negro de la pista, ignorando el horizonte.
+			En este instante crítico, el software suspende inmediatamente el control PID visual, limpia las variables de error e integral a cero para evitar acumulación (windup), y ejecuta la subrutina `LNM.turn_direction()`, bloqueando la dirección en su ángulo máximo mecanico. El vehículo sostiene este giro a ciegas hasta que los sensores confirman la salida: el área negra debe descender de los 6500 px y el sensor ultrasónico frontal debe medir un espacio libre superior a 80 cm. Al cumplirse simultáneamente, se reanuda el centrado PID lateral.
 
-		Adicionalmente, el lazo de control se ajustó con un PID visual suave y amortiguado:
-		- **PID de Línea Base:** (`Kp = 0.015`, `Kd = 0.005`). El Kp bajo evita giros bruscos, mientras que el Kd mínimo estabiliza la trayectoria. Para complementar este PID, se introdujo un `UMBRAL_PIXELES_MUERTO = 150` y una `TOLERANCIA_ANGULO = 3`. Esto significa que si el error diferencial es minúsculo, el software fuerza un ángulo de dirección perfectamente recto (80°), eliminando las oscilaciones mecánicas parasitarias.
+			- **Registro de Vueltas y Temporización Asíncrona**
+La telemetría para el conteo de vueltas se realiza mediante la discriminación de las marcas cromáticas transversales en la zona de meta, a las cuales denominamos **loops** (naranja o azul).
 
-		- **Implementación de la Máquina de Estados:** Durante la carrera abierta, el robot alterna dinámicamente entre tres estados de operación:
+			Al arrancar, el sentido de giro es desconocido. En el primer paso por la meta, si se registra un contorno cromático con un área masiva (mayor a 1200 px), el robot fija de manera permanente su sentido de carrera en memoria. A partir de ahí, se activa el control de conteo no bloqueante. Al cruzar el loop con un área mayor a 500 px, se incrementa el contador general. 
 
-	- **Estado 1:** LINEAL (Navegación Base y Conteo de Loops)
-    
-		Es el estado por defecto. El vehículo compara constantemente `black_area_left` contra `black_area_right` para inyectar correcciones al servo de dirección. En paralelo, el sistema monitorea el color de la pista para identificar el sentido de giro (Azul = Izquierda, Naranja = Derecha) e iniciar el conteo de vueltas. 
-		
-		Para el registro de progreso, el sistema evalúa variables de detección denominadas **loops** (no líneas). Cuando el área del color indicativo supera los 500 px, se incrementa el contador de `loops` y se bloquea la lectura durante 1.1 segundos para evitar falsos positivos por la persistencia visual de la misma marca.
+			Para erradicar los falsos positivos generados por la alta frecuencia de lectura del microcontrolador al pasar sobre una misma marca, se implementó un temporizador de guarda de 1.1 segundos. La lógica interna fluye de la siguiente manera:
 
-	- **Estado 2:** ESQUINA (Giro de 90 Grados)
+			```
+                  Línea de Meta Detectada (Área > 500 px)
+                             [ loops += 1 ]
+                                   |
+                                   v
+                       Activar Estado Fijo (n=1)
+                    Iniciar Temporizador de Guarda
+                                   |
+                                   v
+                      ¿Tiempo Transcurrido > 1.1s?
+                       +--- SI          NO ---+
+                       |                      |
+                       v                      v
+             Liberar Estado (n=0)     Mantener Bloqueo
+            Listo para Nueva Vuelta  (Evita Falsos Conteos)
+	 		```
+  
+			- **Mecanismo de Parada Segura**
+			El reglamento exige que el robot finalice su recorrido tras la vuelta número 12. Interrumpir la energía de los motores de forma abrupta directamente sobre la línea de meta provocaría un derrape severo o la salida de pista debido a la alta inercia que arrastra el chasis a una velocidad de 130.
 
-		Debido a que el control proporcional no es suficiente para tomar curvas ortogonales a alta velocidad, el sistema rompe el lazo PID cuando convergen tres condiciones críticas:
-		1. El sensor ultrasónico frontal detecta el muro exterior (`front_dist < 85 cm`).
-		2. Hay abundante confirmación visual de pista negra (`black_area > 6500`).
-		3. Ya se ha determinado el sentido de la pista (`turning_direction != 0`).
-
-		Al cumplirse esto, el estado conmuta a `girando = True`, delegando la dirección a una rutina por hardware (LNM.turn_direction) de ángulo máximo. El vehículo solo retorna al Estado 1 (LINEAL) cuando el frente se despeja y el área negra se reduce en la cámara al enfilarse hacia la nueva recta.
-
-	- **Estado 3:** EMERGENCIA Y CIERRE (Freno Activo y Fin de Carrera)
-    
-		Actúa como un supervisor asíncrono sobre toda la lógica de carrera. Si por un fallo de tracción el robot se aproxima a colisionar frontalmente (`front_dist < 12.0 cm`), el algoritmo ejecuta un freno de mano, calcula un vector de escape dinámico (`160 - steering_angle`) y, para evitar un retroceso en línea recta que repetiría el atasco, fuerza un ángulo de al menos 60°. El vehículo retrocede a alta potencia durante 0.75 segundos, limpia la memoria integral del PID (`integral = 0.0`) y retoma la carrera.
-
-		Finalmente, cuando el acumulador de **loops** alcanza las 12 detecciones (marcando la última vuelta), el sistema no se detiene en seco. Activa un cronómetro asíncrono temporal que permite al vehículo continuar operando con su lógica normal durante un tiempo de gracia, garantizando que el volumen total del robot cruce el área de meta antes de ejecutar el apagado general (`LNM.stop()`).
+			Para mitigar este estrés mecánico, el software inicia un procedimiento de parada controlada. Al registrar el loop número 12, se levanta la bandera end_game_triggered y se captura el tiempo de reloj en end_game_timer. El vehículo continúa ejecutando activamente sus lazos PID de centrado, evitación de paredes y tracción durante exactamente 1 segundo extra de gracia. Una vez que este margen matemático expira, el sistema rompe el bucle principal y llama a la función LNM.stop(), garantizando que el robot disipe su inercia de forma suave y se detenga legalmente dentro de los márgenes del circuito.
 
 		- **Diagrama de Flujo:**
 
