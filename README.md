@@ -424,6 +424,12 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 	- **Color Detector:** Es una herramienta interactiva de calibración visual diseñada para segmentar y aislar colores específicos en tiempo real mediante el espacio de color LAB (Luminancia, A y B) y filtros de desenfoque gaussiano. El sistema captura el flujo de video de una Picamera2, aplica transformaciones morfológicas de erosión y dilatación para limpiar el ruido de la imagen, y genera una máscara binaria basada en umbrales máximos y mínimos ajustables por deslizadores en una interfaz gráfica (GUI) construida con CustomTkinter. Su función principal es preajustar firmas de color (como rojo, verde, azul o negro) y exportar estos rangos óptimos a un archivo de configuración JSON para que el robot pueda reconocer objetos o líneas de manera 	estable bajo diferentes condiciones de luz.
 
+   	<div align="center">
+
+	<img width="803" height="447" alt="Gemini_Generated_Image_oe7w1uoe7w1uoe7w" src="https://github.com/user-attachments/assets/8ed55c9c-b1f7-45c8-a92f-bee337e51ff2" />
+
+	</div>
+
 	- **ROI Detector:** Es una utilidad de configuración espacial basada en OpenCV que permite delimitar "Regiones de Interés" (ROI) personalizadas sobre la transmisión de video de la cámara mediante clics y arrastres del mouse. El script escala el fotograma original de forma proporcional dentro de un lienzo centrado con bordes negros constantes, permitiendo al usuario dibujar múltiples cuadrantes, visualizando dinámicamente sus dimensiones en píxeles. Su propósito principal es limpiar la memoria caché con la tecla 'C' o finalizar la captura con la tecla 'ESC' para activar una ventana flotante de Tkinter que exporta de forma automatizada las coordenadas $(x_1, y_1, x_2, y_2)$ estructuradas como una lista de objetos en un archivo nativo de Python (.py), aislando las zonas específicas de análisis visual donde el robot debe procesar la información (como la línea del suelo) e ignorando el ruido del entorno.
 
 - ### MegaPiController:
