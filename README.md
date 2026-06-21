@@ -597,7 +597,7 @@ El constructor establece un canal de comunicación a través de puerto serial po
 			
 		[![Open Challenge Video](https://img.youtube.com/vi/WPSj0BXfQ5U/0.jpg)](https://youtu.be/WPSj0BXfQ5U)
 
-		*Demonstrates autonomous navigation and speed control on a dynamic track.*
+		*Demostración de la navegación autónoma y el control de la velocidad en una pista dinámica.*
 
 		</div>
 
