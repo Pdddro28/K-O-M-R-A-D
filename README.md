@@ -443,49 +443,81 @@ Alimentado por la batería dedicada a la Raspberry Pi, este bus es eléctricamen
 
 	Esta es una descripción completa de todos los atributos y métodos de la clase, junto con sus argumentos. Te recomendamos que la consultes primero antes de pasar a las demás secciones y que, cuando clones el repositorio, la utilices como guía para orientarte en nuestro código.
 
-  	### MegaPiController.ino (class Carro)
+  	Aquí tienes toda la documentación técnica completamente traducida al español, manteniendo exactamente el mismo formato y orden riguroso de las imágenes de referencia:
 
-	**Dependencias**
+---
 
-	- ```MeMegaPi.h```
+# mega_pi_controller.py (clase MegaPiController)
 
-	- ```Servo.h```
+## Dependencias
 
-	- ```Ultrasonic.h```
+* `serial`
+* `time`
+* `threading`
+* `pandas`
+* `random`
+* `json`
+* `cv2`
+* `src.vision_controller.VisionController`
+* `dataclasses.dataclass`
 
-	- ```Wire.h```
+## Descripción del método constructor
 
-	#### Descripción del método constructor
+```python
+def __init__(self, port='COM9', baudrate=115200):
+    """
+    Inicializa la conexión serial con la placa MegaPi y registra los subsistemas.
+    Si la conexión falla, termina el proceso con un mensaje de error crítico.
+    """
 
-	```
-	Carro() : motorTraccion(PORT4B) {}
-	```
+```
 
-	El constructor inicializa la representación de bajo nivel del hardware del vehículo autónomo. Vincula explícitamente el motor de tracción de corriente continua RS380 de alto rendimiento a la ranura física del puente en H de alta potencia PORT4B de la placa Makeblock MegaPi.
+El constructor establece un canal de comunicación a través de puerto serial por hardware con el microcontrolador MegaPi. Inicia automáticamente un hilo de escucha en segundo plano (`_read_telemetry`) para capturar las métricas de hardware entrantes de forma asíncrona, inicializa el subsistema de visión artificial (`VisionController`), carga las máscaras de color predefinidas desde estructuras JSON específicas y prepara los registros internos, las variables de estado y las Regiones de Interés (ROIs) para el seguimiento espacial y de líneas.
 
-	#### Descripción del atributo
+## Descripción de atributos:
 
-	| Atributo | Tipo de dato | Funcionalidad|
-	|---|---|---|
-	| ```motorTraccion``` | ```MeMegaPiDCMotor``` | Objeto de la biblioteca Makeblock que se utiliza para regular el ciclo de trabajo del PWM y el vector de rotación del motor de tracción de corriente continua trasero. |
-	| ```servoDireccion```  | ```Servo``` | Objeto Servo estándar de Arduino que maneja el tren de pulsos PWM de hardware ($50\text{Hz}$) para controlar la posición del servomotor de dirección Ackermann delantero MG996R. |
+| Atributo | Tipo de dato | Funcionalidad |
+| --- | --- | --- |
+| `ser` | `serial.Serial` | Representa el canal de comunicación serial por hardware de bajo nivel con la MegaPi. |
+| `dist_front` | `int` | Almacena el valor de distancia en tiempo real (cm) capturado por el sensor ultrasónico central. |
+| `dist_left` | `int` | Almacena el valor de distancia en tiempo real (cm) capturado por el sensor ultrasónico izquierdo. |
+| `dist_right` | `int` | Almacena el valor de distancia en tiempo real (cm) capturado por el sensor ultrasónico derecho. |
+| `ir_left` | `int` | Almacena el valor porcentual bruto de reflectancia ($0\%$ a $100\%$) del sensor IR izquierdo TCRT5000. |
+| `ir_right` | `int` | Almacena el valor porcentual bruto de reflectancia ($0\%$ a $100\%$) del sensor IR derecho TCRT5000. |
+| `data_log` | `list[dict]` | Registro volátil en memoria utilizado para encolar los pasos de telemetría destinados al guardado de datos de entrenamiento. |
+| `log_index` | `int` | Contador de pasos continuo auto-incrementable para el dataframe del registro de telemetría. |
+| `vision` | `VisionController` | Módulo central instanciado responsable de las capturas de fotogramas y del mapeo de contornos LAB/HSV. |
+| `running` | `bool` | Variable booleana de control de ejecución de alto nivel utilizada para terminar de forma segura las operaciones del hilo en segundo plano. |
+| `reader_thread` | `threading.Thread` | Hilo de trabajo daemon asíncrono dedicado a sondear los paquetes de carga útil serial entrantes. |
+| `button_value` | `int` | Representación binaria del estado del botón físico integrado en la placa para el inicio del sistema. |
+| `turning_direction` | `int` | Rastrea la configuración del diseño del carril ($0$: No asignado, $1$: Sentido horario/Azul, $2$: Sentido antihorario/Naranja). |
+| `rois` | `list[ROI]` | Define cuadros de procesamiento fijos en código para el análisis del área de la pared frontal y las líneas de la pista. |
 
-	#### Descripción de métodos:
+## Descripción de métodos:
 
-	| Método | Parámetros | Retorno | Descripción |
-	|---|---|---|---|
-	| ```inicializar()``` | Ninguno | void | Configura los recursos de hardware: activa la resistencia de pull-up interna para el botón de inicio, acopla el servo de dirección al pin A7 y fuerza su alineación física al centro geométrico (90°). |
-	| ```botonPresionado()```	| Ninguno | bool | Realiza una lectura digital en el botón de ejecución principal (A9). Devuelve true si el botón está físicamente presionado (estado LOW debido a la resistencia pull-up interna). |
-	| ```obtenerDistancia()``` | trig: int, echo: int long | tuple | Retorna una tupla conteniendo las lecturas actuales de los sensores ultrasónicos (Frontal, Izquierdo, Derecho) en centímetros, actualizadas por el hilo de telemetría en segundo plano. |
-	| ```getDistanciaFront()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el conjunto del sensor ultrasónico delantero (sensorF). |
-	| ```getDistanciaLeft()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el sensor ultrasónico de orientación izquierdo (sensorL). |
-	| ```getDistanciaRight()``` | Ninguno | long | Recupera la lectura de distancia actual en tiempo real en centímetros desde el sensor ultrasónico de orientación derecho (sensorD). |
-	| ```avanzar()``` | velocidad: byte | void | Mueve el tren motriz trasero hacia adelante a la intensidad PWM en bruto especificada e indicada por la interfaz del controlador de alto nivel. |
-	| ```retroceder()``` | angulo: byte, velocidad: byte | void | Restablece momentáneamente las ruedas físicas a la alineación central, ajusta el servo de dirección a un vector de recuperación dado y asume la salida inversa del motor DC (-velocidad). |
-	| ```girarIzquierda()``` | angulo: byte, velocidad: byte | void | Aplica el ángulo de dirección entrante al servo MG996R hacia el extremo físico izquierdo y proporciona tracción hacia adelante para navegar en curvas cerradas. |
-	| ```girarDerecha()``` | angulo: byte, velocidad: byte | void | Aplica el ángulo de dirección entrante al servo MG996R hacia el extremo físico derecho y proporciona tracción hacia adelante para navegar en curvas cerradas. |
-	| ```detenerse()``` | Ninguno | void | Corta de forma segura todos los suministros de voltaje que van al puente H del motor trasero (motor.stop()) e instantáneamente regresa el mecanismo de dirección al eje neutral. |
-	| ```girarCentro()``` | Ninguno | void | Aísla el servo de dirección y fuerza su matriz de rotación directamente al centro predeterminado (90°), sin modificar el estado de velocidad actual del motor de tracción. |
+| Método | Argumentos | Retorno | Descripción |
+| --- | --- | --- | --- |
+| `_read_telemetry()` | Ninguno | `None` | Hilo de trabajo de sondeo continuo. Decodifica un formato de carga útil rígido de 8 bytes prefijado por un byte de cabecera `0xAA`. |
+| `_send_command()` | `action: int`, `v1: int`, `v2: int` | `None` | Empaqueta y transmite instrucciones de protocolo de control de bajo nivel de 5 bytes prefijadas con una bandera de comando `0xFF`. |
+| `get_masks()` | `color: str` | `list` | Abre los archivos de configuración local de matrices de color y extrae los arreglos de límites numéricos. |
+| `load_masks()` | Ninguno | `None` | Método de arranque secuencial que mapea los límites de los colores rojo, verde, azul, naranja y negro dentro del objeto. |
+| `obtenerarea_frontal()` | Ninguno | `None` | Consulta los volúmenes de masa de contornos negros a lo largo de la ROI del horizonte frontal superior. |
+| `obtener_linea_azul()` | Ninguno | `None` | Segmenta y evalúa el perfil del diseño de la línea de seguimiento buscando activadores de la pista azul. |
+| `obtener_linea_naranja()` | Ninguno | `None` | Segmenta y evalúa el perfil del diseño de la línea de seguimiento buscando activadores de la pista naranja. |
+| `debug_UI()` | Ninguno | `None` | Motor de superposición gráfica que muestra los bucles de seguimiento dinámico de visión artificial en una ventana de fotograma local. |
+| `log_step()` | `action_code: int` | `None` | Añade los valores de las variables en tiempo real (ultrasónicos, infrarrojos) al arreglo del registro local. |
+| `move_forward()` | `speed: int`, `log: bool` | `None` | Invoca los actuadores de tracción de bajo nivel para fijar la marcha hacia adelante a las velocidades seleccionadas. |
+| `move_backward()` | `angle: int`, `speed: int`, `log: bool` | `None` | Activa vectores de movimiento en reversa mientras fija los eslabones de dirección a un ángulo de escape. |
+| `turn_direction()` | Ninguno | `None` | Macro de control reactivo que enruta los pasos de giro basándose en los estados actuales de dirección. |
+| `turn_left()` | `angle: int`, `speed: int`, `log: bool` | `None` | Ajusta los eslabones del servo mecánico Ackermann a ángulos cerrados hacia la izquierda bajo velocidades de tracción fijas. |
+| `turn_right()` | `angle: int`, `speed: int`, `log: bool` | `None` | Ajusta los eslabones del servo mecánico Ackermann a ángulos cerrados hacia la derecha bajo velocidades de tracción fijas. |
+| `turn_center()` | `log: bool` | `None` | Recalibra los pulsos del servo de dirección activa de vuelta a las coordenadas del centro geométrico. |
+| `stop()` | `log: bool` | `None` | Desactiva los registros de velocidad activos de inmediato para cortar la energía de los motores y detener el vehículo. |
+| `get_distances()` | Ninguno | `tuple[int, int, int]` | Getter estándar de telemetría que devuelve una tupla compuesta por las métricas actuales de los sensores (frontal, izquierdo, derecho). |
+| `get_ir_reflectance()` | Ninguno | `tuple[int, int]` | Devuelve una tupla en tiempo real que contiene los porcentajes de reflectividad infrarroja localizada ($0-100\%$). |
+| `save_data_to_csv()` | `filename: str` | `None` | Compila los volcados de datos encolados directamente en estructuras mapeadas por índices en el disco a través de Pandas. |
+| `close()` | Ninguno | `None` | Libera los manejadores de procesos, envía un comando de parada total y cierra de forma segura los puertos seriales abiertos. |
+| `start()` | Ninguno | `bool` | Evalúa los estados del botón. Devuelve `True` si el botón está liberado (HIGH/0), manteniendo el bucle en ejecución. |
 
 - ### Arduino Controller:
 
