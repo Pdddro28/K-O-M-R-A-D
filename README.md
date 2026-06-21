@@ -541,15 +541,9 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 		</div>
 
-		- **Estrategia:** Para cumplir con los desafíos del Open Challenge, se diseñó e implementó una arquitectura de software basada en un bucle de control de alta frecuencia. La estrategia central no depende de un solo sensor, sino de un Control Híbrido (Sensor Fusión) que alterna dinámicamente entre la Visión Artificial (cámara) y la Telemetría Acústica (sensores ultrasónicos) según las condiciones de la pista. El sistema se divide en cuatro pilares de ejecución: Detección de Sentido, Control de Trayectoria (PIDs independientes), Navegación en Esquinas y Seguridad Activa (Anticolisión).
-		
-		- **ROIS:** Para optimizar el procesamiento computacional, mantener un alto framerate y evitar falsos positivos con elementos externos a la pista, el campo de visión de la cámara se segmenta geométricamente:
+		- **Estrategia:**
  
-			- ROI Principal (Búsqueda de Color): Un recuadro amplio (0, 50, width, height-100) dedicado exclusivamente a procesar máscaras de color (Rojo, Verde, Azul, Naranja) mediante la búsqueda de contornos.
-
-			- ROIs Laterales (Centrado Visual): El espacio inferior se divide en dos cuadrantes simétricos, roi_izq y roi_der. Estas regiones aplican una máscara negra (mask_black) para calcular en tiempo real el área en píxeles de las paredes laterales de la pista, permitiendo que el algoritmo sepa matemáticamente hacia qué lado está más inclinado el chasis.
-
-		- **Contador de Loops:** En los instantes iniciales de la carrera, el robot ejecuta ciclos de evaluación (loops de detección) para procesar el área de los colores clave que dictan la dirección del circuito. Si en estos loops el sistema detecta un área mayor a un umbral crítico de 1200 píxeles de color Naranja, la variable de estado asume una orientación de giro a la derecha; si el umbral se rompe con el color Azul, el sistema bloquea la lógica para girar a la izquierda durante el resto de las vueltas.
+  		- **ROIS:**
 
 		- **Diagrama de Flujo:**
 
@@ -561,79 +555,78 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 	- **Obstacle Challenge:**
 
-	La estrategia diseñada para abordar el segundo reto (evasión de obstáculos) se construye de forma modular sobre la base arquitectónica de la ronda abierta. Se conservan las Regiones de Interés laterales (roi_izq y roi_der), la resolución de la cámara y los filtros de segmentación de color base.
+	- **Estrategia:** La estrategia diseñada para abordar el segundo reto (evasión de obstáculos) se construye de forma modular sobre la base arquitectónica de la ronda abierta. Se conservan las Regiones de Interés laterales (roi_izq y roi_der), la resolución de la cámara y los filtros de segmentación de color base.
 
-	El núcleo de este reto radica en la interpretación semántica del entorno según las reglas oficiales de la competencia: los pilares actúan como señales direccionales que indican el carril de paso correcto. Para cumplir con esta lógica de navegación de manera robusta a una velocidad constante (VELOCIDAD_BASE = 68), el software se estructuró sobre tres pilares fundamentales:
+		El núcleo de este reto radica en la interpretación semántica del entorno según las reglas oficiales de la competencia: los pilares actúan como señales direccionales que indican el carril de paso correcto. Para cumplir con esta lógica de navegación de manera robusta a una velocidad constante (VELOCIDAD_BASE = 68), el software se estructuró sobre tres pilares fundamentales:
 
-	- **Base del Reto Abierto (Navegación Línea Base):** Conserva el control de centrado mediante la diferencia de áreas de líneas y el fallback de seguridad asistido por ultrasonidos.
+		- **Base del Reto Abierto (Navegación Línea Base):** Conserva el control de centrado mediante la diferencia de áreas de líneas y el fallback de seguridad asistido por ultrasonidos.
    
-	- **Técnica de Selección de Carril (Visión Computacional):** Segmentación por color a larga distancia mediante una nueva Región de Interés frontal expandida (ROI_OBSTACULOS).
-Máquina de Estados Asíncrona: Algoritmos de control dedicados para la evasión precisa y el retorno seguro al carril.
+		- **Técnica de Selección de Carril (Visión Computacional):** Segmentación por color a larga distancia mediante una nueva Región de Interés frontal expandida (ROI_OBSTACULOS).
+    
+		- **Máquina de Estados Asíncrona:** Algoritmos de control dedicados para la evasión precisa y el retorno seguro al carril.
 
-	Para anticipar la trayectoria de los pilares sin interferir con la lectura de las líneas guía del suelo, se implementó una zona de escaneo central denominada ROI_OBSTACULOS con dimensiones optimizadas en píxeles ROI(30, 30, 610, 320). Esta configuración permite procesar los objetos antes de que entren en el umbral crítico de colisión frontal.
+	- **ROIS:** Para anticipar la trayectoria de los pilares sin interferir con la lectura de las líneas guía del suelo, se implementó una zona de escaneo central denominada ROI_OBSTACULOS con dimensiones optimizadas en píxeles ROI(30, 30, 610, 320). Esta configuración permite procesar los objetos antes de que entren en el umbral crítico de colisión frontal.
 Adicionalmente, el sistema implementa dos lazos de control PID independientes con sintonizaciones diferenciadas según las necesidades dinámicas del vehículo:
 
-	- **PID de Línea Estándar:** Configurado con valores conservadores (Kp = 0.015, Kd = 0.035) para mantener transiciones suaves y un desplazamiento lineal estable en rectas.
+		- **PID de Línea Estándar:** Configurado con valores conservadores (Kp = 0.015, Kd = 0.035) para mantener transiciones suaves y un desplazamiento lineal estable en rectas.
   
-	- **PID de Evasión de Obstáculos:** Configurado con una respuesta altamente agresiva (Kp = 0.32, Kd = 0.01). El término proporcional elevado garantiza que el vehículo responda con un torque de dirección inmediato ante el desplazamiento del pilar en la imagen, mientras que el término derivativo amortigua el retorno para evitar que la parte trasera del chasis (cola) derrape y golpee el obstáculo.
+		- **PID de Evasión de Obstáculos:** Configurado con una respuesta altamente agresiva (Kp = 0.32, Kd = 0.01). El término proporcional elevado garantiza que el vehículo responda con un torque de dirección inmediato ante el desplazamiento del pilar en la imagen, mientras que el término derivativo amortigua el retorno para evitar que la parte trasera del chasis (cola) derrape y golpee el obstáculo.
 
-- **Implementación de la Máquina de Estados de Navegación**
-
-	El comportamiento dinámico de Halbi the Green se rige por una máquina de estados finitos que conmuta de forma asíncrona entre tres modos de operación para asegurar que las lógicas de centrado y evasión no entren en conflicto.
+		- **Implementación de la Máquina de Estados de Navegación:** El comportamiento dinámico de Halbi the Green se rige por una máquina de estados finitos que conmuta de forma asíncrona entre 	tres modos de operación para asegurar que las lógicas de centrado y evasión no entren en conflicto.
 
 	- **Estado 1:** LINEAL (Navegación Base y Curvas Cerradas)
     
-	Es el estado por defecto del robot. Mientras se encuentra en este modo, el vehículo ejecuta de forma prioritaria el centrado geométrico calculando el error entre las áreas negras laterales (error = black_areas[1] - black_areas[0]). Si el sensor de ultrasonido frontal detecta una pared a corta distancia (front_dist < 90 cm) en copresencia con una alta densidad de pixeles negros de pista (LNM.black_area > 8000), el estado se bloquea temporalmente bajo la bandera girando = True para forzar un giro de esquina cerrada de 90°. De manera simultánea, el método procesar_obstaculos() analiza los contornos máximos filtrados bajo las máscaras mask_red y mask_green. La transición hacia el estado de evasión se activa inmediatamente cuando el área de un contorno supera los umbrales de ruido calibrados:
+		Es el estado por defecto del robot. Mientras se encuentra en este modo, el vehículo ejecuta de forma prioritaria el centrado geométrico calculando el error entre las áreas negras laterales (error = black_areas[1] - black_areas[0]). Si el sensor de ultrasonido frontal detecta una pared a corta distancia (front_dist < 90 cm) en copresencia con una alta densidad de pixeles negros de pista (LNM.black_area > 8000), el estado se bloquea temporalmente bajo la bandera girando = True para forzar un giro de esquina cerrada de 90°. De manera simultánea, el método procesar_obstaculos() analiza los contornos máximos filtrados bajo las máscaras mask_red y mask_green. La transición hacia el estado de evasión se activa inmediatamente cuando el área de un contorno supera los umbrales de ruido calibrados:
 
-	<div align="center">
+		<div align="center">
 		
-	**Pilar Verde: Área $> 350 \text{ px} \rightarrow$ Transición a ESQUIVANDO | memoria_lado = "IZQUIERDA" (El pilar se debe dejar a la izquierda).**
+		**Pilar Verde: Área $> 350 \text{ px} \rightarrow$ Transición a ESQUIVANDO | memoria_lado = "IZQUIERDA" (El pilar se debe dejar a la izquierda).**
    
-	**Pilar Rojo: Área $> 300 \text{ px} \rightarrow$ Transición a ESQUIVANDO | memoria_lado = "DERECHA" (El pilar se debe dejar a la derecha).**
+		**Pilar Rojo: Área $> 300 \text{ px} \rightarrow$ Transición a ESQUIVANDO | memoria_lado = "DERECHA" (El pilar se debe dejar a la derecha).**
 
-	</div>
+		</div>
 		
 	- **Estado 2:** ESQUIVANDO (Lazo de Control de Evasión)
 
-	Al entrar en este modo, el PID de líneas se suspende y el control de dirección pasa al lazo PID de obstáculos. El algoritmo persigue un Setpoint o punto de consigna absoluto en los extremos del cuadro visual para forzar al carro a abrirse hacia el carril libre:
+		Al entrar en este modo, el PID de líneas se suspende y el control de dirección pasa al lazo PID de obstáculos. El algoritmo persigue un Setpoint o punto de consigna absoluto en los extremos del cuadro visual para forzar al carro a abrirse hacia el carril libre:
 
-	<div align="center">
+		<div align="center">
 		
-	**Para pilares verdes (dejar a la izquierda), se busca el SETPOINT_VERDE = 549 (extremo derecho del marco).**
+		**Para pilares verdes (dejar a la izquierda), se busca el SETPOINT_VERDE = 549 (extremo derecho del marco).**
 
-	**Para pilares rojos (dejar a la derecha), se busca el SETPOINT_ROJO = 50 (extremo izquierdo del marco).**
+		**Para pilares rojos (dejar a la derecha), se busca el SETPOINT_ROJO = 50 (extremo izquierdo del marco).**
 
-	</div>
+		</div>
 
-	- **Mecanismo de Tiempo de Gracia:** Debido a la agresividad del giro, es común que el pilar salga del campo visual de la cámara antes de que el vehículo lo haya superado físicamente.
+		- **Mecanismo de Tiempo de Gracia:** Debido a la agresividad del giro, es común que el pilar salga del campo visual de la cámara antes de que el vehículo lo haya superado físicamente.
 
-	Para evitar que el robot regrese prematuramente al centro de la pista y colisione con el obstáculo, se implementó un temporizador de inercia (TIEMPO_GRACIA = 0.2 segundos). Si el área del pilar cae a cero, el sistema mantiene el cálculo del último error registrado (error_obs = prev_error), sosteniendo el ángulo de giro por hardware durante el tiempo de gracia antes de conmutar al estado REBASANDO.
+		Para evitar que el robot regrese prematuramente al centro de la pista y colisione con el obstáculo, se implementó un temporizador de inercia (TIEMPO_GRACIA = 0.2 segundos). Si el área del pilar cae a cero, el sistema mantiene el cálculo del último error registrado (error_obs = prev_error), sosteniendo el ángulo de giro por hardware durante el tiempo de gracia antes de conmutar al estado REBASANDO.
 
-	- **Seguridad por Encajonamiento:** Si los sensores ultrasónicos detectan que el vehículo se está aproximando peligrosamente a la pared exterior del circuito debido a la maniobra de esquiva (left_dist o right_dist < DIST_MIN_PARED de $18.0\text{ cm}$), la máquina aborta el lazo PID de visión y fuerza la transición inmediata al estado de rebase para proteger la integridad estructural.
+		- **Seguridad por Encajonamiento:** Si los sensores ultrasónicos detectan que el vehículo se está aproximando peligrosamente a la pared exterior del circuito debido a la maniobra de esquiva (left_dist o right_dist < DIST_MIN_PARED de $18.0\text{ cm}$), la máquina aborta el lazo PID de visión y fuerza la transición inmediata al estado de rebase para proteger la integridad estructural.
   
 	- **Estado 3:** REBASANDO (Zona de Seguridad y Retorno)
     
-	Este estado garantiza que la parte posterior del chasis rebase completamente el pilar antes de restablecer las condiciones de carrera lineal. Dado que la cámara ya no posee contacto visual con el obstáculo, el control se delega a la telemetría de los sensores ultrasónicos laterales. El vehículo mantiene un ángulo de compensación controlado según el lado memorizado para evitar rozar la pared lateral. La máquina de estados no permite el regreso al modo LINEAL hasta que el sensor de ultrasonido del lado opuesto al pilar registre una distancia libre mayor a $40\text{ cm}$ (left_dist > 40 o right_dist > 40). Esta holgura asegura de forma matemática que el volumen total del robot ha despejado la posición del pilar, evitando enganches con las esquinas traseras o la base del obstáculo.
+		Este estado garantiza que la parte posterior del chasis rebase completamente el pilar antes de restablecer las condiciones de carrera lineal. Dado que la cámara ya no posee contacto visual con el obstáculo, el control se delega a la telemetría de los sensores ultrasónicos laterales. El vehículo mantiene un ángulo de compensación controlado según el lado memorizado para evitar rozar la pared lateral. La máquina de estados no permite el regreso al modo LINEAL hasta que el sensor de ultrasonido del lado opuesto al pilar registre una distancia libre mayor a $40\text{ cm}$ (left_dist > 40 o right_dist > 40). Esta holgura asegura de forma matemática que el volumen total del robot ha despejado la posición del pilar, evitando enganches con las esquinas traseras o la base del obstáculo.
 
-	Como última capa de protección ante pérdidas de tracking visual o escenarios de colisión inminente, el ciclo de control ejecuta en cada iteración una subrutina de freno de mano físico. Si el ultrasonido frontal registra una distancia menor a DIST_MIN_CHOQUE ($12.0\text{ cm}$), el vehículo interrumpe la energía de los motores mediante LNM.stop() y calcula un ángulo de escape inverso de manera dinámica:
+		Como última capa de protección ante pérdidas de tracking visual o escenarios de colisión inminente, el ciclo de control ejecuta en cada iteración una subrutina de freno de mano físico. Si el ultrasonido frontal registra una distancia menor a DIST_MIN_CHOQUE ($12.0\text{ cm}$), el vehículo interrumpe la energía de los motores mediante LNM.stop() y calcula un ángulo de escape inverso de manera dinámica:
 
-	<div align="center">
+		<div align="center">
 	
-	$$\text{Ángulo Escapatoria} = 160^\circ_\text{steering\_angle}$$
+		$$\text{Ángulo Escapatoria} = 160^\circ-\text{steering_angle}$$
 
-	</div>
+		</div>
 	
 
-	El robot realiza una maniobra de retroceso a alta potencia (speed = 85) durante $0.75$ segundos, resetea las variables integrales del PID a cero y reestablece el estado de carrera a LINEAL, garantizando la resiliencia del software ante condiciones críticas de atasco ambiental.
+		El robot realiza una maniobra de retroceso a alta potencia (speed = 85) durante $0.75$ segundos, resetea las variables integrales del PID a cero y reestablece el estado de carrera a LINEAL, garantizando la resiliencia del software ante condiciones críticas de atasco ambiental.
 
 
 		- **Diagrama de Flujo:**
  
-	<div align="center">
+		<div align="center">
 
-	<img width="3533" height="5354" alt="untitled" src="https://github.com/user-attachments/assets/9ba2ee32-f8ed-4207-aa86-ce3b5ed009fa" />
+		<img width="3533" height="5354" alt="untitled" src="https://github.com/user-attachments/assets/9ba2ee32-f8ed-4207-aa86-ce3b5ed009fa" />
 
-	</div>
+		</div>
 
 # 4. Challenges
 
