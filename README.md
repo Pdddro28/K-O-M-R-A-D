@@ -531,13 +531,17 @@ El constructor establece un canal de comunicación a través de puerto serial po
 
 	- Open Challenge:
 
-		[![Open Challenge Video](https://youtu.be/WPSj0BXfQ5U)
-   
+	[![Open Challenge Video](https://https://img.youtube.com/vi/WPSj0BXfQ5U/0.jpg)](https://youtu.be/WPSj0BXfQ5U)
+
 		- **Estrategia:** Para cumplir con los desafíos del Open Challenge, se diseñó e implementó una arquitectura de software basada en un bucle de control de alta frecuencia. La estrategia central no depende de un solo sensor, sino de un Control Híbrido (Sensor Fusión) que alterna dinámicamente entre la Visión Artificial (cámara) y la Telemetría Acústica (sensores ultrasónicos) según las condiciones de la pista. El sistema se divide en cuatro pilares de ejecución: Detección de Sentido, Control de Trayectoria (PIDs independientes), Navegación en Esquinas y Seguridad Activa (Anticolisión).
 		
-		- **ROIS:** Para optimizar el procesamiento computacional y evitar falsos positivos con el entorno, la cámara segmenta el espacio en dos ROIs laterales específicas (roi y roi2). Estas regiones buscan activamente las líneas negras que delimitan las paredes o carriles de la pista.
+		- **ROIS:** Para optimizar el procesamiento computacional, mantener un alto framerate y evitar falsos positivos con elementos externos a la pista, el campo de visión de la cámara se segmenta geométricamente:
+ 
+			- ROI Principal (Búsqueda de Color): Un recuadro amplio (0, 50, width, height-100) dedicado exclusivamente a procesar máscaras de color (Rojo, Verde, Azul, Naranja) mediante la búsqueda de contornos.
 
-		- **Contador de Loops:** Se procesa el área de los colores clave en los primeros instantes. Si se detecta un área mayor a un umbral crítico 200px de color naranja, el robot asume una orientación de giro a la derecha; si el color es azul, se configura para girar a la izquierda.
+			- ROIs Laterales (Centrado Visual): El espacio inferior se divide en dos cuadrantes simétricos, roi_izq y roi_der. Estas regiones aplican una máscara negra (mask_black) para calcular en tiempo real el área en píxeles de las paredes laterales de la pista, permitiendo que el algoritmo sepa matemáticamente hacia qué lado está más inclinado el chasis.
+
+		- **Contador de Loops:** En los instantes iniciales de la carrera, el robot ejecuta ciclos de evaluación (loops de detección) para procesar el área de los colores clave que dictan la dirección del circuito. Si en estos loops el sistema detecta un área mayor a un umbral crítico de 1200 píxeles de color Naranja, la variable de estado asume una orientación de giro a la derecha; si el umbral se rompe con el color Azul, el sistema bloquea la lógica para girar a la izquierda durante el resto de las vueltas.
 
 		- **Diagrama de Flujo:**
 
