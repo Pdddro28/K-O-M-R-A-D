@@ -1,3 +1,3 @@
 # Source Code
 
-in this folder is the Main code description
+En esta carpeta se encuentra el ccódigo principal de nuestro robot
