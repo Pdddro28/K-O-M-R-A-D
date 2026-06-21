@@ -1,3 +1,3 @@
 # Source Code
 
-En esta carpeta se encuentra el ccódigo principal de nuestro robot
+En esta carpeta se encuentra el código principal de nuestro robot
