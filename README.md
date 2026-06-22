@@ -90,7 +90,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 | <img width="920" height="920" alt="Captura de pantalla 2026-06-17 185504" src="https://github.com/user-attachments/assets/36166165-a542-42d6-a771-41a60693a399" /> | **Cyber Cooper** | En 2023 teníamos pensado diseñar el coche desde cero, modelando e imprimiendo nuestras propias piezas en 3D, incluidos el chasis y el sistema de dirección. Aunque al principio parecía una buena idea, a medida que avanzábamos empezamos a encontrarnos con un problema tras otro, y nos dimos cuenta de que nuestro diseño actual nos acarrearía más dificultades. Al final, hicimos todo lo que pudimos dentro de las limitaciones de tiempo que teníamos. |
 | <img width="920" height="920" alt="front2" src="https://github.com/user-attachments/assets/ce130237-cc0b-4aa9-a620-0aea287408c2" /> | **Cooper** | En 2024 desarrollamos un chasis con piezas 3D estructurado en dos niveles. El nivel inferior albergaba los sensores y la electrónica de bajo nivel, mientras que el superior sostenía las baterías y la Raspberry Pi 3 para optimizar el espacio. Aunque logramos un gran avance estético y funcional, sufrimos lecciones duras en pista: el peso excesivo provocó la flexión de los acoples en la transmisión trasera, lo cual, a su vez, generó problemas severos de fricción mecánica entre las piezas impresas en 3D. |
 | <img width="920" height="920" alt="front" src="https://github.com/user-attachments/assets/804b3d7f-3500-4351-a917-ccf781029804" /> | **Halbi** | En 2025 teniendo en cuenta los recursos de los que disponíamos en ese momento, nuestra idea principal era rediseñar el Cybercooper, modificando la base y la estrategia existentes y utilizando mejores componentes electrónicos; empezamos a imprimir las nuevas piezas con material blanco y a pensar en mejores formas de montar el sistema de dirección del coche. Al final, decidimos utilizar una base prefabricada para el chasis; la razón principal fue ahorrar tiempo (y dolores de cabeza) con el diseño mecánico, lo que nos permitía dedicar más tiempo a la electrónica y la programación. |
-| <img width="920" height="920" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** | En 2025 a diferencia de los modelos anteriores que pertenecían a nuestro coach, "The Fridge" fue un diseño construido enteramente por nosotros. Aquí dimos el salto a la geometría Ackermann e imprimimos la gran mayoría de las piezas en 3D. A nivel motriz, usamos un motor DC con un engranaje acoplado para traccionar ambas ruedas. Físicamente le instalamos 3 sensores ultrasónicos, una Raspberry Pi 4 y un giroscopio MPU6050, pero por falta de tiempo y severos problemas de configuración, la Raspberry y el IMU quedaron como peso muerto y terminamos controlando todo únicamente desde la MegaPi. Sufrimos muchísimo: las piezas de la dirección impresas en 3D se rompían constantemente por el estrés, y programar la navegación autónoma en Arduino dependiendo de puros rebotes ultrasónicos fue casi imposible. Siendo sinceros, terminó siendo el peor proyecto de los tres. |
+| <img width="920" height="920" alt="WhatsApp Image 2026-06-18 at 7 39 40 PM" src="https://github.com/user-attachments/assets/ca9f62ff-7b8b-452a-97de-95ebf12dc0ef" /> | **The Fridge** | En 2025 a diferencia de los modelos anteriores que pertenecían a nuestro coach, "The Fridge" fue un diseño construido enteramente por nosotros. Aquí dimos el salto a la geometría Ackermann e imprimimos la gran mayoría de las piezas en 3D. A nivel motriz, usamos un motor DC con un engranaje acoplado para traccionar ambas ruedas. Físicamente le instalamos 3 sensores ultrasónicos, una Raspberry Pi 4 y un giroscopio MPU6050, pero por falta de tiempo y severos problemas de configuración, la Raspberry y el IMU quedaron como peso muerto y terminamos controlando todo únicamente desde la MegaPi. Sufrimos muchísimo: las piezas de la dirección impresas en 3D se rompían constantemente por el estrés, y programar la navegación autónoma en Arduino dependiendo de puros rebotes ultrasónicos fue casi imposible. |
 
 </div>
 
@@ -129,12 +129,6 @@ Esta es la estructura de carpetas de nuestro repositorio:
 		* **La Ejecución Mecánica:** Un servo digital **MG996R** de alto par ($11 \text{ kg}\cdot\text{cm}$ de par) se ancla al mamparo delantero mediante un soporte de aluminio en forma de L mecanizado a medida para eliminar la deflexión estructural. El brazo del servo acciona una cremallera de dirección de doble enlace conectada a tirantes asimétricos y manguetas de dirección. Los brazos de dirección están angulados hacia el interior, apuntando al centro del eje trasero, completando el clásico "Trapezoide de Ackermann". Este diseño mecánico exacto convierte el desplazamiento lineal del servo en ángulos de rueda no lineales de forma automática.
 
 		* **El Control Digital y Calibración:** El MG996R es controlado por un tren de pulsos PWM por hardware continuo y libre de fluctuaciones (*jitter*) a $50\text{Hz}$ directamente desde el microcontrolador MegaPi. La dirección está rígidamente mapeada y calibrada a una banda muerta de software donde los $80^\circ$ representan el centro geométrico absoluto. Los puntos finales mecánicos están limitados por software entre $40^\circ$ (Máximo Izquierda) y $105^\circ$ (Máximo Derecha) para evitar que los eslabones de la dirección alcancen un bloqueo mecánico o fuercen los límites de pérdida del motor.
-
-	<div align="center">
-
-	Imagen
-
-	</div>
 
 	- ### ¿Qué es la Geometría Ackermann? 
 
@@ -647,7 +641,7 @@ La telemetría para el conteo de vueltas se realiza mediante la discriminación 
 
 	<div align="center">
 
-	<img width="3505" height="4877" alt="untitled (1)" src="https://github.com/user-attachments/assets/94f21db8-a8a3-445f-988f-bbd1e25d0978" />
+	<img width="4382" height="6096" alt="untitled@1 25x (3)" src="https://github.com/user-attachments/assets/2e304801-5b9d-4e67-b87a-4c6e3bc34b9a" />
 
 	</div>
 
@@ -722,7 +716,7 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
  
 		<div align="center">
 
-		<img width="3533" height="5354" alt="untitled" src="https://github.com/user-attachments/assets/9ba2ee32-f8ed-4207-aa86-ce3b5ed009fa" />
+		<img width="4417" height="6692" alt="untitled@1 25x (4)" src="https://github.com/user-attachments/assets/cad05d6e-52f6-4a7a-926a-9065179510fa" />
 
 		</div>
 
