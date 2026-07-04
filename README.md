@@ -730,7 +730,7 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 
 	- **Espacio ocupado por las baterías:**
 
-		- * *Problema:* Ocupaban demasiado volumen en el chasis y no dejaban espacio para ubicar los componentes de forma cómoda.
+		- *Problema:* Ocupaban demasiado volumen en el chasis y no dejaban espacio para ubicar los componentes de forma cómoda.
 
     	- *Solución:* Se les diseñó una base a medida para ubicarlas en el centro del robot y, sobre esta estructura, se construyó el piso superior.
        
@@ -742,12 +742,14 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
       
     - *Nota técnica:* Esta solución no fue del todo ideal, ya que estas bases sobresalen un poco de la estructura, causando atascamientos mecánicos cuando el vehículo pasa muy cerca de una esquina.
       
-	* **Ubicación de la cámara y controlador:** * *Problema:* No había lugar físico para situar la cámara ni la placa de procesamiento.
+	* **Ubicación de la cámara y controlador:**
+ 
+  		- *Problema:* No había lugar físico para situar la cámara ni la placa de procesamiento.
   
-    	* *Solución:* Sobre la base de las baterías se diseñó un soporte dedicado para la Raspberry Pi y la cámara. Esta última incluye una base con ángulo graduable para poder ajustar el punto de vista del lente de manera cómoda y precisa.
+   		- *Solución:* Sobre la base de las baterías se diseñó un soporte dedicado para la Raspberry Pi y la cámara. Esta última incluye una base con ángulo graduable para poder ajustar el punto de vista del lente de manera cómoda y precisa.
 
-	### Problemas con las conexiones (Cableado)
+	* **Problemas con las conexiones (Cableado)**
 
-	* **Problema:** Al tener cables sueltos y expuestos, estos se quedaban atascados constantemente con el entorno e incluso se llevaban por delante los obstáculos del circuito en algunas ocasiones.
+		- *Problema:* Al tener cables sueltos y expuestos, estos se quedaban atascados constantemente con el entorno e incluso se llevaban por delante los obstáculos del circuito en algunas ocasiones.
   
-	* **Solución:** Se reorganizaron por completo las conexiones para eliminar los bucles y partes sobresalientes del cableado.
+		- *Solución:* Se reorganizaron por completo las conexiones para eliminar los bucles y partes sobresalientes del cableado.
