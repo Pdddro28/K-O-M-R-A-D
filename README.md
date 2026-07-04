@@ -282,12 +282,9 @@ Esta es la estructura de carpetas de nuestro repositorio:
 | 1 | [Arducam 8MP IMX219 175°](https://www.amazon.com/Arducam-IMX219-Degree-Raspberry-Compatible/dp/B09VSVB4DT/ref=sr_1_7?crid=10W18P0RVDUOR&s=electronics&sr=1-7) | $26.99 | $26.99 |
 | 4 | [Lever wire connectors](https://www.amazon.com/Conductor-Compact-Connectors-Electrical-Terminals/dp/B0D9Y5XFQC/ref=sr_1_2_sspa?sr=8-2-spons) | $9.99 | $39.96 |
 | 1 | [Buck Converter 3A 15W Type-C](https://www.amazon.com/-/es/Convertidor-Impermeable-Adaptador-corriente-compatible/dp/B0D2MTJQK8) | $8.79 | $8.79 |
-| 1 | [MAKEBLOCK MegaPi (from mbot mega)](https://www.robotshop.com/products/makeblock-mbot-mega-robot-car-rechargeable-li-po-battery-kit?qd=c181467e2368e663479ab211142e2920) | $148.97 | $148.97 |
-| 1 | [Crash Collision Sensor Module](https://www.amazon.com/-/es/Generic-detecci%C3%B3n-colisi%C3%B3n-interruptor-Arduino/dp/B0D6GZDV95) | $5.54 | $5.54 |
-| 1 | [LED Traffic Light Module](https://www.amazon.com/Traffic-Light-Module-Board-Arduino/dp/B07R1KJ4DT) | $10.99| $10.99 |
-| 2 | [Vl53l0x-v2 Sensor](https://articulo.mercadolibre.com.ve/MLV-724811982-ic-vl53l0x-v2-sensor-tiempo-vuelo-laser-a-distancia-_JM) | $5 | $10 |
-| 1 | [HiLetgo DC-DC Step Down XL4015](https://www.amazon.com/-/es/HiLetgo-alimentaci%C3%B3n-ajustable-pilares-volt%C3%ADmetro/dp/B00LTSC1YK) | $7.99 | $7.99 |
-| | | | **$603.02** |
+| 1 | [MAKEBLOCK MegaPi (from mbot mega)](https://www.robotshop.com/products/makeblock-mbot-mega-robot-car-rechargeable-li-po-battery-kit?qd=c181467e2368e663479ab211142e2920) | $148.97 | $148.97 | 
+| 3 | [Ultrasonic Sensor HC-SR04](https://www.amazon.com/-/es/Ferwooh-ultras%C3%B3nico-HC-SR04-medici%C3%B3n-distancia/dp/B0D1MDP9V3) | $6.99 | $20.97 |
+| | | | **$589.47** |
 
 </div>
 
@@ -306,9 +303,6 @@ Esta es la estructura de carpetas de nuestro repositorio:
 | **ArduCam IMX219 8MP** <div  align="center"> ![Encorder](https://cdn.arducam.com/wp-content/uploads/2022/04/Arducam_IMX219_MIPI_Pi_B0392-8.jpg) </div> | La ArduCam IMX219 de 8MP es un módulo de cámara compacto basado en el sensor Sony IMX219, el mismo estándar de la Raspberry Pi Camera v2, que equilibra resolución y rendimiento para proyectos de visión artificial y robótica. Se conecta mediante la interfaz CSI (Camera Serial Interface), lo que garantiza una transferencia de datos a alta velocidad y con baja latencia hacia computadoras como Raspberry Pi o Jetson Nano. Este diseño la convierte en una solución eficiente y de fácil integración para sistemas embebidos que requieren procesamiento de imagen en tiempo real. |
 | **Buck Converter 3A 15W Type-C** <div  align="center"> ![camera](https://m.media-amazon.com/images/I/61pOfxNxUnL._AC_UF1000,1000_QL80_.jpg) </div> | El módulo **convertidor buck tipo C de 3A y 15W** es un regulador reductor de CC-CC que transforma voltajes de entrada elevados en una salida baja y estable con una eficiencia del 85 al 95%. En este proyecto, se utilizó para conectar la batería **LiPo Zeee 3S** (de hasta 12.6V) a la **Raspberry Pi 4B**, la cual exige un suministro constante de **5V y hasta 3A**. Debido a que el voltaje directo de la batería dañaría la placa, el convertidor reduce y regula la tensión de manera segura, protegiendo los componentes contra sobrevoltajes, minimizando las pérdidas de energía por calor y garantizando un rendimiento estable del sistema a medida que la batería se descarga. |
 | **Ultrasonic Sensor HC-SR04** <div  align="center"> <img width="466" height="466" alt="61CXJgLZwUL _SX466_" src="https://github.com/user-attachments/assets/1345b129-76f7-4f39-8ec2-b839398ea61b" /> </div> | El sensor ultrasónico HC-SR04 es un dispositivo compacto de medición de distancia que opera bajo el principio del eco de sonar, ideal para la evasión de obstáculos en robótica. Está equipado con dos transductores que emiten una ráfaga de ondas de alta frecuencia ($40\text{ kHz}$) y reciben su rebote tras chocar con un objeto. Al calcular con precisión el tiempo que tarda la señal en ir y venir, el módulo determina la distancia lineal en un rango efectivo de 2 a 400 centímetros con una precisión de 3 milímetros, proporcionando datos en tiempo real cruciales para la navegación del vehículo.|
-| **Vl53l0x-v2 Sensor** <div  align="center"> <img width="525" height="478" alt="D_NQ_NP_2X_916413-MLV51649751397_092022-F" src="https://github.com/user-attachments/assets/c3c39671-3595-4e15-aefc-0836d1a81e33" /> </div> | Es un sensor de distancia láser de Tiempo de Vuelo (ToF) que mide distancias de hasta 2 metros con precisión milimétrica mediante la emisión de un pulso infrarrojo invisible de 940 nm. A diferencia de los sensores tradicionales, calcula el tiempo exacto que tarda la luz en rebotar sobre el objeto, lo que le permite ofrecer lecturas estables e independientes del color, reflejo o textura de la superficie. Cuenta con interfaz de comunicación I²C, es compatible con voltajes de 3.3V y 5V, y es ideal para proyectos de robótica, detección de presencia y evitación de obstáculos con tarjetas como Arduino o ESP32 |
-| **HiLetgo DC-DC Step Down XL4015 <div  align="center"> <img width="522" height="522" alt="61nLVKTcmBL _SX522_" src="https://github.com/user-attachments/assets/efe031ca-68ee-4b13-94fd-374ef5acef26" /> </div> | El módulo HiLetgo XL4015 destaca por su alta eficiencia de conversión (hasta el 96%) y un diseño robusto que soporta un voltaje de entrada de 4V a 38V y una salida ajustable de 1.25V a 36V. Cuenta con un voltímetro digital LED integrado que muestra el voltaje de entrada o salida con una precisión de ±0.05V, un botón físico para alternar la medición y luces indicadoras de estado. Además, opera a una frecuencia de conmutación de 180 kHz e incorpora mecanismos de seguridad esenciales como protección contra cortocircuitos, apagado térmico por sobretemperatura y limitación de corriente hasta 5A. |
-
 
 </div>
 
@@ -318,34 +312,36 @@ Esta es la estructura de carpetas de nuestro repositorio:
 
 	- **Arquitectura del Chasis por Niveles:**
 
-	- **1st Level (Planta Baja):** Constituye la base estructural y el tren de rodaje del vehículo. En este nivel se ubica el Motor de Tracción RS380, el mecanismo de dirección asistido por el servomotor, el regulador de voltaje HiLetgo DC-DC Step Down XL4015, los tres sensores ultrasónicos HC-SR04 (Front-US y los sensores laterales Left-US / Right-US), y dos sensores de distancia láser de tiempo de vuelo (ToF) VL53L0X-V2 ubicados a los flancos del sensor ultrasónico central.
+	- **1st Level (Planta Baja):**
+	Constituye la base estructural y el tren de rodaje del vehículo. En este nivel se ubica el Motor de Tracción RS380, el mecanismo de dirección asistido por el servomotor, y los tres sensores ultrasónicos HC-SR04 (Front-US y los sensores laterales Left-US / Right-US).
 
-		- *Justificación Técnica:* Colocar los actuadores pesados en la planta baja garantiza un centro de gravedad pegado al suelo, maximizando la tracción en las ruedas traseras. Reubicar el módulo reductor XL4015 en la base es una decisión de gestión térmica: aleja su disipación de calor de las sensibles celdas LiPo (Nivel 2) y del procesador central (Nivel 3). Asimismo, la integración de los sensores ToF en esta base, con un montaje ligeramente retrasado respecto al sensor ultrasónico central, utiliza a este último como escudo protector ante impactos, mientras que los láseres amplían la resolución de detección exactamente a la altura de colisión.
+		- *Justificación Técnica:* Colocar los actuadores más pesados y el sistema de tracción en la planta baja garantiza un centro de gravedad lo más cercano posible al suelo, proporcionando estabilidad cinemática y tracción máxima en las ruedas traseras durante aceleraciones bruscas.
     
-	- **2nd Level (Planta Intermedia):** Situado inmediatamente arriba de la transmisión, este nivel alberga el núcleo de control de bajo nivel y el almacenamiento de potencia. Aquí se encuentran fijadas la placa de expansión Makeblock MegaPi y la jaula vertical contenedora de las Baterías LiPo.
+	- **2nd Level (Planta Intermedia):**
+Situado inmediatamente arriba de la transmisión, este nivel alberga el núcleo de control de bajo nivel y la distribución eléctrica principal. Aquí se encuentran fijadas la placa de expansión Makeblock MegaPi, el Buck Converter (3A 15W) y la jaula vertical contenedora de las Baterías LiPo.
 
-		- *Justificación Técnica:* La MegaPi actúa como puente físico intermedio para acortar las trayectorias del cableado lógico hacia los actuadores del primer nivel. Al liberar este piso del convertidor térmico y centralizar únicamente las baterías pesadas, alineadas horizontalmente con el centro de masa, se reducen significativamente los momentos de inercia polares, evitando subvirajes o sobrevirajes en las curvas cerradas.
-
+		- *Justificación Técnica:* La MegaPi actúa como puente físico intermedio para acortar las trayectorias del cableado hacia los motores del primer nivel. Al centralizar las baterías pesadas en este piso medio y alineadas horizontalmente con el centro de masa, se reducen los momentos de inercia polares, evitando subvirajes o sobrevirajes en las curvas cerradas de la pista. El Buck Converter se sitúa estratégicamente al lado de la MegaPi para reducir y estabilizar el voltaje proveniente de las celdas antes de enviarlo al nivel superior.
+    
 	- **3rd Level (Planta Superior):** Corresponde a la cúspide de la estructura, dedicada de forma exclusiva al procesamiento de alto nivel y la percepción geométrica. Contiene la computadora a bordo Raspberry Pi 4 B (equipada con su disipador térmico y ventilador activo) y el conjunto elevado de la cámara de visión artificial Arducam IMX219.
 
 		- *Justificación Técnica:* Elevar la Raspberry Pi 4 la aísla por completo de las vibraciones mecánicas directas del motor de tracción y de los bucles de corriente del chasis inferior. Asimismo, la posición superior favorece la convección térmica del ventilador para evitar el estrangulamiento térmico (thermal throttling) del CPU durante la ejecución de los algoritmos de detección.
 
 	**Sistema de Percepción y Orientación Espacial:**
-	Esta distribución en tres dimensiones complementa la estrategia de nuestro sistema de percepción mixto (Visión + Acústica + Óptica Infrarroja), asegurando zonas de cobertura óptimas sin interferencias mutuas:
+	Esta distribución en tres dimensiones complementa la estrategia de nuestro sistema de percepción mixto (Visión + Acústica), asegurando zonas de cobertura óptimas sin interferencias mutuas:
 
 	Esta distribución en tres dimensiones complementa la estrategia de nuestro sistema de percepción mixto, asegurando zonas de cobertura óptimas sin interferencias mutuas:
 
 	- **Distribución de Visión Artificial (3rd Level):**
-La cámara Arducam IMX219 se posiciona en el punto más alto y adelantado del tercer nivel, sostenida por un brazo articulado impreso en 3D con un ángulo de inclinación fijo hacia abajo de 15 grados. Esta elevación es crítica para expandir la línea de visión del lente de 175°, permitiendo al algoritmo abarcar una Región de Interés (ROI) más amplia de la pista para identificar los códigos de color (semáforos) y líneas guía sin que la propia estructura del carro obstruya el encuadre.
+	La cámara Arducam IMX219 se posiciona en el punto más alto y adelantado del tercer nivel, sostenida por un brazo articulado impreso en 3D con un ángulo de inclinación fijo hacia abajo de 15 grados. Esta elevación es crítica para expandir la línea de visión del lente de 175°, permitiendo al algoritmo abarcar una Región de Interés (ROI) más amplia de la pista para identificar los códigos de color (semáforos) y líneas guía sin que la propia estructura del carro obstruya el encuadre.
 
 	- **Distribución Ultrasónica Frontal (1st Level):**
-El sensor ultrasónico delantero (Front-US) se monta directamente sobre la placa base del chasis en una posición baja y avanzada, justo por debajo de la línea de proyección de la cámara. Actúa en el nivel inferior como un bypass de seguridad de hardware en tiempo real, detectando la presencia física de paredes de forma matemática para activar frenados de emergencia.
+	El sensor ultrasónico delantero (Front-US) se monta directamente sobre la placa base del chasis en una posición baja y avanzada, justo por debajo de la línea de proyección de la cámara. Esta sincronización geométrica permite que, mientras la cámara procesa las decisiones lógicas en el nivel superior, el ultrasonido actúe en el nivel inferior como un bypass de seguridad de hardware en tiempo real, detectando la presencia física de obstáculos de forma matemática y directa para activar frenados de emergencia.
 
 	- **Distribución Láser de Precisión ToF (1st Level, Flanqueo Frontal):**
 Ubicados a los flancos del sensor ultrasónico central, los sensores láser VL53L0X-V2 se han instalado con un ligero offset de profundidad. Esta configuración permite que el HC-SR04 actúe como parachoques protector, mientras los haces infrarrojos de los ToF actúan como perfiladores direccionales de alta resolución. Esta configuración garantiza que los obstáculos cilíndricos estrechos sean detectados con precisión milimétrica, blindando los puntos ciegos laterales del ultrasonido a corta distancia.
 
 	- **Distribución Ultrasónica Lateral (1st Level):**
-Los dos sensores ultrasónicos de flanco (Left-US y Right-US) están anclados rígidamente a los costados izquierdo y derecho del primer nivel, posicionados de forma longitudinal entre ambos ejes de ruedas y alineados verticalmente a la altura exacta de los neumáticos. Ubicarlos en el piso bajo minimiza drásticamente las lecturas falsas causadas por el cabeceo (frenada) o el balanceo (giro) del chasis. Esto asegura que el algoritmo de estabilización reciba datos limpios de la distancia hacia los muros para mantener una trayectoria recta.
+	Los dos sensores ultrasónicos de flanco (Left-US y Right-US) están anclados rígidamente a los costados izquierdo y derecho del primer nivel, posicionados de forma longitudinal entre ambos ejes de ruedas y alineados verticalmente a la altura exacta de los neumáticos. Ubicarlos en el piso bajo, simétricos respecto al centro de masa, minimiza drásticamente las lecturas falsas causadas por el cabeceo (frenada) o el balanceo (giro) del chasis. Esto asegura que el algoritmo de estabilización reciba datos limpios y constantes de la distancia real hacia las paredes de la pista para mantener una trayectoria perfectamente recta.
 
 <div align="center">
 
@@ -383,12 +379,10 @@ Los dos sensores ultrasónicos de flanco (Left-US y Right-US) están anclados r�
 | **Arducam 8MP IMX219 (175°)** | 1 | 3.3 V | 250 mA | 250 mA |
 | **Makeblock MegaPi (Lógica)** | 1 | 5.0 V | 100 mA | 100 mA |
 | **Sensores Ultrasonido HC-SR04** | 3 | 5.0 V | 15 mA c/u | 45 mA |
-| **Módulo Sensor de Colisión (Crash)** | 1 | 5.0 V | 10 mA | 10 mA |
 | **Módulo Semáforo LED (Traffic Light)** | 1 | 5.0 V | 30 mA | 30 mA |
 | **Servomotor de Dirección MG996R** | 1 | 5.0 V | 500 mA / 2500 mA | 2500 mA |
 | **Motor de Tracción RS380** | 1 | 11.0 V | 2000 mA | 2000 mA |
-| **Vl53l0x-v2 Sensor** | 2 | 5V | 10.0 mA | 20 mA |
-| Total | | | 4.175 mA (4.17 A) mA | 6.205 mA (6.2 A) |
+| Total | | | 4.145 mA (4.14 A) mA | 6.175 mA (6.17 A) |
 
 </div>
 
