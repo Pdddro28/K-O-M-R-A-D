@@ -609,22 +609,11 @@ La telemetría para el conteo de vueltas se realiza mediante la discriminación 
 
 			Para erradicar los falsos positivos generados por la alta frecuencia de lectura del microcontrolador al pasar sobre una misma marca, se implementó un temporizador de guarda de 1.1 segundos. La lógica interna fluye de la siguiente manera:
 
-			```
-                  Línea de Meta Detectada (Área > 500 px)
-                             [ loops += 1 ]
-                                   |
-                                   v
-                       Activar Estado Fijo (n=1)
-                    Iniciar Temporizador de Guarda
-                                   |
-                                   v
-                      ¿Tiempo Transcurrido > 1.1s?
-                       +--- SI          NO ---+
-                       |                      |
-                       v                      v
-             Liberar Estado (n=0)     Mantener Bloqueo
-            Listo para Nueva Vuelta  (Evita Falsos Conteos)
-	 		```
+			<div align="center">
+
+			<img width="1421" height="1141" alt="untitled@1 25x (5)" src="https://github.com/user-attachments/assets/3a7a52cc-f2c3-4c1f-a628-02fab671084a" />
+
+			</div>
   
 			- **Mecanismo de Parada Segura**
 			El reglamento exige que el robot finalice su recorrido tras la vuelta número 12. Interrumpir la energía de los motores de forma abrupta directamente sobre la línea de meta provocaría un derrape severo o la salida de pista debido a la alta inercia que arrastra el chasis a una velocidad de 130.
