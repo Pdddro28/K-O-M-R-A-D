@@ -703,6 +703,44 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 
 		</div>
 
+		- **Representación Gráfica de los Casos**
+ 
+  		```
+		======================================================================================
+ 		DISTRIBUCIÓN TOTAL DE ESCENARIOS (26 CASOS TOTALES EN JUEGO)
+		======================================================================================
+
+		 CASOS CON 2 OBSTÁCULOS (4 variantes de color por cada posición espacial)
+ 		------------------------------------------------------------------------------------
+		 [Caso 1]       Muro Izquierdo: [🟥]  |  Muro Derecho: [🟥]  --> Variante 1
+ 		               	Muro Izquierdo: [🟥]  |  Muro Derecho: [🟩]  --> Variante 2
+ 		               	Muro Izquierdo: [🟩]  |  Muro Derecho: [🟥]  --> Variante 3
+		                Muro Izquierdo: [🟩]  |  Muro Derecho: [🟩]  --> Variante 4
+
+		[Caso 9]        Arriba Izq:     [🟥]  |  Arriba Der:   [🟥]  --> Variante 1
+		                Arriba Izq:     [🟥]  |  Arriba Der:   [🟩]  --> Variante 2
+		                Arriba Izq:     [🟩]  |  Arriba Der:   [🟥]  --> Variante 3
+ 		 				Arriba Izq:     [🟩]  |  Arriba Der:   [🟩]  --> Variante 4
+
+		[Caso 10]       Abajo Izq:      [🟥]  |  Abajo Der:    [🟥]  --> Variante 1
+		                Abajo Izq:      [🟥]  |  Abajo Der:    [🟩]  --> Variante 2
+ 		                Abajo Izq:      [🟩]  |  Abajo Der:    [🟥]  --> Variante 3
+               			Abajo Izq:      [🟩]  |  Abajo Der:    [🟩]  --> Variante 4
+
+
+		 CASOS CON 1 OBSTÁCULO (2 variantes de color por cada posición espacial)
+		 ------------------------------------------------------------------------------------
+		 [Caso 2]       Centro:         [🟥] (Variante 1)  |  [🟩] (Variante 2)
+		 [Caso 3]       Arriba Centro:  [🟥] (Variante 1)  |  [🟩] (Variante 2)
+		 [Caso 4]       Abajo Centro:   [🟥] (Variante 1)  |  [🟩] (Variante 2)
+		 [Caso 5]       Arriba Der:     [🟥] (Variante 1)  |  [🟩] (Variante 2)
+		 [Caso 6]       Centro Der:     [🟥] (Variante 1)  |  [🟩] (Variante 2)
+		 [Caso 7]       Arriba Izq:     [🟥] (Variante 1)  |  [🟩] (Variante 2)
+		 [Caso 8]       Abajo Izq:      [🟥] (Variante 1)  |  [🟩] (Variante 2)
+		
+		======================================================================================
+    	```
+
 # 4. Challenges
 
 - ### Problemas de Hardware:
