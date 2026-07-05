@@ -707,7 +707,7 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 		<div align="center">
 
 
-		- **Representación Gráfica de los Casos**
+	- **Representación Gráfica de los Casos**
     
  
   		```
@@ -716,11 +716,11 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 		======================================================================================
 		
 		 CASOS CON 2 OBSTÁCULOS (4 variantes de color por cada posición espacial)
-		 ------------------------------------------------------------------------------------
-		 [Caso 1]       Muro Izquierdo: [🟥]  |  Muro Derecho: [🟥]  --> Variante 1 (Rojo-Rojo)
-		                Muro Izquierdo: [🟥]  |  Muro Derecho: [🟩]  --> Variante 2 (Mixto R-V)
-		                Muro Izquierdo: [🟩]  |  Muro Derecho: [🟥]  --> Variante 3 (Mixto V-R)
-		                Muro Izquierdo: [🟩]  |  Muro Derecho: [🟩]  --> Variante 4 (Verde-Verde)
+		 ---------------------------------------------------------------------------
+		 [Caso 1]       Muro Izquierdo: [🟥]  |  Muro Derecho: [🟥]  --> Variante 1
+		                Muro Izquierdo: [🟥]  |  Muro Derecho: [🟩]  --> Variante 2
+		                Muro Izquierdo: [🟩]  |  Muro Derecho: [🟥]  --> Variante 3
+		                Muro Izquierdo: [🟩]  |  Muro Derecho: [🟩]  --> Variante 4
 		
 		 [Caso 9]       Arriba Izq:     [🟥]  |  Arriba Der:   [🟥]  --> Variante 1
 		                Arriba Izq:     [🟥]  |  Arriba Der:   [🟩]  --> Variante 2
@@ -734,7 +734,7 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 		
 		
 		 CASOS CON 1 OBSTÁCULO (2 variantes de color por cada posición espacial)
-		 ------------------------------------------------------------------------------------
+		 -----------------------------------------------------------------------
 		 [Caso 2]       Centro:         [🟥] (Variante 1)  |  [🟩] (Variante 2)
 		 [Caso 3]       Arriba Centro:  [🟥] (Variante 1)  |  [🟩] (Variante 2)
 		 [Caso 4]       Abajo Centro:   [🟥] (Variante 1)  |  [🟩] (Variante 2)
@@ -742,8 +742,6 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 		 [Caso 6]       Centro Der:     [🟥] (Variante 1)  |  [🟩] (Variante 2)
 		 [Caso 7]       Arriba Izq:     [🟥] (Variante 1)  |  [🟩] (Variante 2)
 		 [Caso 8]       Abajo Izq:      [🟥] (Variante 1)  |  [🟩] (Variante 2)
-		
-		======================================================================================
     	```
 
 		</div>
