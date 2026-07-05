@@ -696,6 +696,7 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 
 
 		- **Diagrama de Flujo:**
+    
  
 		<div align="center">
 
@@ -705,7 +706,9 @@ Adicionalmente, el sistema implementa dos lazos de control PID independientes co
 
 		<div align="center">
 
+
 		- **Representación Gráfica de los Casos**
+    
  
   		```
 		======================================================================================
