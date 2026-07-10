@@ -284,7 +284,7 @@ Esta es la estructura de carpetas de nuestro repositorio:
 | 1 | [Buck Converter 3A 15W Type-C](https://www.amazon.com/-/es/Convertidor-Impermeable-Adaptador-corriente-compatible/dp/B0D2MTJQK8) | $8.79 | $8.79 |
 | 1 | [MAKEBLOCK MegaPi (from mbot mega)](https://www.robotshop.com/products/makeblock-mbot-mega-robot-car-rechargeable-li-po-battery-kit?qd=c181467e2368e663479ab211142e2920) | $148.97 | $148.97 | 
 | 3 | [Ultrasonic Sensor HC-SR04](https://www.amazon.com/-/es/Ferwooh-ultras%C3%B3nico-HC-SR04-medici%C3%B3n-distancia/dp/B0D1MDP9V3) | $6.99 | $20.97 |
-| | | | **$589.47** |
+| Total | | | **$589.47** |
 
 </div>
 
